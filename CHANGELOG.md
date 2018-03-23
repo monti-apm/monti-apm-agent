@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.31.0
+
+* Rename to montiapm:agent
+
 ### v2.30.4
 
 * Use `Object.create(null)` rather than object initializer notation when initializing objects to store metric data.

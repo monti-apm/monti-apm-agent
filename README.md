@@ -2,7 +2,7 @@
 
 [![Monti APM - Performance Monitoring for Meteor](https://i.cloudup.com/LwrCCa_RRE.png)](https://montiapm.com)
 
-Monti APM is based on [meteorhacks/kadira](https://atmospherejs.com/meteorhacks/kadira).
+This package is based on [meteorhacks/kadira](https://atmospherejs.com/meteorhacks/kadira).
 
 ### Getting started
 

@@ -1,6 +1,6 @@
 Package.describe({
   "summary": "Performance Monitoring for Meteor",
-  "version": "2.30.4",
+  "version": "2.31.0",
   "git": "https://github.com/monti-apm/monti-apm-agent.git",
   "name": "montiapm:agent"
 });
