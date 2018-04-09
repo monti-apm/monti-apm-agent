@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## v2.31.1
 
 * Show better error message when unable to connect
 
