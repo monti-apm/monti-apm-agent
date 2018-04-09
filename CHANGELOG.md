@@ -1,5 +1,9 @@
 # Changelog
 
+## Next
+
+* Show better error message when unable to connect
+
 ## v2.31.0
 
 * Rename to montiapm:agent
