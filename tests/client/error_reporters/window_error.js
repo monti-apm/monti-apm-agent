@@ -2,10 +2,11 @@
 Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - window.onerror - with all args',
   TestWithErrorTrackingAsync(function (test, next) {
+    Kadira._setupOnErrorReporter();
     hijackKadiraSendErrors(mock_KadiraSendErrors);
     test.equal(typeof window.onerror, 'function');
     var error = new Error('test-error');
-    var message = Meteor.uuid();
+    var message = Random.id();
     window.onerror(message, '_url', 1, 1, error);
 
     function mock_KadiraSendErrors(error) {
@@ -27,7 +28,7 @@ Tinytest.addAsync(
   TestWithErrorTrackingAsync(function (test, next) {
     hijackKadiraSendErrors(mock_KadiraSendErrors);
     test.equal(typeof window.onerror, 'function');
-    var message = Meteor.uuid();
+    var message = Random.id();
     window.onerror(message, '_url', 1, 1);
 
     function mock_KadiraSendErrors(error) {
