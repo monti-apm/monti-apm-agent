@@ -3,7 +3,6 @@ sudo: required
 node_js:
   - "0.10"
 before_install:
-  - export TEST_COMMAND=meteor
   - "curl -L http://git.io/ejPSng | /bin/sh"
 env:
   global:
@@ -12,4 +11,4 @@ env:
     - METEOR_RELEASE=1.4.4.5
     - METEOR_RELEASE=1.5.4.1
     - METEOR_RELEASE=1.6.1
-    - METEOR_RELEASE=1.7-rc.11
+    - METEOR_RELEASE=1.7-rc.12
