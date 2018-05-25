@@ -230,8 +230,10 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.miniMongoSorter - supported sort specifier',
   function (test) {
-    var result = OplogCheck.miniMongoSorter({options: {
-      sort: {aa: 1}
+    var result = OplogCheck.miniMongoSorter({
+      selector: {},
+      options: {
+        sort: {aa: 1}
     }});
     test.equal(result, true);
   }
