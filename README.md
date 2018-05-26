@@ -47,8 +47,8 @@ The run your app with `meteor --settings=settings.json`.
 Export the following environment variables before running or deploying your app:
 
 ```
-export KADIRA_APP_ID=<appId>
-export KADIRA_APP_SECRET=<appSecret>
+export MONTI_APP_ID=<appId>
+export MONTI_APP_SECRET=<appSecret>
 ````
 
 ### Error Tracking

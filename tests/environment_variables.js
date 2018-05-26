@@ -28,6 +28,8 @@ Tinytest.add(
     test.equal(connectArgs[0], 'rcZSEaSgMaxH4c2df');
     test.equal(connectArgs[1], '9af3daf3-64f3-4448-8b1e-4286fdf5f499');
     test.equal(connectArgs[2], {
+      appId: 'rcZSEaSgMaxH4c2df',
+      appSecret: '9af3daf3-64f3-4448-8b1e-4286fdf5f499',
       clientEngineSyncDelay: 123,
       errorDumpInterval: 234,
       maxErrorsPerInterval: 345,
