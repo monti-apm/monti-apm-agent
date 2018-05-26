@@ -32,7 +32,7 @@ Use the followng `settings.json` file with your app:
 ```js
 {
   ...
-  "kadira": {
+  "monti": {
     "appId": "<appId>",
     "appSecret": "<appSecret>"
   }
