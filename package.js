@@ -19,7 +19,7 @@ Npm.depends(npmModules);
 
 Package.on_use(function(api) {
   configurePackage(api);
-  api.export(['Kadira']);
+  api.export(['Kadira', 'Monti']);
 });
 
 Package.on_test(function(api) {
