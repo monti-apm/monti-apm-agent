@@ -15,11 +15,11 @@ This package is based on [meteorhacks/kadira](https://atmospherejs.com/meteorhac
 
 ```js
 Meteor.startup(function() {
-  Kadira.connect('<AppId>', '<AppSecret>');
+  Monti.connect('<AppId>', '<AppSecret>');
 });
 ```
 
-Now you can deploy your application and it will send information to Monti APM. Wait up to one minute and you'll see data appearing in the Kadira Dashboard.
+Now you can deploy your application and it will send information to Monti APM. Wait up to one minute and you'll see data appearing in the Monti APM Dashboard.
 
 
 ### Auto Connect
