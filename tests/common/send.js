@@ -18,7 +18,8 @@ Tinytest.addAsync(
     var func = Kadira._getSendFunction();
     func(endPoint, payload, function(err, res) {
       test.equal(err, null);
-      test.equal(res, {echo: payload});
+      test.equal(res.data, {echo: payload});
+      test.equal(res.statusCode, 200);
       done();
     });
   }
