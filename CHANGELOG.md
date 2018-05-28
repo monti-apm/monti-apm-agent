@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.32.0
+May 27, 2018
+
+* Remove jquery dependency
+* Export a `Monti` object as an alias to the `Kadira` object
+* A `monti` object can be used in the settings.json instead of the `kadira` object
+* Environment variables can be prefixed with `MONTI_` instead of `KADIRA_`
+* `Kadira` has been replaced with `Monti APM` in all console.log messages
+* Fix tracking subscription message sizes on Meteor 1.5 and newer
+
 ## v2.31.1
 
 * Show better error message when unable to connect
