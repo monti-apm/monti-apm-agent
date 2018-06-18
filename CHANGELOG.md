@@ -1,6 +1,7 @@
 # Changelog
 
-## Next
+## v2.32.1
+June 18, 2018
 
 * Fix error stack trace from method and subscription errors showing as an object 
 
