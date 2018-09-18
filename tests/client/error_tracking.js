@@ -27,8 +27,8 @@ Tinytest.add(
     Kadira.enableErrorTracking();
     Kadira.errors.sendError = function (error) {
       test.equal(error.name, "msg");
-      test.equal(error.type, "type");
-      test.equal(error.subType, "client");
+      test.equal(error.type, "client");
+      test.equal(error.subType, "type");
       test.equal(typeof error.appId, "string");
       test.equal(typeof error.startTime, "number");
       test.equal(typeof error.info, "object");
@@ -48,8 +48,8 @@ Tinytest.add(
     Kadira.enableErrorTracking();
     Kadira.errors.sendError = function (error) {
       test.equal(error.name, "msg");
-      test.equal(error.type, "type");
-      test.equal(error.subType, "st");
+      test.equal(error.type, "client");
+      test.equal(error.subType, "type");
       test.equal(typeof error.appId, "string");
       test.equal(typeof error.startTime, "number");
       test.equal(typeof error.info, "object");
