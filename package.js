@@ -72,6 +72,7 @@ Package.on_test(function(api) {
     'tests/client/error_tracking.js',
     'tests/client/models/errors.js',
     'tests/client/error_reporters/window_error.js',
+    'tests/client/error_reporters/unhandled_rejection.js',
     'tests/client/error_reporters/zone.js',
     'tests/client/error_reporters/meteor_debug.js',
   ], 'client');

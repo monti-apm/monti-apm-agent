@@ -90,6 +90,29 @@ Tinytest.addAsync(
 );
 
 Tinytest.addAsync(
+  'Errors - unhandledRejection - track unhandledRejection',
+  function (test, done) {
+    var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+    var error = new Error('rejected')
+    Promise.reject(error);
+
+    Meteor.defer(function () {
+      var payload = Kadira.models.error.buildPayload();
+      var error = payload.errors[0];
+
+      test.equal(1, payload.errors.length);
+      test.equal(error.type, 'server-internal');
+      test.equal(error.subType, 'unhandledRejection');
+
+      _resetErrorTracking(originalErrorTrackingStatus);
+      done();
+    });
+  }
+)
+
+Tinytest.addAsync(
   'Errors - method error - track Meteor.Error',
   function (test, done) {
     var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
