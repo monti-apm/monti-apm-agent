@@ -7,6 +7,7 @@ before_install:
 env:
   global:
     - TEST_COMMAND=meteor
+    - AUTOUPDATE_VERSION='abc'
   matrix:
     - METEOR_RELEASE=1.4.4.5
     - METEOR_RELEASE=1.5.4.1

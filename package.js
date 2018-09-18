@@ -70,7 +70,7 @@ Package.on_test(function(api) {
   api.add_files([
     'tests/client/utils.js',
     'tests/client/error_tracking.js',
-    'tests/client/models/error.js',
+    'tests/client/models/errors.js',
     'tests/client/error_reporters/window_error.js',
     'tests/client/error_reporters/zone.js',
     'tests/client/error_reporters/meteor_debug.js',
@@ -98,6 +98,7 @@ function configurePackage(api) {
 
   // common before
   api.add_files([
+    'lib/common/utils.js',
     'lib/common/unify.js',
     'lib/models/base_error.js'
   ], ['client', 'server']);
@@ -141,7 +142,7 @@ function configurePackage(api) {
     'lib/retry.js',
     'lib/ntp.js',
     'lib/client/utils.js',
-    'lib/client/models/error.js',
+    'lib/client/models/errors.js',
     'lib/client/error_reporters/zone.js',
     'lib/client/error_reporters/window_error.js',
     'lib/client/error_reporters/meteor_debug.js',

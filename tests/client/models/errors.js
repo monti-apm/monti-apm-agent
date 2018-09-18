@@ -1,3 +1,5 @@
+var archVersion = __meteor_runtime_config__.autoupdateVersion || 'abc'
+
 Tinytest.add(
   'Client Side - Error Model - sends errors',
   function(test) {
@@ -9,9 +11,12 @@ Tinytest.add(
     });
     em.sendError({name: "hello"});
 
-    test.equal(payloadReceived, {errors: [
-      {name: "hello", count: 1}
-    ], host: undefined});
+    test.equal(
+      payloadReceived,
+      buildPayload([
+        {name: "hello", count: 1}
+      ])
+    );
 
     test.equal(em.errorsSent["hello"], {
       name: "hello", count: 0
@@ -33,9 +38,12 @@ Tinytest.add(
     em.sendError({name: "hello"});
     em.sendError({name: "hello"});
 
-    test.equal(payloadReceived, {errors: [
-      {name: "hello", count: 1}
-    ], host: undefined});
+    test.equal(
+      payloadReceived,
+      buildPayload([
+        {name: "hello", count: 1}
+      ])
+    );
 
     test.equal(em.errorsSent["hello"], {
       name: "hello", count: 1
@@ -138,9 +146,11 @@ Tinytest.addAsync(
     em.sendError({name: "hello"});
 
     setTimeout(function() {
-      test.equal(payloadReceived, {errors: [
-        {name: "hello", count: 1}
-      ], host: undefined});
+      test.equal(payloadReceived, 
+        buildPayload([
+          {name: "hello", count: 1}
+        ])
+      );
 
       test.equal(em.errorsSent["hello"], {
         name: "hello", count: 0
@@ -167,9 +177,12 @@ Tinytest.add(
     });
     em.sendError({name: "hello"});
 
-    test.equal(payloadReceived, {errors: [
-      {name: "hello", count: 1}
-    ], host: undefined});
+    test.equal(
+      payloadReceived,
+      buildPayload([
+        {name: "hello", count: 1}
+      ])
+    );
 
     test.equal(em.errorsSent["hello"], {
       name: "hello", count: 0
@@ -199,9 +212,12 @@ Tinytest.add(
     });
     em.sendError({name: "hello", startTime: 100});
 
-    test.equal(payloadReceived, {errors: [
-      {name: "hello", count: 1, startTime: 600}
-    ], host: undefined});
+    test.equal(
+      payloadReceived, 
+      buildPayload([
+        {name: "hello", count: 1, startTime: 600}
+      ])
+    );
 
     Kadira.syncedDate.syncTime = orginalSyncTime;
     em.close();
@@ -216,5 +232,14 @@ function onKadiraSend(callback) {
 
   return function() {
     Kadira.send = originalSend;
+  }
+}
+
+function buildPayload(errors) {
+  return {
+    errors: errors,
+    host: undefined,
+    arch: "web.browser",
+    archVersion: archVersion
   }
 }
