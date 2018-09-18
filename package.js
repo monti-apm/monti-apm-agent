@@ -7,7 +7,7 @@ Package.describe({
 
 var npmModules = {
   "debug": "0.7.4",
-  "kadira-core": "1.3.2",
+  "monti-apm-core": "1.4.0",
   "evloop-monitor": "0.1.0",
   "pidusage": "1.1.0",
   "lru-cache": "4.0.0",
@@ -92,7 +92,7 @@ function configurePackage(api) {
 
   api.use([
     'minimongo', 'livedata', 'mongo-livedata', 'ejson', 'ddp-common',
-    'underscore', 'http', 'email', 'random'
+    'underscore', 'http', 'email', 'random', 'webapp'
   ], ['server']);
   api.use(['underscore', 'random', 'http', 'localstorage'], ['client']);
 
@@ -109,6 +109,7 @@ function configurePackage(api) {
     'lib/retry.js',
     'lib/utils.js',
     'lib/ntp.js',
+    'lib/sourcemaps.js',
     'lib/wait_time_builder.js',
     'lib/check_for_oplog.js',
     'lib/tracer/tracer.js',
@@ -146,6 +147,7 @@ function configurePackage(api) {
     'lib/client/error_reporters/zone.js',
     'lib/client/error_reporters/window_error.js',
     'lib/client/error_reporters/meteor_debug.js',
+    'lib/client/error_reporters/unhandled_rejection.js',
     'lib/client/kadira.js'
   ], 'client');
 
