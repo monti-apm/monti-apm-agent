@@ -25,7 +25,7 @@ Package.on_test(function(api) {
   configurePackage(api);
   api.use([
     'tinytest',
-    'test-helpers'
+    'test-helpers',
   ], ['client', 'server']);
 
   // common before
@@ -93,9 +93,9 @@ function configurePackage(api) {
 
   api.use([
     'minimongo', 'livedata', 'mongo-livedata', 'ejson', 'ddp-common',
-    'underscore', 'http', 'email', 'random', 'webapp'
+    'underscore', 'http', 'email', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-  api.use(['underscore', 'random', 'http', 'localstorage'], ['client']);
+  api.use(['random', 'http', 'localstorage', 'ecmascript'], ['client']);
 
   // common before
   api.add_files([
