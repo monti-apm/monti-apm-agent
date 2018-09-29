@@ -1,11 +1,18 @@
 # Changelog
 
+## v2.33.0
+September 29, 2018
+
+* Add `uploadSourceMaps` option. It is enabled by default in production when using a minifier that creates source maps. When enabled, source maps that Monti APM does not cached are uploaded when needed by a new client error
+* Track unhandled promise rejections in the server and in browsers that support it
+* Client architecture and version is sent with client errors
+
 ## v2.32.2
 July 13, 2018
 
 * Fix error stack trace from method and subscription errors showing as an object when error tracking is disabled
-* Fix using environment variables that were not prefixed with `MONTI_` or `KADIRA_`. See [#5](https://github.com/monti-apm/monti-apm-agent/issues/5).
-* Fix crashing app when unable to get cpu or memory usage on Windows. Instead, a message will be shown in the logs, and the memory and cpu usage will show as 0 in the Monti APM UI. See [#4](https://github.com/monti-apm/monti-apm-agent/issues/4).
+* Fix using environment variables that were not prefixed with `MONTI_` or `KADIRA_`. See [#5](https://github.com/monti-apm/monti-apm-agent/issues/5)
+* Fix crashing app when unable to get cpu or memory usage on Windows. Instead, a message will be shown in the logs, and the memory and cpu usage will show as 0 in the Monti APM UI. See [#4](https://github.com/monti-apm/monti-apm-agent/issues/4)
 
 ## v2.32.1
 June 18, 2018
