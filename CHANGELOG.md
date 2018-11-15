@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.34.0
+November 15, 2018
+
+* Remove underscore from client (@sebakerckhof)
+* Remove `endevent forced complete` warning
+
 ## v2.33.0
 September 29, 2018
 
