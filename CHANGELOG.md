@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.34.1
+November 16, 2018
+
+* Fix error when initializing client
+* Fix errors in zone utils
+
 ## v2.34.0
 November 15, 2018
 
