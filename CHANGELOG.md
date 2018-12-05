@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.34.2
+December 5, 2018
+
+* Replace meteorhacks:meteorx with lamhieu:meteorx to add support for Meteor 1.8.1
+
 ## v2.34.1
 November 16, 2018
 
