@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.34.3
+December 26, 2018
+
+* Fix session count in Meteor 1.8.1
+
 ## v2.34.2
 December 5, 2018
 
