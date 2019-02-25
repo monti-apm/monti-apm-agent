@@ -1,9 +1,11 @@
 language: node_js
 sudo: required
 node_js:
-  - "0.10"
+  - "8"
 before_install:
-  - "curl -L http://git.io/ejPSng | /bin/sh"
+  - curl https://install.meteor.com | /bin/sh
+  - npm i -g @zodern/mtest
+
 env:
   global:
     - TEST_COMMAND=meteor
@@ -12,4 +14,7 @@ env:
     - METEOR_RELEASE=1.4.4.5
     - METEOR_RELEASE=1.5.4.1
     - METEOR_RELEASE=1.6.1
-    - METEOR_RELEASE=1.7-rc.12
+    - METEOR_RELEASE=1.7.0.5
+    - METEOR_RELASE=1.8.0.2
+    - METEOR_RELEASE=1.8.1-beta.17
+script: mtest --package ./ --once --release $METEOR_RELEASE
