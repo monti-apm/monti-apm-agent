@@ -430,6 +430,7 @@ Tinytest.add(
     var client = GetMeteorClient();
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
+    Wait(50);
     var h1 = SubscribeAndWait(client, 'tinytest-data');
     Wait(200);
     TestData.remove({});
@@ -517,6 +518,7 @@ Tinytest.add(
     // This will create two observers
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
+    Wait(50);
     var h1 = SubscribeAndWait(client, 'tinytest-data-random');
     var h2 = SubscribeAndWait(client, 'tinytest-data-random');
     Wait(100);

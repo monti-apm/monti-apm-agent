@@ -5,6 +5,8 @@ Tinytest.add(
     CreateMethodCompleted('aa', 'hello', 1, 100, 5);
     CreateMethodCompleted('aa', 'hello', 2, 800 , 10);
     var payload = model.buildPayload();
+    payload.methodRequests = [];
+
     var expected = {
       methodMetrics: [
         {
@@ -85,7 +87,11 @@ Tinytest.add(
     Wait(100);
 
     var payload = Kadira.models.methods.buildPayload();
-    test.equal(payload.methodMetrics[0].methods[methodId].fetchedDocSize, 60);
+    var index = payload.methodMetrics.findIndex(methodMetrics => {
+      return methodId in methodMetrics.methods;
+    });
+
+    test.equal(payload.methodMetrics[index].methods[methodId].fetchedDocSize, 60);
     CleanTestData();
   }
 );

@@ -2,13 +2,19 @@
 Tinytest.addAsync(
   'Client Side - Settings - publication',
   function (test, done) {
-    var SettingsCollection = new Meteor.Collection('kadira_settings');
-    SettingsCollection.find().observe({added: _.once(function (options) {
+    const SettingsCollection = new Meteor.Collection('kadira_settings');
+    let ran = false;
+    SettingsCollection.find().observe({added: function (options) {
+      if (ran) {
+        return;
+      }
+      ran = true;
+
       test.equal(!!options.appId, true);
       test.equal(!!options.endpoint, true);
       test.equal(!!options.clientEngineSyncDelay, true);
       done();
-    })});
+    }});
   }
 );
 
@@ -229,8 +235,9 @@ Tinytest.add(
   function(test) {
     var obj = {
       shortOne: "hello",
-      longOne: {same: $('body')}
+      longOne: {}
     };
+    obj.longOne.same = obj;
 
     var expected = {
       shortOne: "hello",

@@ -1,4 +1,5 @@
-var archVersion = __meteor_runtime_config__.autoupdateVersion || 'abc'
+var arch = getClientArch();
+var archVersion = getClientArchVersion(arch);
 
 Tinytest.add(
   'Client Side - Error Model - sends errors',
@@ -239,7 +240,7 @@ function buildPayload(errors) {
   return {
     errors: errors,
     host: undefined,
-    arch: "web.browser",
+    arch: arch,
     archVersion: archVersion
   }
 }
