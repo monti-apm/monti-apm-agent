@@ -124,7 +124,14 @@ CloseClient = function(client) {
   client.disconnect();
   var f = new Future();
   function checkClientExtence(sessionId) {
-    var sessionExists = Meteor.default_server.sessions[sessionId];
+    let sessionExists;
+    if (Meteor.default_server.sessions instanceof Map) {
+      // Meteor 1.8.1 and newer
+      sessionExists = Meteor.default_server.sessions.has(sessionId);
+    } else {
+      sessionExists = Meteor.default_server.sessions[sessionId];
+    }
+
     if(sessionExists) {
       setTimeout(function() {
         checkClientExtence(sessionId);
