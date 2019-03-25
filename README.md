@@ -61,7 +61,7 @@ For more information, please visit our [docs](http://support.kadira.io/knowledge
 The Monti APM agent can be configured by
 
 - environment variables, prefixed with either `MONTI_` or `KADIRA_`
-- settings.json in the `monti` or `kadira` object
+- settings.json in the `monti` or `kadira` object. Options other than `appId` and `appSecret` should be in `monti.options` or `kadira.options`.
 - code with `Monti.connect('app id', 'app secret', options)`
 
 You should use the same method that you used to give the agent the app id and secret.
