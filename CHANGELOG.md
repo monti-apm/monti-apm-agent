@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.35.0
+March 25, 2019
+
+* Fix pubsub and system metrics that were broken in Meteor 1.8.1
+* Add `recordIPAddress` option which can be used to tell Monti APM to anonymize IP addresses or to not record them. This option has no effect on the open sourced Kadira.
+* Add section to readme to document options
+
 ## v2.34.3
 December 26, 2018
 
