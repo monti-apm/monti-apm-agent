@@ -241,6 +241,7 @@ function buildPayload(errors) {
     errors: errors,
     host: undefined,
     arch: arch,
-    archVersion: archVersion
+    archVersion: archVersion,
+    recordIPAddress: 'full'
   }
 }
