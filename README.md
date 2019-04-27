@@ -77,3 +77,4 @@ You should use the same method that you used to give the agent the app id and se
 | hostname | OPTIONS_HOSTNAME | Server's hostname | What the instance is named in Monti APM |
 | uploadSourceMaps | UPLOAD_SOURCE_MAPS | true | Enables sending source maps to Monti APM to improve error stack traces |
 | recordIPAddress | RECORD_IP_ADDRESS | 'full' | Set to 'full' to record IP Address, 'anonymized' to anonymize last octet of address, or 'none' to not record an IP Address for client errors |
+| eventStackTrace | EVENT_STACK_TRACE | false | If true, records a stack trace when an event starts. Slightly decreases server performance. |
