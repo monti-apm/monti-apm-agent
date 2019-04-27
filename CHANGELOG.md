@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.36.0
+
+* Tracer records one level of nested events
+* Optionally record stack trace of where event started
+* Add `Monti.startEvent` to start a custom event in a trace, and `Monti.endEvent` to end it. These api's are only available on the server.
+
 ## v2.35.0
 March 25, 2019
 
