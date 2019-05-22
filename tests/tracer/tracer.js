@@ -1,3 +1,8 @@
+var eventDefaults = {
+  endAt: 0,
+  nested: [],
+}
+
 Tinytest.add(
   'Tracer - Trace Method - method',
   function (test) {
@@ -9,7 +14,7 @@ Tinytest.add(
     var traceInfo = Kadira.tracer.start({id: 'session-id', userId: 'uid'}, ddpMessage);
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
-    removeDate(traceInfo);
+    cleanTrace(traceInfo);
     var expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
@@ -38,7 +43,7 @@ Tinytest.add(
     Kadira.tracer.event(traceInfo, 'start');
     Kadira.tracer.event(traceInfo, 'error');
     Kadira.tracer.event(traceInfo, 'complete');
-    removeDate(traceInfo);
+    cleanTrace(traceInfo);
     var expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
@@ -66,7 +71,7 @@ Tinytest.add(
     var traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
-    removeDate(traceInfo);
+    cleanTrace(traceInfo);
     var expected = {
       _id: 'session-id::the-id',
       session: 'session-id',
@@ -107,9 +112,10 @@ Tinytest.add(
     var traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
     var eventId = Kadira.tracer.event(traceInfo, 'db');
+    Wait(25);
     Kadira.tracer.eventEnd(traceInfo, eventId);
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
-    removeDate(traceInfo);
+    cleanTrace(traceInfo);
     var expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
@@ -118,44 +124,9 @@ Tinytest.add(
       name: 'method-name',
       events: [
         {type: 'start', data: {abc: 100}},
-        {type: 'db'},
-        {type: 'dbend'},
+        {type: 'db', endAt: 10},
         {type: 'end', data: {abc: 200}}
       ],
-      _lastEventId: null
-    };
-    delete traceInfo.userId;
-    test.equal(traceInfo, expected);
-  }
-);
-
-Tinytest.add(
-  'Tracer - invalid eventId',
-  function (test) {
-    var ddpMessage = {
-      id: 'the-id',
-      msg: 'method',
-      method: 'method-name'
-    };
-    var traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
-    Kadira.tracer.event(traceInfo, 'start', {abc: 100});
-    var eventId = Kadira.tracer.event(traceInfo, 'db');
-    Kadira.tracer.event(traceInfo, 'db');
-    Kadira.tracer.eventEnd(traceInfo, 'invalid-eventId');
-    Kadira.tracer.event(traceInfo, 'end', {abc: 200});
-    delete traceInfo._lastEventId;
-    removeDate(traceInfo);
-    var expected = {
-      _id: 'session-id::the-id',
-      id: 'the-id',
-      session: 'session-id',
-      type: 'method',
-      name: 'method-name',
-      events: [
-        {type: 'start', data: {abc: 100}},
-        {type: 'db'},
-        {type: 'end', data: {abc: 200}}
-      ]
     };
     delete traceInfo.userId;
     test.equal(traceInfo, expected);
@@ -172,12 +143,11 @@ Tinytest.add(
     };
     var traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
-    var eventId = Kadira.tracer.event(traceInfo, 'db');
     Kadira.tracer.event(traceInfo, 'db');
+    Wait(20)
     Kadira.tracer.endLastEvent(traceInfo);
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
-    delete traceInfo._lastEventId;
-    removeDate(traceInfo);
+    cleanTrace(traceInfo);
     var expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
@@ -186,8 +156,7 @@ Tinytest.add(
       name: 'method-name',
       events: [
         {type: 'start', data: {abc: 100}},
-        {type: 'db'},
-        {type: 'dbend'},
+        {type: 'db', endAt: 10, forcedEnd: true},
         {type: 'end', data: {abc: 200}}
       ]
     };
@@ -210,7 +179,7 @@ Tinytest.add(
     Kadira.tracer.event(traceInfo, 'db');
     Kadira.tracer.eventEnd(traceInfo, eventId);
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
-    removeDate(traceInfo);
+    cleanTrace(traceInfo);
     var expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
@@ -219,11 +188,9 @@ Tinytest.add(
       name: 'method-name',
       events: [
         {type: 'start', data: {abc: 100}},
-        {type: 'db'},
-        {type: 'dbend'},
+        {type: 'db', nested: [{ type: 'db', endAt: null }]},
         {type: 'end', data: {abc: 200}}
-      ],
-      _lastEventId: null
+      ]
     };
     delete traceInfo.userId;
     test.equal(traceInfo, expected);
@@ -236,11 +203,9 @@ Tinytest.add(
     var now = (new Date).getTime();
     var traceInfo = {
       events: [
-        {type: 'start', at: now},
-        {type: 'wait', at: now},
-        {type: 'waitend', at: now + 1000},
-        {type: 'db', at: now + 2000},
-        {type: 'dbend', at: now + 2500},
+        {...eventDefaults, type: 'start', at: now, endAt: now},
+        {...eventDefaults, type: 'wait', at: now, endAt: now + 1000},
+        {...eventDefaults, type: 'db', at: now + 2000, endAt: now + 2500},
         {type: 'complete', at: now + 2500}
       ]
     };
@@ -261,12 +226,10 @@ Tinytest.add(
     var now = (new Date).getTime();
     var traceInfo = {
       events: [
-        {type: 'start', at: now},
-        {type: 'wait', at: now},
-        {type: 'waitend', at: now + 1000},
-        {type: 'db', at: now + 2000},
-        {type: 'dbend', at: now + 2500},
-        {type: 'error', at: now + 2500}
+        {...eventDefaults, type: 'start', at: now},
+        {...eventDefaults, type: 'wait', at: now, endAt: now + 1000},
+        {...eventDefaults, type: 'db', at: now + 2000, endAt: now + 2500},
+        {...eventDefaults, type: 'error', at: now + 2500}
       ]
     };
     Kadira.tracer.buildTrace(traceInfo);
@@ -286,10 +249,8 @@ Tinytest.add(
     var now = (new Date).getTime();
     var traceInfo = {
       events: [
-        {type: 'wait', at: now},
-        {type: 'waitend', at: now + 1000},
-        {type: 'db', at: now + 2000},
-        {type: 'dbend', at: now + 2500},
+        {type: 'wait', at: now, endAt: now + 1000},
+        {type: 'db', at: now + 2000, endAt: now + 2500},
         {type: 'complete', at: now + 2500}
       ]
     };
@@ -304,11 +265,9 @@ Tinytest.add(
     var now = (new Date).getTime();
     var traceInfo = {
       events: [
-        {type: 'start', at: now},
-        {type: 'wait', at: now},
-        {type: 'waitend', at: now + 1000},
-        {type: 'db', at: now + 2000},
-        {type: 'dbend', at: now + 2500}
+        {type: 'start', at: now, endAt: now},
+        {type: 'wait', at: now, endAt: now + 1000},
+        {type: 'db', at: now + 2000, endAt: 2500},
       ]
     };
     Kadira.tracer.buildTrace(traceInfo);
@@ -323,9 +282,8 @@ Tinytest.add(
     var traceInfo = {
       events: [
         {type: 'start', at: now},
-        {type: 'wait', at: now},
-        {type: 'db', at: now + 2000},
-        {type: 'dbend', at: now + 2500},
+        {type: 'wait', at: now, endAt: null},
+        {type: 'db', at: now + 2000, endAt: now + 2500},
         {type: 'complete', at: now + 2500}
       ]
     };
@@ -365,7 +323,7 @@ Tinytest.add(
     tracer.eventEnd(traceInfo, id, {coll: "posts", secret: ""});
 
     var expected = {coll: "posts"};
-    test.equal(traceInfo.events[1].data, expected);
+    test.equal(traceInfo.events[0].data, expected);
   }
 );
 
@@ -470,8 +428,24 @@ function startTrace(tracer) {
   return traceInfo;
 }
 
-function removeDate(traceInfo) {
-  traceInfo.events.forEach(function(event) {
+function cleanTrace (traceInfo) {
+  cleanEvents(traceInfo.events)
+}
+
+function cleanEvents(events) {
+  events.forEach(function(event) {
+    if (event.endAt > event.at) {
+      event.endAt = 10;
+    } else if (event.endAt) {
+      delete event.endAt;
+    }
     delete event.at;
+    delete event._id;
+
+    if (event.nested.length === 0) {
+      delete event.nested;
+    } else {
+      cleanEvents(event.nested);
+    }
   });
 }

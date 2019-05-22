@@ -16,5 +16,5 @@ env:
     - METEOR_RELEASE=1.6.0.1
     - METEOR_RELEASE=1.7.0.5
     - METEOR_RELASE=1.8.0.2
-    - METEOR_RELEASE=1.8.1-beta.17
+    - METEOR_RELEASE=1.8.1
 script: mtest --package ./ --once --release $METEOR_RELEASE

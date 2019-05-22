@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.36.0
+May 22, 2019
+
+* Tracer records one level of nested events
+* Custom events can be added to a trace with `Monti.startEvent` and `Monti.endEvent`. These methods are only available on the server
+* Optionally record a stack trace of where event started
+* Added db _nextObject event, recorded during `cursor.forEach` and `cursor.map`
+* Events that were ended due to the trace ending have a `forceEnd` property
+* Some events uploaded to the engine have a fourth item in their array with the data needed for the above features. This is backwards compatible with the open source Kadira, but Kadira would have to be modified to use the additional data.
+
+
 ## v2.35.0
 March 25, 2019
 
