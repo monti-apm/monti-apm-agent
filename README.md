@@ -78,3 +78,38 @@ You should use the same method that you used to give the agent the app id and se
 | uploadSourceMaps | UPLOAD_SOURCE_MAPS | true | Enables sending source maps to Monti APM to improve error stack traces |
 | recordIPAddress | RECORD_IP_ADDRESS | 'full' | Set to 'full' to record IP Address, 'anonymized' to anonymize last octet of address, or 'none' to not record an IP Address for client errors |
 | eventStackTrace | EVENT_STACK_TRACE | false | If true, records a stack trace when an event starts. Slightly decreases server performance. |
+
+### Traces
+
+The agent collects traces of methods and publish functions. Every minute, it sends the outlier traces to Monti APM for you to view.
+
+By default, it tracks events for:
+- method/pubsub start
+- wait time
+- uncaught errors
+- db
+- http
+- email
+- async (time between the fiber yielding and running again)
+- method/pubsub complete
+
+Time between an event ending and the next event starting becomes a `compute` event.
+
+The agent records up to one level of nested events.
+
+You can add custom events to the traces to time specific code or events, or to provide more details to the trace.
+
+```js
+const event = Monti.startEvent('event name', {
+  details: true
+});
+
+// After code runs or event happens
+Monti.endEvent(event, {
+  additionalDetails: true
+});
+```
+
+You can use any name you want. The second parameter is an object with data that is shown to you in the Monti APM UI. The data objects from starting and ending the event are merged together.
+
+Please note that the total size of all traces uploaded each minute is limited (usually around 5mb), and if it is too large the traces and metrics are not stored. Avoid having 1,000's of custom events per trace or adding very large data objects.
