@@ -35,7 +35,7 @@ Tinytest.add(
 
     try {
       Meteor._debug(message, '_stack');
-    } catch(e) {};
+    } catch (e) { };
 
     window.zone = originalZone;
     test.equal(errorSent, true);
@@ -68,7 +68,7 @@ Tinytest.add(
       var err = new Error(message);
       err.stack = '_stack';
       Meteor._debug(err);
-    } catch(e) {};
+    } catch (e) { };
 
     window.zone = originalZone;
     test.equal(errorSent, true);
@@ -79,6 +79,40 @@ Tinytest.add(
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
       test.equal(message, error.name);
+      test.equal('client', error.type);
+      test.equal(true, Array.isArray(JSON.parse(error.stacks)));
+      test.equal('number', typeof error.startTime);
+      test.equal('meteor._debug', error.subType);
+    }
+  })
+);
+
+Tinytest.add(
+  'Client Side - Error Manager - Reporters - meteor._debug - string and Error',
+  TestWithErrorTracking(function (test) {
+    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    test.equal(typeof Meteor._debug, 'function');
+    var errorSent = false;
+    var originalZone = window.zone;
+    var message = Random.id()
+    var errorMessage = Random.id();
+    window.zone = undefined;
+
+    try {
+      var err = new Error(errorMessage);
+      err.stack = '_stack';
+      Meteor._debug(message, err);
+    } catch (e) { };
+
+    window.zone = originalZone;
+    test.equal(errorSent, true);
+    restoreKadiraSendErrors();
+
+    function mock_KadiraSendErrors(error) {
+      errorSent = true;
+      test.equal('string', typeof error.appId);
+      test.equal('object', typeof error.info);
+      test.equal(`${message}: ${errorMessage}`, error.name);
       test.equal('client', error.type);
       test.equal(true, Array.isArray(JSON.parse(error.stacks)));
       test.equal('number', typeof error.startTime);
@@ -100,7 +134,7 @@ function restoreKadiraSendErrors() {
   Kadira.errors.sendError = original_KadiraSendErrors;
 }
 
-function TestWithErrorTracking (testFunction) {
+function TestWithErrorTracking(testFunction) {
   return function (test) {
     var status = Kadira.options.enableErrorTracking;
     var appId = Kadira.options.appId;
