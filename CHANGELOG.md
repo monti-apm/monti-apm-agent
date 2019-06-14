@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.36.1
+June 14, 2019
+
+* Fix stack showing as `[object Object]` in some client errors
+
 ## v2.36.0
 May 22, 2019
 
