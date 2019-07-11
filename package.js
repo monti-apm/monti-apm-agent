@@ -6,11 +6,11 @@ Package.describe({
 });
 
 var npmModules = {
-  "debug": "0.7.4",
+  "debug": "4.1.1",
   "monti-apm-core": "1.4.0",
   "evloop-monitor": "0.1.0",
-  "pidusage": "1.1.0",
-  "lru-cache": "4.0.0",
+  "pidusage": "1.1.6",
+  "lru-cache": "5.1.1",
   "json-stringify-safe": "5.0.1"
 };
 
