@@ -293,6 +293,30 @@ Tinytest.add(
 );
 
 Tinytest.add(
+  'Tracer - Build Trace - truncate events',
+  function (test) {
+    var now = (new Date).getTime();
+    var traceInfo = {
+      events: [
+        {...eventDefaults, type: 'start', at: now},
+        {...eventDefaults, type: 'wait', at: now, endAt: now},
+      ]
+    };
+    
+    for (let i = 0; i < 10000; i++) {
+      traceInfo.events.push({ ...eventDefaults, type: 'db', at: now, endAt: now + 500 });
+      now += 500
+    }
+
+    traceInfo.events.push({...eventDefaults, type: 'complete', at: now + 2500});
+    Kadira.tracer.buildTrace(traceInfo);
+
+    test.equal(traceInfo.metrics.db, 5000000);
+    test.equal(traceInfo.events.length, 1500);
+  }
+)
+
+Tinytest.add(
   'Tracer - Filters - filter start',
   function(test) {
     var tracer = new Tracer();
