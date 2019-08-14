@@ -6,11 +6,11 @@ Package.describe({
 });
 
 var npmModules = {
-  "debug": "0.7.4",
+  "debug": "0.8.1",
   "monti-apm-core": "1.4.0",
   "evloop-monitor": "0.1.0",
-  "pidusage": "1.1.0",
-  "lru-cache": "4.0.0",
+  "pidusage": "1.1.6",
+  "lru-cache": "4.1.5",
   "json-stringify-safe": "5.0.1"
 };
 
@@ -87,7 +87,7 @@ Package.on_test(function(api) {
 function configurePackage(api) {
   if(api.versionsFrom) {
     api.versionsFrom('METEOR@1.2');
-    api.use('lamhieu:meteorx@2.0.1', ['server']);
+    api.use('lamhieu:meteorx@2.1.1', ['server']);
     api.use('meteorhacks:zones@1.2.1', {weak: true});
   }
 
