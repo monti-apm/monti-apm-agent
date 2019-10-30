@@ -90,6 +90,20 @@ Tinytest.addAsync(
 );
 
 Tinytest.addAsync(
+  'Errors - Meteor._debug - do not track when no arguments',
+  function (test, done) {
+    var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+    Meteor._debug();
+    var payload = Kadira.models.error.buildPayload();
+    test.equal(0, payload.errors.length);
+    _resetErrorTracking(originalErrorTrackingStatus);
+    done();
+  }
+);
+
+Tinytest.addAsync(
   'Errors - unhandledRejection - track unhandledRejection',
   function (test, done) {
     var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
