@@ -155,6 +155,43 @@ Tinytest.add(
   })
 );
 
+Tinytest.add(
+  'Client Side - Error Manager - Reporters - meteor._debug - extract firefox stack',
+  TestWithErrorTracking(function (test) {
+    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    var errorSent = false;
+    var originalZone = window.zone;
+    var message = Random.id()
+    var errorMessage = Random.id();
+    window.zone = undefined;
+
+    const stack = `Message
+    @debugger eval code:1:47
+    EVp.withValue@http://localhost:3000/packages/meteor.js?hash=d522625a3ade81e56b990f2722ff3ed57f63222d:1207:15
+    withoutInvocation/<@http://localhost:3000/packages/meteor.js?hash=d522625a3ade81e56b990f2722ff3ed57f63222d:588:25
+    Meteor.bindEnvironment/<@http://localhost:3000/packages/meteor.js?hash=d522625a3ade81e56b990f2722ff3ed57f63222d:1234:22`
+    // The stack without the message on the first line
+    const expectedStack = '\n' + stack.split('\n').slice(1).join('\n');
+
+    try {
+      var err = new Error(errorMessage);
+      err.stack = stack;
+      Meteor._debug(message, err);
+    } catch (e) { };
+
+    window.zone = originalZone;
+    test.equal(errorSent, true);
+    restoreKadiraSendErrors();
+
+    function mock_KadiraSendErrors(error) {
+      errorSent = true;
+      test.equal(expectedStack, stackResult);
+      test.equal('number', typeof error.startTime);
+      test.equal('meteor._debug', error.subType);
+    }
+  })
+);
+
 //--------------------------------------------------------------------------\\
 
 var original_KadiraSendErrors;
