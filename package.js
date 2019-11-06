@@ -75,6 +75,7 @@ Package.on_test(function(api) {
     'tests/client/error_reporters/unhandled_rejection.js',
     'tests/client/error_reporters/zone.js',
     'tests/client/error_reporters/meteor_debug.js',
+    'tests/client/error_reporters/tracker.js', 
   ], 'client');
 
   // common after
@@ -95,7 +96,7 @@ function configurePackage(api) {
     'minimongo', 'livedata', 'mongo-livedata', 'ejson', 'ddp-common',
     'underscore', 'http', 'email', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-  api.use(['random', 'http', 'localstorage', 'ecmascript'], ['client']);
+  api.use(['random', 'http', 'localstorage', 'ecmascript', 'tracker'], ['client']);
 
   // common before
   api.add_files([
@@ -149,6 +150,7 @@ function configurePackage(api) {
     'lib/client/error_reporters/window_error.js',
     'lib/client/error_reporters/meteor_debug.js',
     'lib/client/error_reporters/unhandled_rejection.js',
+    'lib/client/error_reporters/tracker.js',
     'lib/client/kadira.js'
   ], 'client');
 
