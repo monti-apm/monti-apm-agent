@@ -1,9 +1,18 @@
 # Changelog
 
-## v2.36.1
-June 14, 2019
+## v2.37
+August 14, 2019
 
-* Fix stack showing as `[object Object]` in some client errors
+* Fix many errors in IE not being recorded due to having the wrong time from ntp requests being cached
+* Fix crash when event added to trace after it was processed
+* Limit method and subscription start params to 2,000 characters
+* Limit traces to 1,000 events. This will not affect the method or subscription metrics.
+* Replace meteorhacks:kadira-profiler with montiapm:profiler in console message (@Brouilles)
+
+## v2.36.1
+June 14, 2018
+
+* Fix the stack trace for some client errors showing as `[object Object]`
 
 ## v2.36.0
 May 22, 2019
