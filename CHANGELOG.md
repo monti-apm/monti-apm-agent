@@ -1,12 +1,25 @@
 # Changelog
 
+## v2.38
+November 6, 2019
+
+* Fix many instances of unhelpful errors reported by Meteor._debug
+  * Fix tracker errors being reported as 3 different errors. Now one error has all the relevant details
+    * One error had the tracker function that caught the error
+    * One had the error message without the stack
+    * Another had the error stack without the message
+  * Fix internal server errors with no name or stack
+  * Fix empty stack from Meteor._debug on Firefox
+  * Add stack if missing to Meteor._debug server errors
+* Fixed duplicate `:` appearing in some error names
+* Limit method and subscription start params to 2,000 characters
+* Limit traces to 1,000 events. This will not affect the method or subscription metrics.
+
 ## v2.37
 August 14, 2019
 
 * Fix many errors in IE not being recorded due to having the wrong time from ntp requests being cached
 * Fix crash when event added to trace after it was processed
-* Limit method and subscription start params to 2,000 characters
-* Limit traces to 1,000 events. This will not affect the method or subscription metrics.
 * Replace meteorhacks:kadira-profiler with montiapm:profiler in console message (@Brouilles)
 
 ## v2.36.1
