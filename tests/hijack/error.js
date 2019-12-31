@@ -38,6 +38,26 @@ Tinytest.add(
 );
 
 Tinytest.add(
+  'Errors - Meteor._debug - create stack when it doesn\'t exist',
+  function (test) {
+    var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+    Meteor._debug('_debug');
+
+    var payload = Kadira.models.error.buildPayload();
+    var error = payload.errors[0];
+    const stack = error.stacks[0].stack;
+
+    test.equal(error.name, '_debug');
+    test.equal(typeof stack, 'string');
+    test.equal(stack.split('\n').length > 2, true);
+
+    _resetErrorTracking(originalErrorTrackingStatus);
+  }
+);
+
+Tinytest.add(
   'Errors - Meteor._debug - do not track method errors',
   function (test) {
     var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
@@ -86,6 +106,20 @@ Tinytest.addAsync(
     function causeError () {
       HTTP.call('POST', 'localhost', Function());
     }
+  }
+);
+
+Tinytest.addAsync(
+  'Errors - Meteor._debug - do not track when no arguments',
+  function (test, done) {
+    var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+    Meteor._debug();
+    var payload = Kadira.models.error.buildPayload();
+    test.equal(0, payload.errors.length);
+    _resetErrorTracking(originalErrorTrackingStatus);
+    done();
   }
 );
 
