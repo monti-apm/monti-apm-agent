@@ -11,7 +11,14 @@ var npmModules = {
   "evloop-monitor": "0.1.0",
   "pidusage": "1.1.6",
   "lru-cache": "4.1.5",
-  "json-stringify-safe": "5.0.1"
+  "json-stringify-safe": "5.0.1",
+
+  // parseurl is also used by WebApp.
+  // Since it caches the parsed url on
+  // `req`, we should make sure we use a
+  // version that is compatible with the version
+  // used by WebApp.
+  "parseurl": "1.3.3"
 };
 
 Npm.depends(npmModules);
