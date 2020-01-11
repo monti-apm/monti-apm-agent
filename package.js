@@ -54,6 +54,7 @@ Package.on_test(function(api) {
     'tests/hijack/email.js',
     'tests/hijack/base.js',
     'tests/hijack/async.js',
+    'tests/hijack/webapp.js',
     'tests/hijack/http.js',
     'tests/hijack/db.js',
     'tests/hijack/subscriptions.js',
