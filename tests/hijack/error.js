@@ -147,6 +147,48 @@ Tinytest.addAsync(
 );
 
 Tinytest.addAsync(
+  'Errors - Meteor._debug - track Meteor Error thrown in Meteor.bindEnvironment',
+  function (test, done) {
+    var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+    const error = new Meteor.Error('test');
+    Meteor.bindEnvironment(function () {
+      throw error;
+    })();
+    var payload = Kadira.models.error.buildPayload();
+    var errorTrace = payload.errors[0];
+    var expected = {
+      appId: "foo",
+      name: "Exception in callback of async function: [test]",
+      subType: "Meteor._debug",
+      // startTime: 1408098721327,
+      type: "server-internal",
+      trace: {
+        type: "server-internal",
+        name: "Exception in callback of async function: [test]",
+        subType: "Meteor._debug",
+        errored: true,
+        // at: 1408098721326,
+        events: [
+          ["start", 0, {}],
+          ["error", 0, { error: { message: "Exception in callback of async function: [test]", stack: error.stack } }]
+        ],
+        metrics: { total: 0 }
+      },
+      stacks: [{ stack: error.stack }],
+      count: 1
+    }
+
+    delete errorTrace.startTime;
+    delete errorTrace.trace.at;
+    test.equal(expected, errorTrace);
+    _resetErrorTracking(originalErrorTrackingStatus);
+    done();
+  }
+);
+
+Tinytest.addAsync(
   'Errors - unhandledRejection - track unhandledRejection',
   function (test, done) {
     var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
