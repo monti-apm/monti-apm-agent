@@ -124,6 +124,29 @@ Tinytest.addAsync(
 );
 
 Tinytest.addAsync(
+  'Errors - Meteor._debug - preserve error thrown in Meteor.bindEnvironment',
+  function (test, done) {
+    var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    Kadira.enableErrorTracking();
+    const error = new Error('test');
+
+    const origLog = console.log;
+    console.log = function (message, loggedError) {
+      origLog.apply(console, arguments);
+      console.log = origLog;
+      test.equal(error.message, loggedError.message);
+      test.equal(error.stack, loggedError.stack);
+      _resetErrorTracking(originalErrorTrackingStatus);
+      done();
+    }
+
+    Meteor.bindEnvironment(function () {
+      throw error;
+    })();
+  }
+);
+
+Tinytest.addAsync(
   'Errors - unhandledRejection - track unhandledRejection',
   function (test, done) {
     var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
