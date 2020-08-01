@@ -84,6 +84,7 @@ You should use the same method that you used to give the agent the app id and se
 The agent collects traces of methods and publish functions. Every minute, it sends the outlier traces to Monti APM for you to view.
 
 By default, it tracks events for:
+
 - method/pubsub start
 - wait time
 - uncaught errors
@@ -112,4 +113,39 @@ Monti.endEvent(event, {
 
 You can use any name you want. The second parameter is an object with data that is shown to you in the Monti APM UI. The data objects from starting and ending the event are merged together.
 
-Please note that the total size of all traces uploaded each minute is limited (usually around 5mb), and if it is too large the traces and metrics are not stored. Avoid having 1,000's of custom events per trace or adding very large data objects.
+Please note that the total size of all traces uploaded per server every 20 seconds is limited (usually around 5mb), and if it is too large the traces and metrics are not stored. Avoid having 1,000's of custom events per trace or adding very large data objects.
+
+#### Filtering Trace Data
+
+The agent stores user ids, queries, arguments, and other data with each trace to help you fix performance issues and errors. If your app deals with sensitive information, you can use filters to limit what is sent.
+
+Add a filter with:
+
+```js
+Monti.Tracer.addFilter((eventType, data, { type: traceType, name: traceName }) => {
+  if (
+    // traceType can be 'method', 'sub', or 'http'
+    traceType === 'method' &&
+    // traceName has the method or publication name. For http traces
+    // it is '<http method>-<route name>', for example 'POST-/user/:id'.
+    traceName === 'account.setPassword' &&
+    // The eventType can be start, db, http, email, wait, async,
+    // custom, fs, error, or complete.
+    eventType === 'start'
+  ) {
+    // data is the object shown in Monti APM when clicking "Show More" in a trace.
+    // What is in data depends on the event type.
+    delete data.params;
+  }
+
+  return data;
+});
+
+Monti.Tracer.addFilter((eventType, data) => {
+  if (eventType === 'db') {
+    delete data.selector;
+  }
+
+  return data;
+});
+```
