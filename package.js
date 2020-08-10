@@ -99,6 +99,7 @@ function configurePackage(api) {
     api.versionsFrom('METEOR@1.2');
     api.use('lamhieu:meteorx@2.1.1', ['server']);
     api.use('meteorhacks:zones@1.2.1', {weak: true});
+    api.use('simple:json-routes@2.1.0', {weak: true});
   }
 
   api.use([
