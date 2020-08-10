@@ -7,7 +7,7 @@ Package.describe({
 
 var npmModules = {
   "debug": "0.8.1",
-  "monti-apm-core": "1.4.0",
+  "monti-apm-core": "1.5.0",
   "evloop-monitor": "0.1.0",
   "pidusage": "1.1.6",
   "lru-cache": "4.1.5",
