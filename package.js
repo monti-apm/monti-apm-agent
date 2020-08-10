@@ -12,7 +12,7 @@ var npmModules = {
   "pidusage": "1.1.6",
   "lru-cache": "4.1.5",
   "json-stringify-safe": "5.0.1",
-  "sketches-js": "0.0.3",
+  "monti-apm-sketches-js": "0.0.3",
 
   // parseurl is also used by WebApp.
   // Since it caches the parsed url on
