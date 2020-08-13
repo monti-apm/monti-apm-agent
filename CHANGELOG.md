@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.38.1
+January 23, 2020
+
+* Improve detection of errors that should be ignored in Meteor._debug. This will fix some errors not being reported
+* Fix some stack traces missing when logged by Meteor._debug
+
 ## v2.38
 November 6, 2019
 
