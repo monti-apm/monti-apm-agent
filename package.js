@@ -100,7 +100,7 @@ function configurePackage(api) {
     api.use('lamhieu:meteorx@2.1.1', ['server']);
     api.use('meteorhacks:zones@1.2.1', {weak: true});
     api.use('simple:json-routes@2.1.0', {weak: true});
-    api.use('zodern:meteor-package-versions@0.1.0');
+    api.use('zodern:meteor-package-versions@0.2.0');
   }
 
   api.use([
