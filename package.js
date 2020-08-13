@@ -7,7 +7,7 @@ Package.describe({
 
 var npmModules = {
   "debug": "0.8.1",
-  "monti-apm-core": "1.5.0",
+  "monti-apm-core": "1.6.0",
   "evloop-monitor": "0.1.0",
   "pidusage": "1.1.6",
   "lru-cache": "4.1.5",
@@ -100,6 +100,7 @@ function configurePackage(api) {
     api.use('lamhieu:meteorx@2.1.1', ['server']);
     api.use('meteorhacks:zones@1.2.1', {weak: true});
     api.use('simple:json-routes@2.1.0', {weak: true});
+    api.use('zodern:meteor-package-versions@0.1.0');
   }
 
   api.use([
