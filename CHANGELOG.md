@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.39.0
+August 21, 2020
+
+* Add monitoring for incoming HTTP requests, supported for Meteor 1.6.1 and newer
+  * Instruments WebApp.rawConnectHandlers, WebAppInternals.meteorInternalHandlers, WebApp.connectHandlers, WebApp.connectApp, fast-render, connect-route, and simple:json-routes (which is used by most Meteor REST packages)
+* Create histograms of HTTP response time
+* Instrument fs.stat and fs.createReadStream
+* Fix unhandled promise rejections not being logged to the console
+* Fix calculating compute time between the second to last event and complete event
+* Sends agent version to the engine
+
 ## v2.38.1
 January 23, 2020
 
