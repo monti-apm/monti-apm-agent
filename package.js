@@ -1,17 +1,25 @@
 Package.describe({
   "summary": "Performance Monitoring for Meteor",
-  "version": "2.38.1",
+  "version": "2.39.0-beta.9",
   "git": "https://github.com/monti-apm/monti-apm-agent.git",
   "name": "montiapm:agent"
 });
 
 var npmModules = {
   "debug": "0.8.1",
-  "monti-apm-core": "1.4.0",
+  "monti-apm-core": "1.6.0",
   "evloop-monitor": "0.1.0",
   "pidusage": "1.1.6",
   "lru-cache": "4.1.5",
-  "json-stringify-safe": "5.0.1"
+  "json-stringify-safe": "5.0.1",
+  "monti-apm-sketches-js": "0.0.3",
+
+  // parseurl is also used by WebApp.
+  // Since it caches the parsed url on
+  // `req`, we should make sure we use a
+  // version that is compatible with the version
+  // used by WebApp.
+  "parseurl": "1.3.3"
 };
 
 Npm.depends(npmModules);
@@ -47,6 +55,7 @@ Package.on_test(function(api) {
     'tests/hijack/email.js',
     'tests/hijack/base.js',
     'tests/hijack/async.js',
+    'tests/hijack/webapp.js',
     'tests/hijack/http.js',
     'tests/hijack/db.js',
     'tests/hijack/subscriptions.js',
@@ -90,12 +99,15 @@ function configurePackage(api) {
     api.versionsFrom('METEOR@1.2');
     api.use('lamhieu:meteorx@2.1.1', ['server']);
     api.use('meteorhacks:zones@1.2.1', {weak: true});
+    api.use('simple:json-routes@2.1.0', {weak: true});
+    api.use('zodern:meteor-package-versions@0.2.0');
   }
 
   api.use([
     'minimongo', 'livedata', 'mongo-livedata', 'ejson', 'ddp-common',
-    'underscore', 'http', 'email', 'random', 'webapp', 'ecmascript'
+    'underscore', 'http', 'random', 'webapp', 'ecmascript'
   ], ['server']);
+  api.use('email@1.0.0||2.0.0-beta||2.0.0')
   api.use(['random', 'http', 'localstorage', 'ecmascript', 'tracker'], ['client']);
 
   // common before
