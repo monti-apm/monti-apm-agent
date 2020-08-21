@@ -1,6 +1,7 @@
 # Changelog
 
-## Next
+## v2.39.0
+August 21, 2020
 
 * Add monitoring for incoming HTTP requests, supported for Meteor 1.6.1 and newer
   * Instruments WebApp.rawConnectHandlers, WebAppInternals.meteorInternalHandlers, WebApp.connectHandlers, WebApp.connectApp, fast-render, connect-route, and simple:json-routes (which is used by most Meteor REST packages)
