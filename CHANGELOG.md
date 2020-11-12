@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.39.1
+Nov 11, 2020
+
+* Fix return value of connect app `.use`
+* Log a message if trying to add a nested event to an invalid trace
+
 ## v2.39.0
 August 21, 2020
 
