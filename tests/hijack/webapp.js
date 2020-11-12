@@ -1,3 +1,4 @@
+import { WebApp } from 'meteor/webapp';
 import { checkHandlersInFiber } from "../../lib/hijack/wrap_webapp";
 
 const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => {
@@ -16,3 +17,16 @@ Tinytest.add(
     test.equal(checkHandlersInFiber(), expected);
   }
 );
+
+if (httpMonitoringEnabled) {
+  Tinytest.add(
+    'Webapp - return connect app from .use',
+    function (test) {
+      const result = WebApp.connectHandlers.use((req, res, next) =>{
+        next();
+      });
+
+      test.equal(result, WebApp.connectHandlers);
+    }
+  )
+}
