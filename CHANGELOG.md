@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.40.1
+January 8, 2021
+
+* Fix issues publishing v2.40.0
+
+## v2.40.0
+January 8, 2021
+
+* Store histogram of response times for Methods and Publications
+* Store CPU usage every 2 seconds instead of 20
+* Improve performance when there are a large number of different methods, publications, or HTTP routes
+* Add `Monti.startContinuousProfiling()`. Requires a version of `montiapm:profiler` that supports continuous profiling.
+
 ## v2.39.1
 Nov 11, 2020
 

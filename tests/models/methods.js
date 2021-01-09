@@ -23,7 +23,18 @@ Tinytest.add(
               compute: 7.5,
               total: 7.5,
               fetchedDocSize: 0,
-              sentMsgSize: 0
+              sentMsgSize: 0,
+              histogram: {
+                alpha: 0.02,
+                bins: {
+                  41: 1,
+                  58: 1
+                },
+                maxNumBins: 2048,
+                n: 2,
+                gamma: 1.0408163265306123,
+                numBins: 2
+              }
             }
           }
         }
@@ -59,7 +70,18 @@ Tinytest.add(
           compute: 7.5,
           total: 7.5,
           fetchedDocSize: 0,
-          sentMsgSize: 0
+          sentMsgSize: 0,
+          histogram: {
+            alpha: 0.02,
+            bins: {
+              41: 1,
+              58: 1
+            },
+            maxNumBins: 2048,
+            n: 2,
+            gamma: 1.0408163265306123,
+            numBins: 2
+          }
         }
       }
     }];
