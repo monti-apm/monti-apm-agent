@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.40.1
+January 8, 2021
+
+* Fix issues publishing v2.40.0
+
 ## v2.40.0
 January 8, 2021
 
