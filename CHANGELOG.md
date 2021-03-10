@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.40.2
+March 10, 2021
+
+* Increase minimum version for monitoring incoming HTTP requests from Meteor 1.6.1 to Meteor 1.7. HTTP monitoring is automatically disabled when using an older version of Meteor.
+
 ## v2.40.1
 January 8, 2021
 
