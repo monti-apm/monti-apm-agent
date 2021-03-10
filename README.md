@@ -122,7 +122,7 @@ The agent stores user ids, queries, arguments, and other data with each trace to
 Add a filter with:
 
 ```js
-Monti.Tracer.addFilter((eventType, data, { type: traceType, name: traceName }) => {
+Monti.tracer.addFilter((eventType, data, { type: traceType, name: traceName }) => {
   if (
     // traceType can be 'method', 'sub', or 'http'
     traceType === 'method' &&
@@ -141,7 +141,7 @@ Monti.Tracer.addFilter((eventType, data, { type: traceType, name: traceName }) =
   return data;
 });
 
-Monti.Tracer.addFilter((eventType, data) => {
+Monti.tracer.addFilter((eventType, data) => {
   if (eventType === 'db') {
     delete data.selector;
   }
