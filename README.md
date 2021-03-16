@@ -2,7 +2,7 @@
 
 [![Travis](https://img.shields.io/travis/com/monti-apm/monti-apm-agent.svg?style=flat-square)](https://travis-ci.com/monti-apm/monti-apm-agent)
 
-[![Monti APM - Performance Monitoring for Meteor](https://i.cloudup.com/LwrCCa_RRE.png)](https://montiapm.com)
+[![Monti APM - Performance Monitoring for Meteor](https://docs.montiapm.com/images/overview-2.png)](https://montiapm.com)
 
 This package is based on [meteorhacks/kadira](https://atmospherejs.com/meteorhacks/kadira).
 
