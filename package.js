@@ -107,7 +107,7 @@ function configurePackage(api) {
     'minimongo', 'livedata', 'mongo-livedata', 'ejson', 'ddp-common',
     'underscore', 'http', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-  api.use('email@1.0.0||2.0.0-beta||2.0.0')
+  api.use('email@1.0.0||2.0.0')
   api.use(['random', 'http', 'localstorage', 'ecmascript', 'tracker'], ['client']);
 
   // common before
