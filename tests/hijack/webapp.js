@@ -1,14 +1,15 @@
 import { WebApp } from 'meteor/webapp';
-import { checkHandlersInFiber } from "../../lib/hijack/wrap_webapp";
+import { checkHandlersInFiber, wrapWebApp } from "../../lib/hijack/wrap_webapp";
 
 const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => {
   return parseInt(num, 10)
 })
 
-// Check if Meteor 1.6.1 or newer, which are the
-// versions that wrap connect handlers in a fiber
-const httpMonitoringEnabled = releaseParts[0] > 0 &&
-  (releaseParts[1] === 6 ? releaseParts[2] > 0 : releaseParts[1] > 6)
+// Check if Meteor 1.7 or newer, which are the
+// versions that wrap connect handlers in a fiber and are easy
+// to wrap the static middleware
+const httpMonitoringEnabled = releaseParts[0] > 2 ||
+  (releaseParts[0] > 0 && releaseParts[1] > 6)
 
 Tinytest.add(
   'Webapp - checkHandlersInFiber',
@@ -19,6 +20,8 @@ Tinytest.add(
 );
 
 if (httpMonitoringEnabled) {
+  wrapWebApp();
+
   Tinytest.add(
     'Webapp - return connect app from .use',
     function (test) {
@@ -29,4 +32,33 @@ if (httpMonitoringEnabled) {
       test.equal(result, WebApp.connectHandlers);
     }
   )
+
+  Tinytest.addAsync(
+    'Webapp - filter headers',
+    function (test, done) {
+      Kadira.tracer.redactField('x--test--authorization');
+
+      let req = {
+        url: '/test',
+        method: 'GET',
+        headers: {
+          'content-type': 'application/json',
+          'content-length': '1000',
+          'x--test--authorization': 'secret'
+        }
+      };
+
+      WebApp.rawConnectHandlers.stack[0].handle(
+        req,
+        {on() {}},
+        function () {
+          const expected = JSON.stringify({
+            'content-type': 'application/json',
+            'content-length': '1000',
+            'x--test--authorization': 'Monti: redacted'
+          });
+          test.equal(req.__kadiraInfo.trace.events[0].data.headers, expected)
+          done();
+      });
+  })
 }
