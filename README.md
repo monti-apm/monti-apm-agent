@@ -21,6 +21,15 @@ Meteor.startup(function() {
 
 Now you can deploy your application and it will send information to Monti APM. Wait up to one minute and you'll see data appearing in the Monti APM Dashboard.
 
+### Compatibility
+
+The agent is Compatible with:
+
+- Meteor 1.4 and newer
+- Internet Explorer 9 and newer web browsers
+- Can be used with [Monti APM](https://montiapm.com/) or the open source version of Kadira, though many new features are not supported by Kadira.
+
+Some features require newer Meteor versions or newer browsers. Unsupported features are automatically disabled. For example, monitoring incoming HTTP requests is only enabled with Meteor 1.7 or newer.
 
 ### Auto Connect
 
@@ -46,7 +55,7 @@ The run your app with `meteor --settings=settings.json`.
 
 Export the following environment variables before running or deploying your app:
 
-```
+```bash
 export MONTI_APP_ID=<appId>
 export MONTI_APP_SECRET=<appSecret>
 ````
