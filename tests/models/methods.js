@@ -143,6 +143,24 @@ Tinytest.add(
   }
 );
 
+Tinytest.add(
+  'Models - Method - Trace - filter params',
+  function (test) {
+    Kadira.tracer.redactField('__test1');
+    var methodId = RegisterMethod(function(){
+    });
+
+    var client = GetMeteorClient();
+    client.call(methodId, { __test1: 'value', abc: true }, { xyz: false, __test1: 'value2' });
+
+    var trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
+
+    var expected = JSON.stringify([{ __test1: 'Monti: redacted', abc: true }, { xyz: false, __test1: 'Monti: redacted'}]);
+    test.equal(trace.events[0][2].params, expected);
+    CleanTestData();
+  }
+);
+
 function GetPayload (buildDetailInfo) {
   return model.buildPayload(buildDetailInfo);
 }
