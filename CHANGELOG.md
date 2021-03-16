@@ -5,6 +5,7 @@
 * Add `Monti.tracer.redactField(fieldName)`. The fields are removed from objects passed as parameters to methods and publications, or from the list of headers from incoming HTTP requests before storing the data in a trace.
 * Reduce disk usage by 15mb by removing some npm dependencies from `monti-apm-core`
 * Remove internal use of Meteor's HTTP package. Monti APM still instruments it to track outgoing HTTP calls in traces.
+* Fix sending errors from Internet Explorer 9
 * Documented Meteor and browser compatibility in readme. We support Meteor 1.4 and newer, and Internet Explorer 9 and newer web browsers.
 * Increase minimum version for monitoring incoming HTTP requests from Meteor 1.6.1 to Meteor 1.7. As before, HTTP monitoring is automatically disabled when using an older version of Meteor.
 * Drop compatibility for old beta versions Meteor's email package. You can still force the beta version by modifying your app's `.meteor/packages` file to have a `!` after the email package's version.
