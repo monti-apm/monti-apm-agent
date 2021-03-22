@@ -93,6 +93,17 @@ Tinytest.add(
 );
 
 Tinytest.add(
+  'Tracer - Default filters - Tracer.stripSensitive - strip headers and request body',
+  function (test) {
+    var filter = Tracer.stripSensitive();
+    var filtered = filter(
+      "start", { body: '{"_id": 5}', headers: "{'x-token': '123'}" }, "http", "POST-/create"
+    );
+    test.equal(filtered, {body: "[stripped]", headers: "[stripped]"});
+  }
+);
+
+Tinytest.add(
   'Tracer - Default filters - Tracer.stripSelectors - given collections',
   function (test) {
     var filter = Tracer.stripSelectors(["posts", "comments"]);
