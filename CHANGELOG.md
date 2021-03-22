@@ -4,8 +4,9 @@
 
 * Add `Monti.tracer.redactField(fieldName)`. The fields are removed from objects passed as parameters to methods and publications, or from the list of headers from incoming HTTP requests before storing the data in a trace. By default it filters the `password` field.
 * Reduce disk usage by 15mb by removing some npm dependencies from `monti-apm-core`
-* Warns when an app uses multiple APM agent packages since they can conflict with `montiapm:agent`
+* Warns when an app uses multiple APM agent packages since they can conflict with each other
 * Remove internal use of Meteor's HTTP package. Monti APM still instruments it to track outgoing HTTP calls in traces.
+* Store `detail` property of Method and pub/sub errors (Thanks @ulion).
 * Fix sending errors from Internet Explorer 9
 * Documented Meteor and browser compatibility in readme. We support Meteor 1.4 and newer, and Internet Explorer 9 and newer web browsers.
 * Add Tracer.stripSensitiveThorough filter. This filter internally uses an allow list instead of deny list of which fields to strip, which reduces the chance of forgetting to strip new fields
