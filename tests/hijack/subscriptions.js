@@ -99,7 +99,7 @@ Tinytest.add(
     h1.stop();
     CloseClient(client);
     var metrics = FindMetricsForPub('tinytest-data');
-    test.isTrue(CompareNear(metrics.lifeTime, 50, 50));
+    test.isTrue(CompareNear(metrics.lifeTime, 50, 75));
   }
 );
 
