@@ -150,6 +150,7 @@ function configurePackage(api) {
     'lib/hijack/set_labels.js',
     'lib/environment_variables.js',
     'lib/auto_connect.js',
+    'lib/conflicting_agents.js',
   ], 'server');
 
   // only client
