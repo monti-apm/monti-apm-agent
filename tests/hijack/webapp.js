@@ -8,7 +8,7 @@ const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => {
 // Check if Meteor 1.7 or newer, which are the
 // versions that wrap connect handlers in a fiber and are easy
 // to wrap the static middleware
-const httpMonitoringEnabled = releaseParts[0] > 2 ||
+const httpMonitoringEnabled = releaseParts[0] > 1 ||
   (releaseParts[0] > 0 && releaseParts[1] > 6)
 
 Tinytest.add(
