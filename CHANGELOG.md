@@ -3,7 +3,8 @@
 ## Next
 
 * Add `Monti.tracer.redactField(fieldName)`. The fields are removed from objects passed as parameters to methods and publications, or from the list of headers from incoming HTTP requests before storing the data in a trace. By default it filters the `password` field.
-* Reduce disk usage by 15mb by removing some npm dependencies from `monti-apm-core`
+* Reduce time spent loading package on server by up to 80% (from up to ~1,000ms to 200ms)
+* Reduce disk usage of package from 25mb to 3mb
 * Warns when an app uses multiple APM agent packages since they can conflict with each other
 * Remove internal use of Meteor's HTTP package. Monti APM still instruments it to track outgoing HTTP calls in traces.
 * Store `detail` property of Method and pub/sub errors (Thanks @ulion).
