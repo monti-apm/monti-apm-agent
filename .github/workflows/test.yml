@@ -1,0 +1,40 @@
+name: Test
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        meteorRelease:
+          - '--release 1.4.4.5'
+          - '--release 1.5.4.1'
+          - '--release 1.6.0.1'
+          - '--release 1.7.0.5'
+          - '--release 1.8.1'
+          - '--release 1.8.3'
+          - '--release 1.9.1'
+          - '--release 1.10.2'
+          - '--release 1.11'
+          - '--release 1.12.1'
+          - '--release 2.1'
+          # Latest version
+          - 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Install Dependencies
+        run: |
+          curl https://install.meteor.com | /bin/sh
+          npm i -g @zodern/mtest
+
+      - name: Run Tests
+        run: |
+          # Retry tests since some of them are flaky
+          mtest --package ./ --once ${{ matrix.meteorRelease }} || mtest --package ./ --once ${{ matrix.meteorRelease }} 
