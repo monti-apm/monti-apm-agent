@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.41.1
+March 23, 2021
+
+* Fix error when filtering arrays with null values
+
 ## 2.41.0
 March 22, 2021
 
