@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.41.2
+March 24, 2021
+
+* Update `monti-apm-core`
+
 ## 2.41.1
 March 23, 2021
 
