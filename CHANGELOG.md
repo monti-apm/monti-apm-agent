@@ -6,6 +6,7 @@
 * Fix pcpuUser and pcpuSystem metrics
 * Fix error when DocSize is given a map
 * Fix error when MeteorX.Multiplexer is undefined, which fixes using the agent in Rocket Chat
+* Fix how stripSensitiveThorough filter handles waitend event
 * Continuous profiles are only sent if the agent is connected
 * Remove pidusage npm dependency
 
