@@ -1,5 +1,14 @@
 # Changelog
 
+## Next
+
+* Add memoryArrayBuffers, memoryExternal, memoryHeapUsed, and memoryHeapTotal metrics
+* Fix pcpuUser and pcpuSystem metrics
+* Fix error when DocSize is given a map
+* Fix error when MeteorX.Multiplexer is undefined, which fixes using the agent in Rocket Chat
+* Continuous profiles are only sent if the agent is connected
+* Remove pidusage npm dependency
+
 ## 2.41.2
 March 24, 2021
 
