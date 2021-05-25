@@ -1,6 +1,7 @@
 # Changelog
 
-## Next
+## 2.42.0
+May 25, 2021
 
 * Add memoryArrayBuffers, memoryExternal, memoryHeapUsed, and memoryHeapTotal metrics
 * Fix pcpuUser and pcpuSystem metrics
