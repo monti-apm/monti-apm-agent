@@ -94,20 +94,19 @@ Package.onTest(function(api) {
 });
 
 function configurePackage(api) {
-  if(api.versionsFrom) {
-    api.versionsFrom('METEOR@1.2');
-    api.use('lamhieu:meteorx@2.1.1', ['server']);
-    api.use('meteorhacks:zones@1.2.1', {weak: true});
-    api.use('simple:json-routes@2.1.0', {weak: true});
-    api.use('zodern:meteor-package-versions@0.2.0');
-  }
+  api.versionsFrom('METEOR@1.4');
+  api.use('montiapm:meteorx@2.2.0', ['server']);
+  api.use('meteorhacks:zones@1.2.1', {weak: true});
+  api.use('simple:json-routes@2.1.0', {weak: true});
+  api.use('zodern:meteor-package-versions@0.2.0');
 
   api.use([
     'minimongo', 'livedata', 'mongo-livedata', 'ejson', 'ddp-common',
-    'underscore', 'http', 'random', 'webapp', 'ecmascript'
+    'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-  api.use('email@1.0.0||2.0.0')
-  api.use(['random', 'http', 'localstorage', 'ecmascript', 'tracker'], ['client']);
+  api.use('email@1.0.0||2.0.0');
+  api.use('http@1.0.0||2.0.0-beta||2.0.0', 'server');
+  api.use(['random', 'localstorage', 'ecmascript', 'tracker'], ['client']);
 
   // common before
   api.addFiles([
@@ -169,7 +168,7 @@ function configurePackage(api) {
   api.addFiles([
     // It's possible to remove this file after some since this just contains
     // a notice to the user.
-    // Actual implementation is in the meteorhacks:kadira-profiler package
+    // Actual implementation is in the montiapm:profiler package
     'lib/profiler/client.js',
   ], 'client');
 
