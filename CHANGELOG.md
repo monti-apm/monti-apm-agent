@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.43.0
+June 7, 2021
+
+* Fix compatibility with Meteor 2.3
+* Remove HTTP package from client dependencies
+
 ## 2.42.0
 May 25, 2021
 
