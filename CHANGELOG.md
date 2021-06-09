@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.43.1
+June 9, 2021
+
+* Store current cpu usage percent for profiler
+
 ## 2.43.0
 June 7, 2021
 
