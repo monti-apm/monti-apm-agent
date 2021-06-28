@@ -1,5 +1,12 @@
 # Changelog
 
+## Next
+
+* Add totalFibersCreated, activeFibers, fiberPoolSize, activeRequests, and activeHandles metrics
+* Add garbage collection metrics, though they are only enabled when using Node 8.5 or newer
+* Record histogram of event loop delay
+* Record system and user cpu usage in cpu history
+
 ## 2.43.1
 June 9, 2021
 
