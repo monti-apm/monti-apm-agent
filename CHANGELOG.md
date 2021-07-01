@@ -2,7 +2,7 @@
 
 ## Next
 
-* Add totalFibersCreated, activeFibers, fiberPoolSize, activeRequests, and activeHandles metrics
+* Add createdFibers, activeFibers, fiberPoolSize, activeRequests, and activeHandles metrics
 * Add garbage collection metrics, enabled when using Node 8.5 or newer
 * Record histogram of event loop delay
 * Add metrics for mongo node driver's connection pool, enabled when using Meteor 2.2 or newer
