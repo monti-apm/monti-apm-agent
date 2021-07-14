@@ -1,6 +1,7 @@
 # Changelog
 
-## Next
+## 2.44.0
+July 14, 2021
 
 * Add createdFibers, activeFibers, fiberPoolSize, activeRequests, and activeHandles metrics
 * Add garbage collection metrics, enabled when using Node 8.5 or newer
