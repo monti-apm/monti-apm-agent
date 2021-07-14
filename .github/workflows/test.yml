@@ -19,7 +19,7 @@ jobs:
           - '--release 1.12.1'
           - '--release 2.1.1'
           - '--release 2.2'
-          - '--release 2.3-beta.4'
+          - '--release 2.3.2'
           # Latest version
           - 
     steps:
