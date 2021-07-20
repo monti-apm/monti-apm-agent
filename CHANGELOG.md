@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.44.1
+July 20, 21
+
+* Fix memory leak with Node 8 from monitoring garbage collection
+* Fix memory leak when agent is not connected
+* Remove support for beta versions of Meteor 2.3
+
 ## 2.44.0
 July 14, 2021
 
