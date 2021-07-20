@@ -105,7 +105,7 @@ function configurePackage(api) {
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
   api.use('email@1.0.0||2.0.0');
-  api.use('http@1.0.0||2.0.0-beta||2.0.0', 'server');
+  api.use('http@1.0.0||2.0.0', 'server');
   api.use(['random', 'localstorage', 'ecmascript', 'tracker'], ['client']);
 
   // common before
