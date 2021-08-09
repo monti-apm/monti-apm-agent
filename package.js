@@ -101,11 +101,11 @@ function configurePackage(api) {
   api.use('zodern:meteor-package-versions@0.2.0');
 
   api.use([
-    'minimongo', 'ejson', 'ddp-common',
+    'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
 
-  api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0', 'mongo', 'ddp'], 'server', { weak: true });
+  api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server', { weak: true });
   api.use(['random', 'ecmascript', 'tracker'], ['client']);
 
   // common before
