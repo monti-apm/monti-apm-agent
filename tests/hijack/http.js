@@ -1,26 +1,28 @@
-
-Tinytest.add(
-  'HTTP - call a server',
-  function (test) {
-    EnableTrackingMethods();
-    var methodId = RegisterMethod(function () {
-      var result = HTTP.get('http://localhost:3301');
-      return result.statusCode;
-    });
-    var client = GetMeteorClient();
-    var result = client.call(methodId);
-    var events = GetLastMethodEvents([0, 2]);
-    var expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['http',,{url: 'http://localhost:3301', method: 'GET', statusCode: 200}],
-      ['complete']
-    ];
-    test.equal(events, expected);
-    test.equal(result, 200);
-    CleanTestData();
-  }
-);
+if (Package['http']) {
+  const HTTP = Package['http'].HTTP;
+  Tinytest.add(
+    'HTTP - call a server',
+    function (test) {
+      EnableTrackingMethods();
+      var methodId = RegisterMethod(function () {
+        var result = HTTP.get('http://localhost:3301');
+        return result.statusCode;
+      });
+      var client = GetMeteorClient();
+      var result = client.call(methodId);
+      var events = GetLastMethodEvents([0, 2]);
+      var expected = [
+        ['start',,{userId: null, params: '[]'}],
+        ['wait',,{waitOn: []}],
+        ['http',,{url: 'http://localhost:3301', method: 'GET', statusCode: 200}],
+        ['complete']
+      ];
+      test.equal(events, expected);
+      test.equal(result, 200);
+      CleanTestData();
+    }
+  );
+}
 
 Tinytest.add(
   'HTTP - async callback',
