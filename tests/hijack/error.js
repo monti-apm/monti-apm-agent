@@ -57,7 +57,6 @@ Tinytest.add(
   }
 );
 
-const HTTP = Package['http'].HTTP;
 Tinytest.add(
   'Errors - Meteor._debug - do not track method errors',
   function (test) {
