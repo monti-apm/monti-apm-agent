@@ -86,7 +86,6 @@ Tinytest.add(
   }
 );
 
-const HTTP = Package['http'].HTTP;
 Tinytest.addAsync(
   'Errors - Meteor._debug - do not track pubsub errors',
   function (test, done) {
