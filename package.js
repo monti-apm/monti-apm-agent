@@ -24,12 +24,12 @@ var npmModules = {
 Npm.depends(npmModules);
 
 Package.onUse(function (api) {
-  configurePackage(api);
+  configurePackage({ api, isTesting: false });
   api.export(['Kadira', 'Monti']);
 });
 
 Package.onTest(function (api) {
-  configurePackage(api, 'test');
+  configurePackage({ api, isTesting: true });
   api.use([
     'tinytest',
     'test-helpers',
@@ -93,7 +93,7 @@ Package.onTest(function (api) {
   ], ['client', 'server']);
 });
 
-function configurePackage(api, mode) {
+function configurePackage({ api, isTesting }) {
   api.versionsFrom('METEOR@1.4');
   api.use('montiapm:meteorx@2.2.0', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
@@ -104,7 +104,7 @@ function configurePackage(api, mode) {
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-  api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server', { weak: mode !== 'test' });
+  api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server', { weak: !isTesting });
   api.use(['random', 'ecmascript', 'tracker'], ['client']);
 
   // common before
