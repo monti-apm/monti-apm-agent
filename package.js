@@ -24,12 +24,12 @@ var npmModules = {
 Npm.depends(npmModules);
 
 Package.onUse(function (api) {
-  configurePackage({ api, isTesting: false });
+  configurePackage(api, false);
   api.export(['Kadira', 'Monti']);
 });
 
 Package.onTest(function (api) {
-  configurePackage({ api, isTesting: true });
+  configurePackage(api, true);
   api.use([
     'tinytest',
     'test-helpers',
@@ -93,7 +93,7 @@ Package.onTest(function (api) {
   ], ['client', 'server']);
 });
 
-function configurePackage({ api, isTesting }) {
+function configurePackage(api, isTesting) {
   api.versionsFrom('METEOR@1.4');
   api.use('montiapm:meteorx@2.2.0', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
