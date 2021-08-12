@@ -23,12 +23,12 @@ var npmModules = {
 
 Npm.depends(npmModules);
 
-Package.onUse(function(api) {
+Package.onUse(function (api) {
   configurePackage(api);
   api.export(['Kadira', 'Monti']);
 });
 
-Package.onTest(function(api) {
+Package.onTest(function (api) {
   configurePackage(api, 'test');
   api.use([
     'tinytest',
@@ -83,7 +83,7 @@ Package.onTest(function(api) {
     'tests/client/error_reporters/unhandled_rejection.js',
     'tests/client/error_reporters/zone.js',
     'tests/client/error_reporters/meteor_debug.js',
-    'tests/client/error_reporters/tracker.js', 
+    'tests/client/error_reporters/tracker.js',
   ], 'client');
 
   // common after
@@ -96,19 +96,15 @@ Package.onTest(function(api) {
 function configurePackage(api, mode) {
   api.versionsFrom('METEOR@1.4');
   api.use('montiapm:meteorx@2.2.0', ['server']);
-  api.use('meteorhacks:zones@1.2.1', {weak: true});
-  api.use('simple:json-routes@2.1.0', {weak: true});
+  api.use('meteorhacks:zones@1.2.1', { weak: true });
+  api.use('simple:json-routes@2.1.0', { weak: true });
   api.use('zodern:meteor-package-versions@0.2.0');
 
   api.use([
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-  if (mode !== 'test') {
-    api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server', { weak: true });
-  } else {
-    api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server');
-  }
+  api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server', { weak: mode !== 'test' });
   api.use(['random', 'ecmascript', 'tracker'], ['client']);
 
   // common before
