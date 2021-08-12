@@ -29,7 +29,7 @@ Package.onUse(function(api) {
 });
 
 Package.onTest(function(api) {
-  configurePackage(api);
+  configurePackage(api, 'test');
   api.use([
     'tinytest',
     'test-helpers',
@@ -93,7 +93,7 @@ Package.onTest(function(api) {
   ], ['client', 'server']);
 });
 
-function configurePackage(api) {
+function configurePackage(api, mode) {
   api.versionsFrom('METEOR@1.4');
   api.use('montiapm:meteorx@2.2.0', ['server']);
   api.use('meteorhacks:zones@1.2.1', {weak: true});
@@ -104,8 +104,11 @@ function configurePackage(api) {
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-
-  api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server', { weak: true });
+  if (mode !== 'test') {
+    api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server', { weak: true });
+  } else {
+    api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server');
+  }
   api.use(['random', 'ecmascript', 'tracker'], ['client']);
 
   // common before
