@@ -516,36 +516,6 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
-  'Database - Cursor - rewind',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({_id: 'aa'});
-    TestData.insert({_id: 'bb'});
-    var methodId = RegisterMethod(function () {
-      var curosr = TestData.find({_id: {$exists: true}});
-      curosr.fetch();
-      curosr.rewind();
-      return curosr.fetch();
-    });
-    var client = GetMeteorClient();
-    var result = client.call(methodId);
-    var events = GetLastMethodEvents([0, 2]);
-    var expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
-      ['db',,{coll: 'tinytest-data', func: 'fetch', cursor: true, selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2, docSize: JSON.stringify({_id: 'aa'}).length*2}],
-      ['db',,{coll: 'tinytest-data', func: 'rewind', cursor: true, selector: JSON.stringify({_id: {$exists: true}})}],
-      ['db',,{coll: 'tinytest-data', func: 'fetch', cursor: true, selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2, docSize: JSON.stringify({_id: 'aa'}).length*2}],
-      ['complete']
-    ];
-    test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
-    test.equal(events, expected);
-    CleanTestData();
-  }
-);
-
 function clearAdditionalObserverInfo (info) {
   delete info.queueLength;
   delete info.initialPollingTime;

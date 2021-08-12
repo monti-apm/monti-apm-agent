@@ -160,6 +160,6 @@ function sendConnectMessage (options) {
     socket.headers['x-forwarded-for'] = options.forwardedAddress;
   if(options.sessionId)
     message.session = options.sessionId;
-  Meteor.default_server._handleConnect(socket, message);
+  Meteor.server._handleConnect(socket, message);
   return socket._meteorSession;
 }

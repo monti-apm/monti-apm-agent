@@ -46,7 +46,6 @@ Tinytest.add(
   function (test) {
     CleanTestData();
     var client = GetMeteorClient();
-    var Future = Npm.require('fibers/future');
     var pubName = "pub-" + Random.id();
     Meteor.publish(pubName, function() {
       Wait(200);
@@ -95,15 +94,12 @@ Tinytest.add(
     CleanTestData();
     EnableTrackingMethods();
     var client = GetMeteorClient();
-    var Future = Npm.require('fibers/future');
-    var f = new Future();
     var h1 = SubscribeAndWait(client, 'tinytest-data');
-    Wait(100);
+    Wait(50);
     h1.stop();
-    Wait(200);
-    var metrics = FindMetricsForPub('tinytest-data');
-    test.isTrue(CompareNear(metrics.lifeTime, 100));
     CloseClient(client);
+    var metrics = FindMetricsForPub('tinytest-data');
+    test.isTrue(CompareNear(metrics.lifeTime, 50, 75));
   }
 );
 

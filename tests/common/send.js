@@ -8,63 +8,48 @@ Tinytest.add(
       test.equal(func, Kadira._clientSend);
     }
   }
-);
+  );
 
-Tinytest.addAsync(
-  'Kadira Send - send data',
-  function (test, done) {
-    var endPoint = 'http://localhost:8808/echo';
-    var payload = {aa: 10};
-    var func = Kadira._getSendFunction();
-    func(endPoint, payload, function(err, res) {
-      test.equal(err, null);
-      test.equal(res.data, {echo: payload});
-      test.equal(res.statusCode, 200);
-      done();
-    });
-  }
-);
-
-Tinytest.addAsync(
-  'Kadira Send - Kadira.send with path',
-  function (test, done) {
-    var payload = {aa: 10};
-    var newKadiraOptions = {endpoint: 'http://localhost:8808'};
-    withKadiraOptions(newKadiraOptions, function() {
-      Kadira.send(payload, '/echo', function(err, data) {
-        test.equal(err, null);
-        test.equal(data, {echo: payload});
-        done();
-      });
-    });
-  }
-);
-
-Tinytest.addAsync(
-  'Kadira Send - Kadira.send with path (but no begining slash)',
-  function (test, done) {
-    var payload = {aa: 10};
-    var newKadiraOptions = {endpoint: 'http://localhost:8808'};
-    withKadiraOptions(newKadiraOptions, function() {
-      Kadira.send(payload, 'echo', function(err, data) {
-        test.equal(err, null);
-        test.equal(data, {echo: payload});
-        done();
-      });
-    });
-  }
-);
-
-if(Meteor.isServer) {
+if (Meteor.isClient) {
   Tinytest.addAsync(
-    'Kadira Send - Kadira.send - accepting server errors',
+    'Kadira Send - send data',
+    function (test, done) {
+      var endPoint = 'http://localhost:8808/echo';
+      var payload = {aa: 10};
+      var func = Kadira._getSendFunction();
+      func(endPoint, payload, function(err, res) {
+        test.equal(err, null);
+        test.equal(res.data, {echo: payload});
+        test.equal(res.statusCode, 200);
+        done();
+      });
+    }
+  );
+
+  Tinytest.addAsync(
+    'Kadira Send - Kadira.send with path',
     function (test, done) {
       var payload = {aa: 10};
       var newKadiraOptions = {endpoint: 'http://localhost:8808'};
       withKadiraOptions(newKadiraOptions, function() {
-        Kadira.send(payload, 'non-exisiting-route', function(err, data) {
-          test.equal(err.reason, 'internal-error-here');
-          test.equal(err.error, 400);
+        Kadira.send(payload, '/echo', function(err, data) {
+          test.equal(err, null);
+          test.equal(data, {echo: payload});
+          done();
+        });
+      });
+    }
+  );
+
+  Tinytest.addAsync(
+    'Kadira Send - Kadira.send with path (but no begining slash)',
+    function (test, done) {
+      var payload = {aa: 10};
+      var newKadiraOptions = {endpoint: 'http://localhost:8808'};
+      withKadiraOptions(newKadiraOptions, function() {
+        Kadira.send(payload, 'echo', function(err, data) {
+          test.equal(err, null);
+          test.equal(data, {echo: payload});
           done();
         });
       });

@@ -1,8 +1,8 @@
 ## [Monti APM - Performance Monitoring for Meteor](https://montiapm.com)
 
-[![Travis](https://img.shields.io/travis/monti-apm/monti-apm-agent.svg?style=flat-square)](https://travis-ci.org/monti-apm/monti-apm-agent)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/monti-apm/monti-apm-agent/Test?style=flat-square)
 
-[![Monti APM - Performance Monitoring for Meteor](https://i.cloudup.com/LwrCCa_RRE.png)](https://montiapm.com)
+[![Monti APM - Performance Monitoring for Meteor](https://docs.montiapm.com/images/overview-2.png)](https://montiapm.com)
 
 This package is based on [meteorhacks/kadira](https://atmospherejs.com/meteorhacks/kadira).
 
@@ -21,13 +21,23 @@ Meteor.startup(function() {
 
 Now you can deploy your application and it will send information to Monti APM. Wait up to one minute and you'll see data appearing in the Monti APM Dashboard.
 
+### Compatibility
+
+`montiapm:agent` is compatible with:
+
+- Meteor 1.4.3.2 and newer
+- Internet Explorer 9 and newer web browsers
+- Can be used with [Monti APM](https://montiapm.com/) or the open sourced version of Kadira, though many new features are not supported by Kadira
+
+Features that require a newer version of Meteor are only enabled when using a supported version. For example, monitoring incoming HTTP requests is automatically enabled when the app uses Meteor 1.7 or newer.
 
 ### Auto Connect
 
 Your app can connect to Monti APM using environment variables or [`Meteor.settings`](http://docs.meteor.com/#meteor_settings).
 
 #### Using Meteor.settings
-Use the followng `settings.json` file with your app:
+
+Use the following `settings.json` file with your app:
 
 ```js
 {
@@ -46,7 +56,7 @@ The run your app with `meteor --settings=settings.json`.
 
 Export the following environment variables before running or deploying your app:
 
-```
+```bash
 export MONTI_APP_ID=<appId>
 export MONTI_APP_SECRET=<appSecret>
 ````
@@ -84,6 +94,7 @@ You should use the same method that you used to give the agent the app id and se
 The agent collects traces of methods and publish functions. Every minute, it sends the outlier traces to Monti APM for you to view.
 
 By default, it tracks events for:
+
 - method/pubsub start
 - wait time
 - uncaught errors
@@ -112,4 +123,39 @@ Monti.endEvent(event, {
 
 You can use any name you want. The second parameter is an object with data that is shown to you in the Monti APM UI. The data objects from starting and ending the event are merged together.
 
-Please note that the total size of all traces uploaded each minute is limited (usually around 5mb), and if it is too large the traces and metrics are not stored. Avoid having 1,000's of custom events per trace or adding very large data objects.
+Please note that the total size of all traces uploaded per server every 20 seconds is limited (usually around 5mb), and if it is too large the traces and metrics are not stored. Avoid having 1,000's of custom events per trace or adding very large data objects.
+
+#### Filtering Trace Data
+
+The agent stores user ids, queries, arguments, and other data with each trace to help you fix performance issues and errors. If your app deals with sensitive information, you can use filters to limit what is sent.
+
+Add a filter with:
+
+```js
+Monti.tracer.addFilter((eventType, data, { type: traceType, name: traceName }) => {
+  if (
+    // traceType can be 'method', 'sub', or 'http'
+    traceType === 'method' &&
+    // traceName has the method or publication name. For http traces
+    // it is '<http method>-<route name>', for example 'POST-/user/:id'.
+    traceName === 'account.setPassword' &&
+    // The eventType can be start, db, http, email, wait, async,
+    // custom, fs, error, or complete.
+    eventType === 'start'
+  ) {
+    // data is the object shown in Monti APM when clicking "Show More" in a trace.
+    // What is in data depends on the event type.
+    delete data.params;
+  }
+
+  return data;
+});
+
+Monti.tracer.addFilter((eventType, data) => {
+  if (eventType === 'db') {
+    delete data.selector;
+  }
+
+  return data;
+});
+```

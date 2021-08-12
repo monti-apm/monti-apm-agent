@@ -23,7 +23,18 @@ Tinytest.add(
               compute: 7.5,
               total: 7.5,
               fetchedDocSize: 0,
-              sentMsgSize: 0
+              sentMsgSize: 0,
+              histogram: {
+                alpha: 0.02,
+                bins: {
+                  41: 1,
+                  58: 1
+                },
+                maxNumBins: 2048,
+                n: 2,
+                gamma: 1.0408163265306123,
+                numBins: 2
+              }
             }
           }
         }
@@ -59,7 +70,18 @@ Tinytest.add(
           compute: 7.5,
           total: 7.5,
           fetchedDocSize: 0,
-          sentMsgSize: 0
+          sentMsgSize: 0,
+          histogram: {
+            alpha: 0.02,
+            bins: {
+              41: 1,
+              58: 1
+            },
+            maxNumBins: 2048,
+            n: 2,
+            gamma: 1.0408163265306123,
+            numBins: 2
+          }
         }
       }
     }];
@@ -117,6 +139,42 @@ Tinytest.add(
         JSON.stringify({ msg: 'result', id: '1', result: returnValue })).length
 
     test.equal(payload.methodMetrics[0].methods[methodId].sentMsgSize, expected);
+    CleanTestData();
+  }
+);
+
+Tinytest.add(
+  'Models - Method - Trace - filter params',
+  function (test) {
+    Kadira.tracer.redactField('__test1');
+    var methodId = RegisterMethod(function(){
+    });
+
+    var client = GetMeteorClient();
+    client.call(methodId, { __test1: 'value', abc: true }, { xyz: false, __test1: 'value2' });
+
+    var trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
+
+    var expected = JSON.stringify([{ __test1: 'Monti: redacted', abc: true }, { xyz: false, __test1: 'Monti: redacted'}]);
+    test.equal(trace.events[0][2].params, expected);
+    CleanTestData();
+  }
+);
+
+Tinytest.add(
+  'Models - Method - Trace - filter params with null',
+  function (test) {
+    Kadira.tracer.redactField('__test1');
+    var methodId = RegisterMethod(function () {
+    });
+
+    var client = GetMeteorClient();
+    client.call(methodId, { __test1: 'value', abc: true }, null, { xyz: false, __test1: 'value2' });
+
+    var trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
+
+    var expected = JSON.stringify([{ __test1: 'Monti: redacted', abc: true }, null, { xyz: false, __test1: 'Monti: redacted' }]);
+    test.equal(trace.events[0][2].params, expected);
     CleanTestData();
   }
 );

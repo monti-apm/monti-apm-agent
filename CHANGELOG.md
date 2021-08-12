@@ -1,12 +1,126 @@
 # Changelog
 
+## 2.44.1
+July 20, 21
+
+* Fix memory leak with Node 8 from monitoring garbage collection
+* Fix memory leak when agent is not connected
+* Remove support for beta versions of Meteor 2.3
+
+## 2.44.0
+July 14, 2021
+
+* Add createdFibers, activeFibers, fiberPoolSize, activeRequests, and activeHandles metrics
+* Add garbage collection metrics, enabled when using Node 8.5 or newer
+* Record histogram of event loop delay
+* Add metrics for mongo node driver's connection pool, enabled when using Meteor 2.2 or newer
+* Record system and user cpu usage in cpu history
+
+## 2.43.1
+June 9, 2021
+
+* Store current cpu usage percent for profiler
+
+## 2.43.0
+June 7, 2021
+
+* Fix compatibility with Meteor 2.3
+* Remove HTTP package from client dependencies
+
+## 2.42.0
+May 25, 2021
+
+* Add memoryArrayBuffers, memoryExternal, memoryHeapUsed, and memoryHeapTotal metrics
+* Fix pcpuUser and pcpuSystem metrics
+* Fix error when DocSize is given a map
+* Fix error when MeteorX.Multiplexer is undefined, which fixes using the agent in Rocket Chat
+* Fix how stripSensitiveThorough filter handles waitend event
+* Continuous profiles are only sent if the agent is connected
+* Remove pidusage npm dependency
+
+## 2.41.2
+March 24, 2021
+
+* Update `monti-apm-core`
+
+## 2.41.1
+March 23, 2021
+
+* Fix error when filtering arrays with null values
+
+## 2.41.0
+March 22, 2021
+
+* Add `Monti.tracer.redactField(fieldName)`. Removes the value of these fields from objects before storing them in a trace. By default it filters the `password` field. Is used for headers from incoming HTTP requests, and parameters passed to methods and pub/sub.
+* Reduce time spent loading the package in the server by up to 80% (from up to ~1,000ms to 200ms)
+* Reduce disk usage of package from 25mb to 3mb
+* Warns when an app uses multiple APM agent packages since they can conflict with each other
+* Remove internal use of Meteor's HTTP package. Monti APM still instruments it to track outgoing HTTP calls in traces.
+* Store `detail` property of Method and pub/sub errors (Thanks @ulion).
+* Fix sending errors from Internet Explorer 9
+* Documented Meteor and browser compatibility in readme. We support Meteor 1.4 and newer, and Internet Explorer 9 and newer web browsers.
+* Add Tracer.stripSensitiveThorough filter. This filter internally uses a list of which fields to not strip instead of which fields to strip, which reduces the consequences of forgetting to update the filter after adding new fields
+* Update Tracer.stripSensitive to support headers and request bodies for HTTP traces
+* Increase minimum version for monitoring incoming HTTP requests from Meteor 1.6.1 to Meteor 1.7. As before, HTTP monitoring is automatically disabled when using an older version of Meteor.
+* Drop compatibility for old beta versions of Meteor's email package. You can still force the beta version by modifying your app's `.meteor/packages` file to have a `!` after the email package's version.
+* Fix filter examples in readme
+
+## v2.40.1
+January 8, 2021
+
+* Fix issues publishing v2.40.0
+
+## v2.40.0
+January 8, 2021
+
+* Store histogram of response times for Methods and Publications
+* Store CPU usage every 2 seconds instead of 20
+* Improve performance when there are a large number of different methods, publications, or HTTP routes
+* Add `Monti.startContinuousProfiling()`. Requires a version of `montiapm:profiler` that supports continuous profiling.
+
+## v2.39.1
+Nov 11, 2020
+
+* Fix return value of connect app `.use`
+* Log a message if trying to add a nested event to an invalid trace
+
+## v2.39.0
+August 21, 2020
+
+* Add monitoring for incoming HTTP requests, supported for Meteor 1.6.1 and newer
+  * Instruments WebApp.rawConnectHandlers, WebAppInternals.meteorInternalHandlers, WebApp.connectHandlers, WebApp.connectApp, fast-render, connect-route, and simple:json-routes (which is used by most Meteor REST packages)
+* Create histograms of HTTP response time
+* Instrument fs.stat and fs.createReadStream
+* Fix unhandled promise rejections not being logged to the console
+* Fix calculating compute time between the second to last event and complete event
+* Sends agent version to the engine
+
+## v2.38.1
+January 23, 2020
+
+* Improve detection of errors that should be ignored in Meteor._debug. This will fix some errors not being reported
+* Fix some stack traces missing when logged by Meteor._debug
+
+## v2.38
+November 6, 2019
+
+* Fix many instances of unhelpful errors reported by Meteor._debug
+  * Fix tracker errors being reported as 3 different errors. Now one error has all the relevant details
+    * One error had the tracker function that caught the error
+    * One had the error message without the stack
+    * Another had the error stack without the message
+  * Fix internal server errors with no name or stack
+  * Fix empty stack from Meteor._debug on Firefox
+  * Add stack if missing to Meteor._debug server errors
+* Fixed duplicate `:` appearing in some error names
+* Limit method and subscription start params to 2,000 characters
+* Limit traces to 1,000 events. This will not affect the method or subscription metrics.
+
 ## v2.37
 August 14, 2019
 
 * Fix many errors in IE not being recorded due to having the wrong time from ntp requests being cached
 * Fix crash when event added to trace after it was processed
-* Limit method and subscription start params to 2,000 characters
-* Limit traces to 1,000 events. This will not affect the method or subscription metrics.
 * Replace meteorhacks:kadira-profiler with montiapm:profiler in console message (@Brouilles)
 
 ## v2.36.1

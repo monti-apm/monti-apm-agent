@@ -4,9 +4,14 @@ Tinytest.addAsync(
     hijackKadiraSendErrors(mock_KadiraSendErrors);
     var message = Random.id();
     var error = new Error(message);
+    let timeout = setTimeout(() => {
+      test.equal('false', 'browser supports onunhandledrejection');
+      next();
+    }, 500);
     Promise.reject(error)
 
     function mock_KadiraSendErrors(error) {
+      clearTimeout(timeout);
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
       test.equal(message, error.name);
@@ -25,9 +30,14 @@ Tinytest.addAsync(
   TestWithErrorTrackingAsync(function (test, next) {
     hijackKadiraSendErrors(mock_KadiraSendErrors);
     var message = Random.id();
+    let timeout = setTimeout(() => {
+      test.equal('false', 'browser supports onunhandledrejection');
+      next();
+    }, 500);
     Promise.reject(message)
 
     function mock_KadiraSendErrors(error) {
+      clearTimeout(timeout);
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
       test.equal(message, error.name);

@@ -93,6 +93,17 @@ Tinytest.add(
 );
 
 Tinytest.add(
+  'Tracer - Default filters - Tracer.stripSensitive - strip headers and request body',
+  function (test) {
+    var filter = Tracer.stripSensitive();
+    var filtered = filter(
+      "start", { body: '{"_id": 5}', headers: "{'x-token': '123'}" }, "http", "POST-/create"
+    );
+    test.equal(filtered, {body: "[stripped]", headers: "[stripped]"});
+  }
+);
+
+Tinytest.add(
   'Tracer - Default filters - Tracer.stripSelectors - given collections',
   function (test) {
     var filter = Tracer.stripSelectors(["posts", "comments"]);
@@ -145,5 +156,69 @@ Tinytest.add(
     var notfiltered = filter("db", {coll: "posts", selector: "something-else"},
                              {type: "method", name: "not-name"});
     test.equal(notfiltered, {coll: "posts", selector: "something-else"});
+  }
+);
+
+Tinytest.add(
+  'Tracer - Default filters - Tracer.stripSensitiveThorough - filter start',
+  function (test) {
+    var filter = Tracer.stripSensitiveThorough();
+    var filtered = filter("start", {userId: "user-1", params: "create"});
+    test.equal(filtered, {userId: "user-1", params: "[stripped]"});
+  }
+);
+
+Tinytest.add(
+  'Tracer - Default filters - Tracer.stripSensitiveThorough - filter db',
+  function (test) {
+    var filter = Tracer.stripSensitiveThorough();
+    var filtered = filter("db", {coll: "notes", query: "{_id: '1234'}"});
+    test.equal(filtered, {coll: "notes", query: "[stripped]"});
+  }
+);
+
+Tinytest.add(
+  'Tracer - Default filters - Tracer.stripSensitiveThorough - filter http',
+  function (test) {
+    var filter = Tracer.stripSensitiveThorough();
+    var filtered = filter("http", {method: "get", data: "{_id: '1234'}"});
+    test.equal(filtered, {method: "get", data: "[stripped]"});
+  }
+);
+
+Tinytest.add(
+  'Tracer - Default filters - Tracer.stripSensitiveThorough - filter email',
+  function (test) {
+    var filter = Tracer.stripSensitiveThorough();
+    var filtered = filter("http", {to: "hello@test.com"});
+    test.equal(filtered, {to: "[stripped]"});
+  }
+);
+
+Tinytest.add(
+  'Tracer - Default filters - Tracer.stripSensitiveThorough - do not filter custom',
+  function (test) {
+    var filter = Tracer.stripSensitiveThorough();
+    var filtered = filter("custom", { method: "get", data: "{_id: '1234'}" });
+    test.equal(filtered, { method: "get", data: "{_id: '1234'}" });
+  }
+);
+
+
+Tinytest.add(
+  'Tracer - Default filters - Tracer.stripSensitiveThorough - filter unknown',
+  function (test) {
+    var filter = Tracer.stripSensitiveThorough();
+    var filtered = filter("other", { method: "get", data: "{_id: '1234'}" });
+    test.equal(filtered, { method: "[stripped]", data: "[stripped]" });
+  }
+);
+
+Tinytest.add(
+  'Tracer - Default filters - Tracer.stripSensitiveThorough - filter error',
+  function (test) {
+    var filter = Tracer.stripSensitiveThorough();
+    var filtered = filter("error", { error: { message: 'Unrecognized type', stack: 'stack' }});
+    test.equal(filtered, { error: { message: 'Unrecognized type', stack: 'stack' } });
   }
 );
