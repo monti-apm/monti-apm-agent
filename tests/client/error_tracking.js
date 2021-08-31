@@ -142,6 +142,7 @@ function hijackSendErrorOnce(sendError) {
 
 function TestWithErrorTracking (testFunction) {
   return function (test, done) {
+    try {
     var status = Kadira.options.enableErrorTracking;
     var appId = Kadira.options.appId;
     Kadira.options.appId = 'app';
@@ -151,6 +152,9 @@ function TestWithErrorTracking (testFunction) {
       _resetErrorTracking(status);
       done();
     });
+  } catch (e) {
+    console.log("ERROR: ", e)
+  } 
   }
 }
 
