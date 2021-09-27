@@ -26,7 +26,8 @@ Tinytest.add(
     var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
     Kadira.enableErrorTracking();
     Kadira.models.error.trackError = function (err, trace) {
-      test.equal(err, {message: 'msg', stack: ''});
+      test.equal(err.message, 'msg');
+      test.equal(err.stack.includes('TestCase.func'), true);
       delete trace.at;
       test.equal(trace, {
         type: 'type',
@@ -36,7 +37,7 @@ Tinytest.add(
         // at: 123,
         events: [
           ['start', 0, {}],
-          ['error', 0, {error: {message: 'msg', stack: ''}}]
+          ['error', 0, {error: {message: 'msg', stack: err.stack}}]
         ],
         metrics: {total: 0}
       });
@@ -151,7 +152,7 @@ Tinytest.add(
         // at: 123,
         events: [
           ['start', 0, {}],
-          ['error', 0, {error: {message: 'error-message', stack: error.stack}}]
+          ['error', 0, {error: {message: 'error-message', stack: err.stack}}]
         ],
         metrics: {total: 0}
       });
@@ -169,7 +170,8 @@ Tinytest.add(
     var originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
     Kadira.enableErrorTracking();
     Kadira.models.error.trackError = function (err, trace) {
-      test.equal(err, {message: 'error-message', stack: ''});
+      test.equal(err.message, 'error-message');
+      test.equal(err.stack.includes('TestCase.func'), true);
       delete trace.at;
       test.equal(trace, {
         type: 'job',
@@ -179,7 +181,7 @@ Tinytest.add(
         // at: 123,
         events: [
           ['start', 0, {}],
-          ['error', 0, {error: {message: 'error-message', stack: ''}}]
+          ['error', 0, {error: {message: 'error-message', stack: err.stack}}]
         ],
         metrics: {total: 0}
       });
