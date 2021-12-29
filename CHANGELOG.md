@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.45.0
+December 29, 2021
+
+* Add simplified `Monti.trackError` api: `Monti.trackError(error)`
+* Track `collection.createIndex` in traces
+* Fix some cases where details for unhandled rejections were not collected
+* The dependencies `email` and `http` are now weak
+* Removed dependency on `localstorage`, and replaced deprecated `livedata` and `mongo-livedata` packages with `mongo` and `ddp`
+
 ## 2.44.2
 August 30, 2021
 
