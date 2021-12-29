@@ -1,10 +1,10 @@
-
 Tinytest.add(
   'Email - success',
   function (test) {
     EnableTrackingMethods();
+    const Email = Package['email'].Email;
     var methodId = RegisterMethod(function () {
-      Email.send({from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com'});
+      Email.send({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
     });
     var client = GetMeteorClient();
     var result = client.call(methodId);
