@@ -247,7 +247,6 @@ Tinytest.add(
     EnableTrackingMethods();
     let name = typeof TestData.createIndex === 'function' ? 'createIndex' : '_ensureIndex';
     var methodId = RegisterMethod(function () {
-      debugger;
       TestData[name]({aa: 1, bb: 1});
       TestData._dropIndex({aa: 1, bb: 1});
       return 'indexes';

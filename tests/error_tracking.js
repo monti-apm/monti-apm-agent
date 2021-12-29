@@ -171,7 +171,7 @@ Tinytest.add(
     Kadira.enableErrorTracking();
     Kadira.models.error.trackError = function (err, trace) {
       test.equal(err.message, 'error-message');
-      test.equal(err.stack.includes('TestCase.func'), true);
+      test.equal(err.stack.includes('tinytest.js'), true);
       delete trace.at;
       test.equal(trace, {
         type: 'job',
