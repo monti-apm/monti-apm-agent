@@ -20,6 +20,8 @@ jobs:
           - '--release 2.1.1'
           - '--release 2.2'
           - '--release 2.3.2'
+          - '--release 2.4.1'
+          - '--release 2.5.2'
           # Latest version
           - 
     steps:
@@ -38,5 +40,8 @@ jobs:
 
       - name: Run Tests
         run: |
+          # Fix using old versions of Meteor
+          export NODE_TLS_REJECT_UNAUTHORIZED=0
+
           # Retry tests since some of them are flaky
-          mtest --package ./ --once ${{ matrix.meteorRelease }} || mtest --package ./ --once ${{ matrix.meteorRelease }} 
+          mtest --package ./ --once ${{ matrix.meteorRelease }} || (sleep 5 && mtest --package ./ --once ${{ matrix.meteorRelease }}) 

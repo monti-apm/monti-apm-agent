@@ -63,8 +63,19 @@ export MONTI_APP_SECRET=<appSecret>
 
 ### Error Tracking
 
-Monti APM comes with built in error tracking solution for Meteor apps. It has been enabled by default.
-For more information, please visit our [docs](http://support.kadira.io/knowledgebase/topics/62637-error-tracking) on [error tracking](http://support.kadira.io/knowledgebase/topics/62637-error-tracking).
+Monti APM comes with built in error tracking solution for Meteor apps. It has been enabled by default. Uncaught errors, unhandled promise rejections and errors logged by Meteor are automatically tracked.
+
+To manually track an error, you can use `Monti.trackError`:
+
+```js
+try {
+  functionThatCouldFail();
+} catch (err) {
+  Monti.trackError(err);
+}
+```
+
+Monti APM can use source maps to show where in the original code the error occurred. Learn more in our [docs](https://docs.montiapm.com/source-maps).
 
 ### Options
 

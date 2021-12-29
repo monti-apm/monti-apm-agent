@@ -245,8 +245,9 @@ Tinytest.add(
   'Database - indexes',
   function (test) {
     EnableTrackingMethods();
+    let name = typeof TestData.createIndex === 'function' ? 'createIndex' : '_ensureIndex';
     var methodId = RegisterMethod(function () {
-      TestData._ensureIndex({aa: 1, bb: 1});
+      TestData[name]({aa: 1, bb: 1});
       TestData._dropIndex({aa: 1, bb: 1});
       return 'indexes';
     });
@@ -256,7 +257,7 @@ Tinytest.add(
     var expected = [
       ['start',,{userId: null, params: '[]'}],
       ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: '_ensureIndex', index: JSON.stringify({aa: 1, bb: 1})}],
+      ['db',,{coll: 'tinytest-data', func: name, index: JSON.stringify({aa: 1, bb: 1})}],
       ['db',,{coll: 'tinytest-data', func: '_dropIndex', index: JSON.stringify({aa: 1, bb: 1})}],
       ['complete']
     ];
