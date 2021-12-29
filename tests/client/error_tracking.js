@@ -29,7 +29,7 @@ Tinytest.addAsync(
       test.equal(typeof error.appId, "string");
       test.equal(typeof error.startTime, "number");
       test.equal(typeof error.info, "object");
-      test.equal(JSON.parse(error.stacks)[0].stack.includes('createStackTrace'), true);
+      test.equal(JSON.parse(error.stacks)[0].stack.includes('TestCase.func'), true);
 
       done();
     });
@@ -125,7 +125,7 @@ Tinytest.addAsync(
       test.equal(typeof err.startTime, "number");
       test.equal(typeof err.info, "object");
       console.log(JSON.parse(err.stacks)[0].stack)
-      test.equal(JSON.parse(err.stacks)[0].stack.includes('createStackTrace'), true);
+      test.equal(JSON.parse(err.stacks)[0].stack.includes('TestCase.func'), true);
 
       done();
     });
