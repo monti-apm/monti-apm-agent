@@ -1,7 +1,13 @@
 # Changelog
 
+## 2.44.2
+August 30, 2021
+
+* Fix `Kadira._getInfo is not a function` error
+* Update monti-apm-core to fix sending large traces and cpu profiles
+
 ## 2.44.1
-July 20, 21
+July 20, 2021
 
 * Fix memory leak with Node 8 from monitoring garbage collection
 * Fix memory leak when agent is not connected

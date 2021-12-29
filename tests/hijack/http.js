@@ -1,4 +1,3 @@
-
 Tinytest.add(
   'HTTP - call a server',
   function (test) {
@@ -11,9 +10,9 @@ Tinytest.add(
     var result = client.call(methodId);
     var events = GetLastMethodEvents([0, 2]);
     var expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['http',,{url: 'http://localhost:3301', method: 'GET', statusCode: 200}],
+      ['start', , { userId: null, params: '[]' }],
+      ['wait', , { waitOn: [] }],
+      ['http', , { url: 'http://localhost:3301', method: 'GET', statusCode: 200 }],
       ['complete']
     ];
     test.equal(events, expected);
@@ -21,6 +20,7 @@ Tinytest.add(
     CleanTestData();
   }
 );
+
 
 Tinytest.add(
   'HTTP - async callback',
@@ -30,7 +30,7 @@ Tinytest.add(
       var Future = Npm.require('fibers/future');
       var f = new Future();
       var result;
-      HTTP.get('http://localhost:3301', function(err, res) {
+      HTTP.get('http://localhost:3301', function (err, res) {
         result = res;
         f.return();
       });
@@ -41,10 +41,10 @@ Tinytest.add(
     var result = client.call(methodId);
     var events = GetLastMethodEvents([0, 2]);
     var expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['http',,{url: 'http://localhost:3301', method: 'GET', async: true}],
-      ['async',, {}],
+      ['start', , { userId: null, params: '[]' }],
+      ['wait', , { waitOn: [] }],
+      ['http', , { url: 'http://localhost:3301', method: 'GET', async: true }],
+      ['async', , {}],
       ['complete']
     ];
     test.equal(events, expected);
