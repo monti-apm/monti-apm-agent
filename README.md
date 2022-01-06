@@ -170,3 +170,9 @@ Monti.tracer.addFilter((eventType, data) => {
   return data;
 });
 ```
+
+### Development
+
+#### Tests
+
+Run `meteor test-packages ./` to execute all test cases.
