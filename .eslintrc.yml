@@ -1,5 +1,5 @@
 ---
-parser: '@babel/eslint-parser'
+parser: "@babel/eslint-parser"
 extends:
   - es/2015/server
 plugins:
@@ -8,9 +8,12 @@ env:
   es6: true
   node: true
   mocha: true
+globals:
+  Tinytest: readonly
+  Meteor: readonly
 parserOptions:
   requireConfigFile: false
-  sourceType: 'module'
+  sourceType: "module"
   ecmaVersion: 2017
   ecmaFeatures:
     accessor-pairs: 2
@@ -50,7 +53,7 @@ rules:
   camelcase:
     - 2
     - properties: always
-  comma-dangle: [2, 'never']
+  comma-dangle: [ 2, "never" ]
   comma-spacing: 0
   comma-style:
     - 2
@@ -136,7 +139,7 @@ rules:
   no-extend-native: 2
   no-extra-bind: 2
   no-extra-boolean-cast: 2
-  no-extra-parens: [ 2, 'all', { nestedBinaryExpressions: false }]
+  no-extra-parens: [ 2, "all", { nestedBinaryExpressions: false } ]
   no-extra-semi: 2
   no-fallthrough: 2
   no-floating-decimal: 2
@@ -229,7 +232,7 @@ rules:
   operator-linebreak:
     - 2
     - after
-  padded-blocks: [2, 'never']
+  padded-blocks: [ 2, "never" ]
   prefer-const: 0
   prefer-reflect: 0
   prefer-spread: 2
