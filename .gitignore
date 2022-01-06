@@ -1,4 +1,5 @@
 .build*
+node_modules/
 .npm
 smart.lock
 versions.json

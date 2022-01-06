@@ -1,0 +1,26 @@
+{
+  "name": "monti-apm-agent",
+  "version": "2.45.0",
+  "description": "Performance Monitoring for Meteor",
+  "main": "package.js",
+  "scripts": {
+    "test": "meteor test-packages ./",
+    "lint": "eslint ./**/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/monti-apm/monti-apm-agent.git"
+  },
+  "author": "zodern",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/monti-apm/monti-apm-agent/issues"
+  },
+  "homepage": "https://github.com/monti-apm/monti-apm-agent#readme",
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.16.5",
+    "eslint": "^8.6.0",
+    "eslint-config-es": "^0.8.12",
+    "eslint-plugin-babel": "^5.3.1"
+  }
+}
