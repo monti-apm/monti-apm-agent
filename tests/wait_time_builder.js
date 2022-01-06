@@ -1,3 +1,5 @@
+import { WaitTimeBuilder } from "../lib/wait_time_builder";
+
 Tinytest.add(
   'WaitTimeBuilder - register and build - clean _messageCache',
   function (test) {
