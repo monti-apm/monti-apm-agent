@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import { _ } from 'meteor/underscore';
 import { WaitTimeBuilder } from '../lib/wait_time_builder';
 
