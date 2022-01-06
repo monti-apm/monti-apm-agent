@@ -175,10 +175,10 @@ Monti.tracer.addFilter((eventType, data) => {
 
 #### Code Style & Format
 
-Run `npx prettier --check ./` to check all files.
+There is ESLint config file from `meteor-up` project. In the future, we should adapt it.
 
-Run `npx prettier --write ./` to fix formatting issues.
+Run `npm run lint` to check all files.
 
 #### Tests
 
-Run `meteor test-packages ./` to execute all test cases.
+Run `npm run test` to execute all test cases.
