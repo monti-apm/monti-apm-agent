@@ -173,6 +173,12 @@ Monti.tracer.addFilter((eventType, data) => {
 
 ### Development
 
+#### Code Style & Format
+
+Run `npx prettier --check ./` to check all files.
+
+Run `npx prettier --write ./` to fix formatting issues.
+
 #### Tests
 
 Run `meteor test-packages ./` to execute all test cases.
