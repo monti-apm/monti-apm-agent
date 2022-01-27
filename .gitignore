@@ -4,3 +4,4 @@ node_modules/
 smart.lock
 versions.json
 .idea
+.eslintcache

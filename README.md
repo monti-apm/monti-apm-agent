@@ -173,12 +173,19 @@ Monti.tracer.addFilter((eventType, data) => {
 
 ### Development
 
-#### Code Style & Format
+#### Tests:
 
-There is ESLint config file from `meteor-up` project. In the future, we should adapt it.
+```
+npm run test
 
-Run `npm run lint` to check all files.
+# Run tests for specific Meteor version
+npm run test -- --release 1.8.1
+```
 
-#### Tests
+#### Lint
 
-Run `npm run test` to execute all test cases.
+Make sure you install the dev dependencies first with `npm install`.
+
+```
+npm run lint
+```
