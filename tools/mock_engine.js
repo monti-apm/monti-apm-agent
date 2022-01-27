@@ -1,7 +1,7 @@
-var http = require('http');
-var app = http.createServer(function(req, res) {
-  console.log("AUTH:", req.headers);
-  var data = "";
+const http = require('http');
+const app = http.createServer((req, res) => {
+  console.log('AUTH:', req.headers);
+  let data = '';
   req.on('data', ondata);
   req.once('end', onend);
   req.socket.setKeepAlive(false);
@@ -19,7 +19,6 @@ var app = http.createServer(function(req, res) {
   }
 });
 
-var port = process.env.PORT || 11011;
+const port = process.env.PORT || 11011;
 console.log('Mock APM Engine started on port: ', port);
 app.listen(port);
-

@@ -170,3 +170,15 @@ Monti.tracer.addFilter((eventType, data) => {
   return data;
 });
 ```
+
+### Development
+
+#### Code Style & Format
+
+There is ESLint config file from `meteor-up` project. In the future, we should adapt it.
+
+Run `npm run lint` to check all files.
+
+#### Tests
+
+Run `npm run test` to execute all test cases.
