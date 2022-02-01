@@ -72,6 +72,7 @@ Package.onTest(function (api) {
     'tests/hijack/set_labels.js',
     'tests/environment_variables.js',
     'tests/docsize_cache.js',
+    'tests/mongo_driver_events.js'
   ], 'server');
 
   // common client
