@@ -45,7 +45,7 @@ Tinytest.addAsync(
     await delay(5000);
     const delayedStats = getMongoDriverStats();
     test.equal(delayedStats, {
-      poolSize: 100,
+      poolSize: 0,
       primaryCheckouts: 0,
       otherCheckouts: 0,
       checkoutTime: 0,
@@ -58,7 +58,7 @@ Tinytest.addAsync(
     resetMongoDriverStats();
     const postResetStats = getMongoDriverStats();
     test.equal(postResetStats, {
-      poolSize: 100,
+      poolSize: 0,
       primaryCheckouts: 0,
       otherCheckouts: 0,
       checkoutTime: 0,
