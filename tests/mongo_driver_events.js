@@ -32,7 +32,7 @@ Tinytest.addAsync(
     resetMongoDriverStats();
     const stats = getMongoDriverStats();
     test.equal(stats, {
-      poolSize: 100,
+      poolSize: 0,
       primaryCheckouts: 0,
       otherCheckouts: 0,
       checkoutTime: 0,
