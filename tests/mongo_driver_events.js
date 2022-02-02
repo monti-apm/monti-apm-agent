@@ -37,7 +37,7 @@ if (mongoMonitoringEnabled) {
       const stats = getMongoDriverStats();
       // immediately checking for poolsize after triggering getMongoDriverStats should be zerob 
       test.equal(stats, {
-        poolSize: 0,
+        poolSize: 10,
         primaryCheckouts: 0,
         otherCheckouts: 0,
         checkoutTime: 0,
