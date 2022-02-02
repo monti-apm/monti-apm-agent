@@ -3,9 +3,7 @@ import { releaseParts } from './hijack/webapp';
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-// Check if Meteor 2.2 or newer, which are the
-// versions that wrap connect handlers in a fiber and are easy
-// to wrap the static middleware
+// Check if Meteor 2.2 or newer
 const mongoMonitoringEnabled = releaseParts[0] > 1 ||
   (releaseParts[0] > 1 && releaseParts[1] > 1)
 
