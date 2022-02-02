@@ -8,7 +8,7 @@ const mongoMonitoringEnabled = releaseParts[0] > 1 ||
   (releaseParts[0] > 1 && releaseParts[1] > 1)
 
 if (mongoMonitoringEnabled) {
-  Tinytest.addAsync(
+  Tinytest.add(
     'Mongo Driver Events - getMongoDriverStats',
     function (test) {
       const stats = getMongoDriverStats();
@@ -24,7 +24,6 @@ if (mongoMonitoringEnabled) {
           created: 1,
           measurementCount: 0
         }
-
       );
     }
   );
