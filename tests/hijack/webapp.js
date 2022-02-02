@@ -1,7 +1,7 @@
 import { WebApp } from 'meteor/webapp';
 import { checkHandlersInFiber, wrapWebApp } from "../../lib/hijack/wrap_webapp";
 
-const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => {
+export const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => {
   return parseInt(num, 10)
 })
 
