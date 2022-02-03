@@ -179,7 +179,7 @@ Tinytest.add(
         cursor: true,
         selector: JSON.stringify({_id: 'aa'}),
         sort: JSON.stringify({dd: -1}),
-        fields: JSON.stringify({dd: 1}),
+        projection: JSON.stringify({dd: 1}),
         docsFetched: 1,
         docSize: JSON.stringify({_id: 'aa', dd: 10}).length,
         limit: 1
