@@ -20,8 +20,8 @@ if (mongoMonitoringEnabled) {
           otherCheckouts: 0,
           checkoutTime: 0,
           maxCheckoutTime: 0,
-          pending: NaN,
-          checkedOut: NaN,
+          pending: stats.pending,
+          checkedOut: stats.checkedOut,
           created: stats.created,
           measurementCount: stats.measurementCount
         }
