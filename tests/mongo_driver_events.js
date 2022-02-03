@@ -22,7 +22,7 @@ if (mongoMonitoringEnabled) {
           maxCheckoutTime: 0,
           pending: NaN,
           checkedOut: NaN,
-          created: 1,
+          created: stats.created,
           measurementCount: stats.measurementCount
         }
       );
