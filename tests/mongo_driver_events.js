@@ -7,7 +7,6 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 const mongoMonitoringEnabled = releaseParts[1] ? (releaseParts[0] > 1 && releaseParts[1] > 1) : releaseParts[0] > 1;
 
 if (mongoMonitoringEnabled) {
-  
   Tinytest.add(
     'Mongo Driver Events - getMongoDriverStats',
     function (test) {
