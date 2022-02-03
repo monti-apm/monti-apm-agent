@@ -1,4 +1,3 @@
-
 Tinytest.add(
   'Database - insert',
   function (test) {
