@@ -25,8 +25,7 @@ if (mongoMonitoringEnabled) {
           maxCheckoutTime: 0,
           pending: stats.pending,
           checkedOut: stats.checkedOut,
-          created: stats.created,
-          measurementCount: stats.measurementCount
+          created: stats.created
         }
       );
       pendingValues.includes(stats.pending);
@@ -50,8 +49,7 @@ if (mongoMonitoringEnabled) {
         maxCheckoutTime: 0,
         pending: 0,
         checkedOut: 0,
-        created: 0,
-        measurementCount: 0
+        created: 0
       });
       done();
     }
