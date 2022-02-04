@@ -1,11 +1,6 @@
 import { getMongoDriverStats, resetMongoDriverStats } from '../lib/hijack/mongo-driver-events.js';
 import { releaseParts } from './hijack/webapp';
 
-// Check if Meteor 2.2 or newer, which is the first version that enabled `useUnifiedTopology` by default
-const mongoMonitoringEnabled = releaseParts[1] ? (releaseParts[0] > 1 && releaseParts[1] > 1) : releaseParts[0] > 1;
-
-if (mongoMonitoringEnabled) {
-  
   Tinytest.add(
     'Mongo Driver Events - getMongoDriverStats',
     function (test) {
@@ -51,5 +46,3 @@ if (mongoMonitoringEnabled) {
       });
     }
   );
-
-}
