@@ -36,7 +36,7 @@ if (mongoMonitoringEnabled) {
 
   Tinytest.add(
     'Mongo Driver Events - resetMongoDriverStats',
-    function (test, done) {
+    function (test) {
       resetMongoDriverStats();
       const postResetStats = getMongoDriverStats();
       test.equal(postResetStats, {
@@ -49,7 +49,6 @@ if (mongoMonitoringEnabled) {
         checkedOut: 0,
         created: 0
       });
-      done();
     }
   );
 
