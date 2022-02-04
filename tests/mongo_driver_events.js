@@ -29,6 +29,7 @@ if (mongoMonitoringEnabled) {
       pendingValues.includes(stats.pending);
       poolSizeValues.includes(stats.poolSize);
       checkedOutValues.includes(stats.checkedOutValues);
+      checkedOutValues.includes(stats.created);
     }
   );
 
