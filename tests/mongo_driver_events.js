@@ -3,7 +3,7 @@ import { releaseParts } from './hijack/webapp';
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-// Check if Meteor 2.2 or newer
+// Check if Meteor 2.2 or newer, which is the first version that enabled `useUnifiedTopology` by default
 const mongoMonitoringEnabled = releaseParts[1] ? (releaseParts[0] > 1 && releaseParts[1] > 1) : releaseParts[0] > 1;
 
 if (mongoMonitoringEnabled) {
