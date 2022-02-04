@@ -40,7 +40,7 @@ if (mongoMonitoringEnabled) {
       resetMongoDriverStats();
       const postResetStats = getMongoDriverStats();
       test.equal(postResetStats, {
-        poolSize: stats.poolSize,
+        poolSize: postResetStats.poolSize,
         primaryCheckouts: 0,
         otherCheckouts: 0,
         checkoutTime: 0,
