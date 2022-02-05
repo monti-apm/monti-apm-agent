@@ -44,8 +44,8 @@ import { getMongoDriverStats, resetMongoDriverStats, getPoolSize } from '../lib/
         otherCheckouts: 0,
         checkoutTime: 0,
         maxCheckoutTime: 0,
-        pending: 0,
-        checkedOut: 0,
+        pending: null,
+        checkedOut: null,
         created: 0
       });
     }
