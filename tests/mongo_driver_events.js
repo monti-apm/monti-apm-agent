@@ -15,7 +15,7 @@ import { getMongoDriverStats, resetMongoDriverStats, getPoolSize } from '../lib/
       test.equal(stats,
         {
           poolSize: stats.poolSize,
-          primaryCheckouts: poolSize+extraRounds,
+          primaryCheckouts: (poolSize > 0) ? poolSize+extraRounds : poolSize,
           otherCheckouts: 0,
           checkoutTime: 0,
           maxCheckoutTime: 0,
