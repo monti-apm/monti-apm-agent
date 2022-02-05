@@ -32,7 +32,6 @@ import { getMongoDriverStats, resetMongoDriverStats, getPoolSize } from '../lib/
     }
   );
 
-
   Tinytest.add(
     'Mongo Driver Events - resetMongoDriverStats',
     function (test) {
