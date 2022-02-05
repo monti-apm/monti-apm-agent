@@ -1,18 +1,21 @@
-import { getMongoDriverStats, resetMongoDriverStats } from '../lib/hijack/mongo-driver-events.js';
-import { releaseParts } from './hijack/webapp';
+import { getMongoDriverStats, resetMongoDriverStats, getPoolSize } from '../lib/hijack/mongo-driver-events.js';
 
   Tinytest.add(
     'Mongo Driver Events - getMongoDriverStats',
     function (test) {
-      const stats = getMongoDriverStats();
+      const poolSize = getPoolSize();
       const poolSizeValues = [100, 10];
-      const checkedOutValues = 	[...Array(stats.poolSize).keys()];
+      const checkedOutValues = 	[...Array(poolSize).keys()];
       const pendingValues = [...Array(10).keys()];
-
+      const extraRounds = 5;
+      [...Array(poolSize+extraRounds).keys()].forEach(() => {
+        TestData.find().count()
+      })
+      const stats = getMongoDriverStats();
       test.equal(stats,
         {
           poolSize: stats.poolSize,
-          primaryCheckouts: 0,
+          primaryCheckouts: poolSize+extraRounds,
           otherCheckouts: 0,
           checkoutTime: 0,
           maxCheckoutTime: 0,
@@ -21,6 +24,7 @@ import { releaseParts } from './hijack/webapp';
           created: stats.created
         }
       );
+
       pendingValues.includes(stats.pending);
       poolSizeValues.includes(stats.poolSize);
       checkedOutValues.includes(stats.checkedOutValues);
