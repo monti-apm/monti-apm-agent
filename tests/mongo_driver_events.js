@@ -1,4 +1,9 @@
 import { getMongoDriverStats, resetMongoDriverStats, getPoolSize } from '../lib/hijack/mongo-driver-events.js';
+import { releaseParts } from './hijack/webapp';
+
+
+const mongoMonitoringEnabled = releaseParts[1] ? (releaseParts[0] > 1 && releaseParts[1] > 1) : releaseParts[0] > 1;
+
 
   Tinytest.add(
     'Mongo Driver Events - getMongoDriverStats',
@@ -15,7 +20,7 @@ import { getMongoDriverStats, resetMongoDriverStats, getPoolSize } from '../lib/
       test.equal(stats,
         {
           poolSize: stats.poolSize,
-          primaryCheckouts: (poolSize > 0) ? poolSize+extraRounds : poolSize,
+          primaryCheckouts: mongoMonitoringEnabled ? (poolSize > 0) ? poolSize+extraRounds : poolSize : 0,
           otherCheckouts: 0,
           checkoutTime: stats.checkoutTime,
           maxCheckoutTime: stats.maxCheckoutTime,
