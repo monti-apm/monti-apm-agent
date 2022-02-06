@@ -17,8 +17,8 @@ import { getMongoDriverStats, resetMongoDriverStats, getPoolSize } from '../lib/
           poolSize: stats.poolSize,
           primaryCheckouts: (poolSize > 0) ? poolSize+extraRounds : poolSize,
           otherCheckouts: 0,
-          checkoutTime: 0,
-          maxCheckoutTime: 0,
+          checkoutTime: stats.checkoutTime,
+          maxCheckoutTime: stats.maxCheckoutTime,
           pending: stats.pending,
           checkedOut: stats.checkedOut,
           created: stats.created
@@ -26,6 +26,8 @@ import { getMongoDriverStats, resetMongoDriverStats, getPoolSize } from '../lib/
       );
 
       pendingValues.includes(stats.pending);
+      pendingValues.includes(stats.maxCheckoutTime);
+      pendingValues.includes(stats.checkedOutTimeValues);
       poolSizeValues.includes(stats.poolSize);
       checkedOutValues.includes(stats.checkedOutValues);
       checkedOutValues.includes(stats.created);
