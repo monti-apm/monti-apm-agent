@@ -1,41 +1,47 @@
-import { getMongoDriverStats, resetMongoDriverStats, getPoolSize } from '../lib/hijack/mongo-driver-events.js';
-import { releaseParts } from './hijack/webapp';
+import { getMongoDriverStats, resetMongoDriverStats } from '../lib/hijack/mongo-driver-events.js';
+import { releaseParts } from './_helpers/helpers';
 
+// Check if Meteor 2.2 or newer, which is the first version that enabled
+// useUnifiedTopology by default
+const mongoMonitoringEnabled = releaseParts[0] > 2 ||
+  (releaseParts[0] > 1 && releaseParts[1] > 1);
 
-const mongoMonitoringEnabled = releaseParts[1] ? (releaseParts[0] > 1 && releaseParts[1] > 1) : releaseParts[0] > 1;
+function checkRange(value, disabledValue, min, max) {
+  if (!mongoMonitoringEnabled) {
+    if (value !== disabledValue) {
+      throw new Error(`${value} does not equal ${disabledValue}`);
+    }
 
+    return;
+  }
 
-  Tinytest.add(
+  if (value < min || value > max) {
+    throw new Error(`Value (${value}) is outside of range (${min} - ${max})`);;
+  }
+}
+
+  Tinytest.addAsync(
     'Mongo Driver Events - getMongoDriverStats',
-    function (test) {
-      const poolSize = getPoolSize();
-      const poolSizeValues = [100, 10];
-      const checkedOutValues = 	[...Array(poolSize).keys()];
-      const pendingValues = [...Array(10).keys()];
-      const extraRounds = 5;
-      [...Array(poolSize+extraRounds).keys()].forEach(() => {
-        TestData.find().count()
-      })
-      const stats = getMongoDriverStats();
-      test.equal(stats,
-        {
-          poolSize: stats.poolSize,
-          primaryCheckouts: mongoMonitoringEnabled ? (poolSize > 0) ? poolSize+extraRounds : poolSize : 0,
-          otherCheckouts: 0,
-          checkoutTime: stats.checkoutTime,
-          maxCheckoutTime: stats.maxCheckoutTime,
-          pending: stats.pending,
-          checkedOut: stats.checkedOut,
-          created: stats.created
-        }
-      );
+    async function (test) {
+      resetMongoDriverStats();
 
-      pendingValues.includes(stats.pending);
-      pendingValues.includes(stats.maxCheckoutTime);
-      pendingValues.includes(stats.checkedOutTimeValues);
-      poolSizeValues.includes(stats.poolSize);
-      checkedOutValues.includes(stats.checkedOutValues);
-      checkedOutValues.includes(stats.created);
+      const promises = [];
+      for(let i = 0; i < 200; i++) {
+        promises.push(TestData.rawCollection().count());
+      }
+
+      await Promise.all(promises);
+
+      const stats = getMongoDriverStats();
+
+      checkRange(stats.poolSize, 0, 10, 100);
+      test.equal(stats.primaryCheckouts, mongoMonitoringEnabled ? 200 : 0);
+      test.equal(stats.otherCheckouts, 0);
+      checkRange(stats.checkoutTime, 0, 100, 20000);
+      checkRange(stats.maxCheckoutTime, 0, 10, 200);
+      checkRange(stats.pending, 0, 0, 10);
+      checkRange(stats.checkedOut, 0, 0, 1);
+      checkRange(stats.created, 0, 1, 100);
     }
   );
 
@@ -50,8 +56,8 @@ const mongoMonitoringEnabled = releaseParts[1] ? (releaseParts[0] > 1 && release
         otherCheckouts: 0,
         checkoutTime: 0,
         maxCheckoutTime: 0,
-        pending: NaN,
-        checkedOut: NaN,
+        pending: 0,
+        checkedOut: 0,
         created: 0
       });
     }
