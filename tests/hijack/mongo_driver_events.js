@@ -1,4 +1,4 @@
-import { getMongoDriverStats, resetMongoDriverStats } from '../lib/hijack/mongo-driver-events.js';
+import { getMongoDriverStats, resetMongoDriverStats } from '../lib/hijack/mongo_driver_events.js';
 import { releaseParts } from './_helpers/helpers';
 
 // Check if Meteor 2.2 or newer, which is the first version that enabled
