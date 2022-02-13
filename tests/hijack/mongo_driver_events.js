@@ -52,7 +52,7 @@ function checkRange(value, disabledValue, min, max) {
 
   Tinytest.add(
     'Mongo Driver Events - resetMongoDriverStats',
-    function (test, done) {
+    function (test) {
       resetMongoDriverStats();
       const postResetStats = getMongoDriverStats();
       test.equal(postResetStats, {
@@ -65,7 +65,5 @@ function checkRange(value, disabledValue, min, max) {
         checkedOut: 0,
         created: 0
       });
-
-      done();
     }
   );
