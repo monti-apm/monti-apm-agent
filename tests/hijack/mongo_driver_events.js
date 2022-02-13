@@ -26,7 +26,7 @@ function checkRange(value, disabledValue, min, max) {
 
   Tinytest.addAsync(
     'Mongo Driver Events - getMongoDriverStats',
-    async function (test) {
+    async function (test, done) {
       resetMongoDriverStats();
 
       const promises = [];
@@ -46,12 +46,13 @@ function checkRange(value, disabledValue, min, max) {
       checkRange(stats.pending, 0, 0, 50);
       checkRange(stats.checkedOut, 0, 0, 1);
       checkRange(stats.created, 0, 1, 100);
+      done();
     }
   );
 
   Tinytest.add(
     'Mongo Driver Events - resetMongoDriverStats',
-    function (test) {
+    function (test, done) {
       resetMongoDriverStats();
       const postResetStats = getMongoDriverStats();
       test.equal(postResetStats, {
@@ -64,5 +65,7 @@ function checkRange(value, disabledValue, min, max) {
         checkedOut: 0,
         created: 0
       });
+
+      done();
     }
   );
