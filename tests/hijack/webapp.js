@@ -1,9 +1,6 @@
 import { WebApp } from 'meteor/webapp';
 import { checkHandlersInFiber, wrapWebApp } from "../../lib/hijack/wrap_webapp";
-
-const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => {
-  return parseInt(num, 10)
-})
+import { releaseParts } from '../_helpers/helpers';
 
 // Check if Meteor 1.7 or newer, which are the
 // versions that wrap connect handlers in a fiber and are easy

@@ -153,3 +153,7 @@ WithDocCacheGetSize = function(fn, patchedSize){
     Kadira.docSzCache.getSize = original
   }
 }
+
+export const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => {
+  return parseInt(num, 10)
+});

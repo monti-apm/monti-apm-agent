@@ -59,6 +59,7 @@ Package.onTest(function (api) {
     'tests/hijack/db.js',
     'tests/hijack/subscriptions.js',
     'tests/hijack/error.js',
+    'tests/hijack/mongo_driver_events.js',
     'tests/models/methods.js',
     'tests/models/pubsub.js',
     'tests/models/system.js',

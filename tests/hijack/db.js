@@ -1,4 +1,3 @@
-
 Tinytest.add(
   'Database - insert',
   function (test) {
@@ -179,14 +178,18 @@ Tinytest.add(
         cursor: true,
         selector: JSON.stringify({_id: 'aa'}),
         sort: JSON.stringify({dd: -1}),
-        fields: JSON.stringify({dd: 1}),
         docsFetched: 1,
         docSize: JSON.stringify({_id: 'aa', dd: 10}).length,
         limit: 1
       }],
       ['complete']
     ];
-
+    const projection = JSON.stringify({dd: 1});
+    if (events[3][2].projection) {
+      expected[3][2].projection = projection
+    } else {
+      expected[3][2].fields = projection;
+    }
     test.equal(result, {_id: 'aa', dd: 10});
     test.equal(events, expected);
     CleanTestData();
