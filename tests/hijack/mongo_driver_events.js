@@ -7,6 +7,10 @@ const mongoMonitoringEnabled = releaseParts[0] > 2 ||
   (releaseParts[0] > 1 && releaseParts[1] > 1);
 
 function checkRange(value, disabledValue, min, max) {
+  if (typeof value !== 'number') {
+    throw new Error(`${value} is not a number`);
+  }
+
   if (!mongoMonitoringEnabled) {
     if (value !== disabledValue) {
       throw new Error(`${value} does not equal ${disabledValue}`);
@@ -39,7 +43,7 @@ function checkRange(value, disabledValue, min, max) {
       test.equal(stats.otherCheckouts, 0);
       checkRange(stats.checkoutTime, 0, 100, 20000);
       checkRange(stats.maxCheckoutTime, 0, 10, 200);
-      checkRange(stats.pending, 0, 0, 10);
+      checkRange(stats.pending, 0, 0, 50);
       checkRange(stats.checkedOut, 0, 0, 1);
       checkRange(stats.created, 0, 1, 100);
     }
