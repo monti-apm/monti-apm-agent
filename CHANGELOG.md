@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.45.1
+February 13, 2022
+
+* Fix compatibility with Meteor 2.6
+
 ## 2.45.0
 December 29, 2021
 
