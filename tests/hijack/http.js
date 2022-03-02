@@ -74,3 +74,44 @@ Tinytest.add('HTTP - meteor/fetch - async call', function (test) {
     CleanTestData();
   }
 );
+
+Tinytest.add('HTTP - meteor/fetch - trace error', function (test) {
+    const methodId = RegisterMethod(function () {
+      const f = new Future();
+      let error;
+      fetch('http://localhost:9999/').catch(function (err) {
+        error = err;
+        f.return();
+      });
+      f.wait();
+      return error;
+    });
+    const client = GetMeteorClient();
+    const result = client.call(methodId);
+    const events = GetLastMethodEvents([0, 2]);
+    const expected = [
+      ["start", , { userId: null, params: "[]" }],
+      ["wait", , { waitOn: [] }],
+      [
+        "http",
+        ,
+        {
+          method: "GET",
+          url: "http://localhost:9999/",
+          library: "meteor/fetch",
+          err: "request to http://localhost:9999/ failed, reason: connect ECONNREFUSED 127.0.0.1:9999",
+        },
+      ],
+      ["complete"],
+    ];
+    test.equal(events, expected);
+    test.equal(result, {
+      message:
+        "request to http://localhost:9999/ failed, reason: connect ECONNREFUSED 127.0.0.1:9999",
+      type: "system",
+      errno: "ECONNREFUSED",
+      code: "ECONNREFUSED",
+    });
+    CleanTestData();
+  }
+);
