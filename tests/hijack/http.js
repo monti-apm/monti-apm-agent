@@ -1,7 +1,8 @@
 import { HTTP } from 'meteor/http';
+import { fetch } from 'meteor/fetch';
 const Future = Npm.require('fibers/future');
 
-Tinytest.add('HTTP - call a server', function (test) {
+Tinytest.add('HTTP - meteor/http - call a server', function (test) {
     const methodId = RegisterMethod(function () {
       const result = HTTP.get('http://localhost:3301');
       return result.statusCode;
@@ -12,7 +13,7 @@ Tinytest.add('HTTP - call a server', function (test) {
     const expected = [
       ['start', , { userId: null, params: '[]' }],
       ['wait', , { waitOn: [] }],
-      ['http', , { url: 'http://localhost:3301', method: 'GET', statusCode: 200 }],
+      ['http', , { url: 'http://localhost:3301', method: 'GET', statusCode: 200, library: 'meteor/http' }],
       ['complete']
     ];
     test.equal(events, expected);
@@ -21,7 +22,7 @@ Tinytest.add('HTTP - call a server', function (test) {
   }
 );
 
-Tinytest.add('HTTP - async callback', function (test) {
+Tinytest.add('HTTP - meteor/http - async callback', function (test) {
     const methodId = RegisterMethod(function () {
       const f = new Future();
       let result;
@@ -38,8 +39,34 @@ Tinytest.add('HTTP - async callback', function (test) {
     const expected = [
       ['start', , { userId: null, params: '[]' }],
       ['wait', , { waitOn: [] }],
-      ['http', , { url: 'http://localhost:3301', method: 'GET', async: true }],
+      ['http', , { url: 'http://localhost:3301', method: 'GET', async: true, library: 'meteor/http' }],
       ['async', , {}],
+      ['complete']
+    ];
+    test.equal(events, expected);
+    test.equal(result, 200);
+    CleanTestData();
+  }
+);
+
+Tinytest.add('HTTP - meteor/fetch - async call', function (test) {
+    const methodId = RegisterMethod(function () {
+      const f = new Future();
+      let result;
+      fetch('http://localhost:3301/').then(function (res) {
+        result = res;
+        f.return();
+      });
+      f.wait();
+      return result.status;
+    });
+    const client = GetMeteorClient();
+    const result = client.call(methodId);
+    const events = GetLastMethodEvents([0, 2]);
+    const expected = [
+      ['start', , { userId: null, params: '[]' }],
+      ['wait', , { waitOn: [] }],
+      ['http', , { method: 'GET', url: 'http://localhost:3301/', library: 'meteor/fetch' }],
       ['complete']
     ];
     test.equal(events, expected);

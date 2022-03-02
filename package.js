@@ -105,7 +105,7 @@ function configurePackage(api, isTesting) {
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-  api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server', { weak: !isTesting });
+  api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0', 'fetch'], 'server', { weak: !isTesting });
   api.use(['random', 'ecmascript', 'tracker'], ['client']);
 
   // common before
