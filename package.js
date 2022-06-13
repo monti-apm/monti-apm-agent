@@ -126,7 +126,7 @@ function configurePackage(api, isTesting) {
   ], ['server']);
   api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server', { weak: !isTesting });
 
-  api.use('fetch@0.1.1', 'server', {
+  api.use('fetch@0.1.0', 'server', {
     weak: !(isTesting && canRunTestsWithFetch()),
   });
 
