@@ -1,5 +1,10 @@
 # Changelog
 
+## Next
+
+* Instrument fetch package (@afrokick)
+* Handle `RangeError: Invalid string length` error 
+
 ## 2.45.1
 February 13, 2022
 
