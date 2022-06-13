@@ -1,12 +1,14 @@
-var Future = Npm.require('fibers/future');
+import { Meteor } from 'meteor/meteor';
+import { Random } from 'meteor/random';
+const Future = Npm.require('fibers/future');
 
 GetMeteorClient = function (_url) {
-  var url = _url || Meteor.absoluteUrl();
+  const url = _url || Meteor.absoluteUrl();
   return DDP.connect(url, {retry: false});
 }
 
 RegisterMethod = function (F) {
-  var id = 'test_' + Random.id();
+  const id = 'test_' + Random.id();
   var methods = {};
   methods[id] = F;
   Meteor.methods(methods);
