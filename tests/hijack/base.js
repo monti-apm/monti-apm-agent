@@ -3,13 +3,13 @@ Tinytest.add(
   'Base - method params',
   function (test) {
     EnableTrackingMethods();
-    var methodId = RegisterMethod(function () {
+    let methodId = RegisterMethod(function () {
       TestData.insert({aa: 10});
     });
-    var client = GetMeteorClient();
-    var result = client.call(methodId, 10, 'abc');
-    var events = GetLastMethodEvents([0, 2]);
-    var expected = [
+    let client = GetMeteorClient();
+    let result = client.call(methodId, 10, 'abc');
+    let events = GetLastMethodEvents([0, 2]);
+    let expected = [
       ['start',, {userId: null, params: '[10,"abc"]'}],
       ['wait',, {waitOn: []}],
       ['db',, {coll: 'tinytest-data', func: 'insert'}],

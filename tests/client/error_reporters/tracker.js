@@ -1,3 +1,5 @@
+import { Random } from 'meteor/random';
+import { Tracker } from 'meteor/tracker';
 
 Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - tracker - afterFlush',
@@ -5,15 +7,15 @@ Tinytest.addAsync(
     Kadira._setupOnErrorReporter();
     hijackKadiraSendErrors(mock_KadiraSendErrors);
 
-    var message = Random.id();
-    var error = new Error(message);
-    var stack = error.stack;
+    let message = Random.id();
+    let error = new Error(message);
+    let stack = error.stack;
 
     Tracker.afterFlush(() => {
       throw error;
-    })
+    });
 
-    function mock_KadiraSendErrors(error) {
+    function mock_KadiraSendErrors (error) {
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
       test.equal(message, error.name);
@@ -31,22 +33,22 @@ Tinytest.addAsync(
 Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - tracker - afterFlush with throwFirstError',
   TestWithErrorTrackingAsync(function (test, next) {
-    var error = new Error(Random.id());
-    var errorSent = false;
+    let error = new Error(Random.id());
+    let errorSent = false;
 
     hijackKadiraSendErrors(() => {
       errorSent = true;
     });
     Tracker.afterFlush(() => {
-        throw error;
-    })
+      throw error;
+    });
 
     try {
-      Tracker.flush({_throwFirstError: true})
+      Tracker.flush({_throwFirstError: true});
     } catch (e) {
       test.equal(e.message, error.message);
       test.equal(e.stack, error.stack);
-      test.equal(errorSent, false)
+      test.equal(errorSent, false);
       next();
     }
   })
@@ -58,21 +60,21 @@ Tinytest.addAsync(
     Kadira._setupOnErrorReporter();
     hijackKadiraSendErrors(mock_KadiraSendErrors);
 
-    var message = Random.id();
-    var error = new Error(message);
-    var stack = error.stack;
-    let firstRun = true
+    let message = Random.id();
+    let error = new Error(message);
+    let stack = error.stack;
+    let firstRun = true;
 
-    var computation = Tracker.autorun(() => {
+    let computation = Tracker.autorun(() => {
       if (!firstRun) {
         throw error;
       }
-      firstRun = false
+      firstRun = false;
     });
 
     computation.invalidate();
 
-    function mock_KadiraSendErrors(error) {
+    function mock_KadiraSendErrors (error) {
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
       test.equal(message, error.name);
@@ -90,8 +92,8 @@ Tinytest.addAsync(
 Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - tracker - autorun first run',
   TestWithErrorTrackingAsync(function (test, next) {
-    var error = new Error(Random.id());
-    var errorSent = false;
+    let error = new Error(Random.id());
+    let errorSent = false;
 
     hijackKadiraSendErrors(() => {
       errorSent = true;
@@ -99,32 +101,32 @@ Tinytest.addAsync(
 
     try {
       Tracker.autorun(() => {
-          throw error;
-      })
+        throw error;
+      });
     } catch (e) {
       test.equal(e.message, error.message);
       test.equal(e.stack, error.stack);
-      test.equal(errorSent, false)
+      test.equal(errorSent, false);
       next();
     }
   })
 );
 
-var original_KadiraSendErrors;
+let original_KadiraSendErrors;
 
-function hijackKadiraSendErrors(mock) {
-  original_KadiraSendErrors = Kadira.errors.sendError
+function hijackKadiraSendErrors (mock) {
+  original_KadiraSendErrors = Kadira.errors.sendError;
   Kadira.errors.sendError = mock;
 }
 
-function restoreKadiraSendErrors() {
+function restoreKadiraSendErrors () {
   Kadira.errors.sendError = original_KadiraSendErrors;
 }
 
 function TestWithErrorTrackingAsync (testFunction) {
   return function (test, next) {
-    var status = Kadira.options.enableErrorTracking;
-    var appId = Kadira.options.appId;
+    let status = Kadira.options.enableErrorTracking;
+    let appId = Kadira.options.appId;
     Kadira.options.appId = 'app';
     Kadira.enableErrorTracking();
     testFunction(test, function () {
@@ -132,5 +134,5 @@ function TestWithErrorTrackingAsync (testFunction) {
       status ? Kadira.enableErrorTracking() : Kadira.disableErrorTracking();
       next();
     });
-  }
+  };
 }

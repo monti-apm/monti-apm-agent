@@ -1,11 +1,11 @@
 Tinytest.add(
   'Models - BaseErrorModel - add filters - pass errors',
   function (test) {
-    var model = new BaseErrorModel();
-    model.addFilter(function() {
+    let model = new BaseErrorModel();
+    model.addFilter(function () {
       return true;
     });
-    var validated = model.applyFilters('type', 'message', {}, 'subType');
+    let validated = model.applyFilters('type', 'message', {}, 'subType');
     test.equal(validated, true);
   }
 );
@@ -13,8 +13,8 @@ Tinytest.add(
 Tinytest.add(
   'Models - BaseErrorModel - add filters - no filters',
   function (test) {
-    var model = new BaseErrorModel();
-    var validated = model.applyFilters('type', 'message', {}, 'subType');
+    let model = new BaseErrorModel();
+    let validated = model.applyFilters('type', 'message', {}, 'subType');
     test.equal(validated, true);
   }
 );
@@ -22,11 +22,11 @@ Tinytest.add(
 Tinytest.add(
   'Models - BaseErrorModel - add filters - fail errors',
   function (test) {
-    var model = new BaseErrorModel();
-    model.addFilter(function() {
+    let model = new BaseErrorModel();
+    model.addFilter(function () {
       return false;
     });
-    var validated = model.applyFilters('type', 'message', {}, 'subType');
+    let validated = model.applyFilters('type', 'message', {}, 'subType');
     test.equal(validated, false);
   }
 );
@@ -34,11 +34,11 @@ Tinytest.add(
 Tinytest.add(
   'Models - BaseErrorModel - add filters - multiple errors',
   function (test) {
-    var model = new BaseErrorModel();
-    model.addFilter(function() { return true; });
-    model.addFilter(function() { return false; });
+    let model = new BaseErrorModel();
+    model.addFilter(function () { return true; });
+    model.addFilter(function () { return false; });
 
-    var validated = model.applyFilters('type', 'message', {}, 'subType');
+    let validated = model.applyFilters('type', 'message', {}, 'subType');
     test.equal(validated, false);
   }
 );
@@ -46,13 +46,13 @@ Tinytest.add(
 Tinytest.add(
   'Models - BaseErrorModel - remove filters - multiple errors',
   function (test) {
-    var model = new BaseErrorModel();
-    var falseFilter = function() { return false; };
-    model.addFilter(function() { return true; });
+    let model = new BaseErrorModel();
+    let falseFilter = function () { return false; };
+    model.addFilter(function () { return true; });
     model.addFilter(falseFilter);
     model.removeFilter(falseFilter);
 
-    var validated = model.applyFilters('type', 'message', {}, 'subType');
+    let validated = model.applyFilters('type', 'message', {}, 'subType');
     test.equal(validated, true);
   }
 );
@@ -60,12 +60,12 @@ Tinytest.add(
 Tinytest.add(
   'Models - BaseErrorModel - add filters - invalid filters',
   function (test) {
-    var model = new BaseErrorModel();
+    let model = new BaseErrorModel();
     try {
       model.addFilter({});
       test.fail('expect an error');
-    } catch(ex) {
-      
+    } catch (ex) {
+
     }
   }
 );
@@ -73,8 +73,8 @@ Tinytest.add(
 Tinytest.addAsync(
   'Models - BaseErrorModel - apply filters - get params',
   function (test, done) {
-    var model = new BaseErrorModel();
-    model.addFilter(function(type, message, error, subType) {
+    let model = new BaseErrorModel();
+    model.addFilter(function (type, message, error, subType) {
       test.equal(type, 'type');
       test.equal(subType, 'subType');
       test.equal(error, {stack: {}});
@@ -88,15 +88,15 @@ Tinytest.addAsync(
 Tinytest.add(
   'Models - BaseErrorModel - apply filters - throw an error inside a filter',
   function (test) {
-    var model = new BaseErrorModel();
-    model.addFilter(function() {
-      throw new Error("super error");
+    let model = new BaseErrorModel();
+    model.addFilter(function () {
+      throw new Error('super error');
     });
 
     try {
       model.applyFilters();
       test.fail('we are looking for an error');
-    } catch(ex) {
+    } catch (ex) {
       if (ex.message === 'super error') {
         // Old versions of IE don't have a useful error message
         test.equal(true, true);
