@@ -1,25 +1,25 @@
-var eventDefaults = {
+let eventDefaults = {
   endAt: 0,
   nested: [],
-}
+};
 
 Tinytest.add(
   'Tracer - Trace Method - method',
   function (test) {
-    var ddpMessage = {
+    let ddpMessage = {
       id: 'the-id',
       msg: 'method',
       method: 'method-name'
     };
-    var traceInfo = Kadira.tracer.start({id: 'session-id', userId: 'uid'}, ddpMessage);
+    let traceInfo = Kadira.tracer.start({id: 'session-id', userId: 'uid'}, ddpMessage);
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
     cleanTrace(traceInfo);
-    var expected = {
+    let expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
       session: 'session-id',
-      userId: "uid",
+      userId: 'uid',
       type: 'method',
       name: 'method-name',
       events: [
@@ -34,21 +34,21 @@ Tinytest.add(
 Tinytest.add(
   'Tracer - Trace Method - complete after errored',
   function (test) {
-    var ddpMessage = {
+    let ddpMessage = {
       id: 'the-id',
       msg: 'method',
       method: 'method-name'
     };
-    var traceInfo = Kadira.tracer.start({id: 'session-id', userId: 'uid'}, ddpMessage);
+    let traceInfo = Kadira.tracer.start({id: 'session-id', userId: 'uid'}, ddpMessage);
     Kadira.tracer.event(traceInfo, 'start');
     Kadira.tracer.event(traceInfo, 'error');
     Kadira.tracer.event(traceInfo, 'complete');
     cleanTrace(traceInfo);
-    var expected = {
+    let expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
       session: 'session-id',
-      userId: "uid",
+      userId: 'uid',
       type: 'method',
       name: 'method-name',
       events: [
@@ -63,16 +63,16 @@ Tinytest.add(
 Tinytest.add(
   'Tracer - trace sub',
   function (test) {
-    var ddpMessage = {
+    let ddpMessage = {
       id: 'the-id',
       msg: 'sub',
       name: 'sub-name'
     };
-    var traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
+    let traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
     cleanTrace(traceInfo);
-    var expected = {
+    let expected = {
       _id: 'session-id::the-id',
       session: 'session-id',
       id: 'the-id',
@@ -91,12 +91,12 @@ Tinytest.add(
 Tinytest.add(
   'Tracer - trace other ddp',
   function (test) {
-    var ddpMessage = {
+    let ddpMessage = {
       id: 'the-id',
       msg: 'unsub',
       name: 'sub-name'
     };
-    var traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
+    let traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
     test.equal(traceInfo, null);
   }
 );
@@ -104,19 +104,19 @@ Tinytest.add(
 Tinytest.add(
   'Tracer - trace other events',
   function (test) {
-    var ddpMessage = {
+    let ddpMessage = {
       id: 'the-id',
       msg: 'method',
       method: 'method-name'
     };
-    var traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
+    let traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
-    var eventId = Kadira.tracer.event(traceInfo, 'db');
+    let eventId = Kadira.tracer.event(traceInfo, 'db');
     Wait(25);
     Kadira.tracer.eventEnd(traceInfo, eventId);
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
     cleanTrace(traceInfo);
-    var expected = {
+    let expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
       session: 'session-id',
@@ -136,19 +136,19 @@ Tinytest.add(
 Tinytest.add(
   'Tracer - end last event',
   function (test) {
-    var ddpMessage = {
+    let ddpMessage = {
       id: 'the-id',
       msg: 'method',
       method: 'method-name'
     };
-    var traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
+    let traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
     Kadira.tracer.event(traceInfo, 'db');
-    Wait(20)
+    Wait(20);
     Kadira.tracer.endLastEvent(traceInfo);
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
     cleanTrace(traceInfo);
-    var expected = {
+    let expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
       session: 'session-id',
@@ -168,19 +168,19 @@ Tinytest.add(
 Tinytest.add(
   'Tracer - trace same event twice',
   function (test) {
-    var ddpMessage = {
+    let ddpMessage = {
       id: 'the-id',
       msg: 'method',
       method: 'method-name'
     };
-    var traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
+    let traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
-    var eventId = Kadira.tracer.event(traceInfo, 'db');
+    let eventId = Kadira.tracer.event(traceInfo, 'db');
     Kadira.tracer.event(traceInfo, 'db');
     Kadira.tracer.eventEnd(traceInfo, eventId);
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
     cleanTrace(traceInfo);
-    var expected = {
+    let expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
       session: 'session-id',
@@ -200,8 +200,8 @@ Tinytest.add(
 Tinytest.add(
   'Tracer - Build Trace - simple',
   function (test) {
-    var now = (new Date).getTime();
-    var traceInfo = {
+    let now = new Date().getTime();
+    let traceInfo = {
       events: [
         {...eventDefaults, type: 'start', at: now, endAt: now},
         {...eventDefaults, type: 'wait', at: now, endAt: now + 1000},
@@ -223,8 +223,8 @@ Tinytest.add(
 Tinytest.add(
   'Tracer - Build Trace - errored',
   function (test) {
-    var now = (new Date).getTime();
-    var traceInfo = {
+    let now = new Date().getTime();
+    let traceInfo = {
       events: [
         {...eventDefaults, type: 'start', at: now},
         {...eventDefaults, type: 'wait', at: now, endAt: now + 1000},
@@ -246,8 +246,8 @@ Tinytest.add(
 Tinytest.add(
   'Tracer - Build Trace - no start',
   function (test) {
-    var now = (new Date).getTime();
-    var traceInfo = {
+    let now = new Date().getTime();
+    let traceInfo = {
       events: [
         {type: 'wait', at: now, endAt: now + 1000},
         {type: 'db', at: now + 2000, endAt: now + 2500},
@@ -262,8 +262,8 @@ Tinytest.add(
 Tinytest.add(
   'Tracer - Build Trace - no complete',
   function (test) {
-    var now = (new Date).getTime();
-    var traceInfo = {
+    let now = new Date().getTime();
+    let traceInfo = {
       events: [
         {type: 'start', at: now, endAt: now},
         {type: 'wait', at: now, endAt: now + 1000},
@@ -278,8 +278,8 @@ Tinytest.add(
 Tinytest.add(
   'Tracer - Build Trace - event not ended',
   function (test) {
-    var now = (new Date).getTime();
-    var traceInfo = {
+    let now = new Date().getTime();
+    let traceInfo = {
       events: [
         {type: 'start', at: now},
         {type: 'wait', at: now, endAt: null},
@@ -295,17 +295,17 @@ Tinytest.add(
 Tinytest.add(
   'Tracer - Build Trace - truncate events',
   function (test) {
-    var now = (new Date).getTime();
-    var traceInfo = {
+    let now = new Date().getTime();
+    let traceInfo = {
       events: [
         {...eventDefaults, type: 'start', at: now},
         {...eventDefaults, type: 'wait', at: now, endAt: now},
       ]
     };
-    
+
     for (let i = 0; i < 10000; i++) {
       traceInfo.events.push({ ...eventDefaults, type: 'db', at: now, endAt: now + 500 });
-      now += 500
+      now += 500;
     }
 
     traceInfo.events.push({...eventDefaults, type: 'complete', at: now + 2500});
@@ -314,150 +314,150 @@ Tinytest.add(
     test.equal(traceInfo.metrics.db, 5000000);
     test.equal(traceInfo.events.length, 1500);
   }
-)
+);
 
 Tinytest.add(
   'Tracer - Filters - filter start',
-  function(test) {
-    var tracer = new Tracer();
-    tracer.addFilter(function(type, data) {
-      test.equal(type, "db");
+  function (test) {
+    let tracer = new Tracer();
+    tracer.addFilter(function (type, data) {
+      test.equal(type, 'db');
       return _.pick(data, 'coll');
     });
 
-    var traceInfo = startTrace(tracer);
-    tracer.event(traceInfo, 'db', {coll: "posts", secret: ""});
+    let traceInfo = startTrace(tracer);
+    tracer.event(traceInfo, 'db', {coll: 'posts', secret: ''});
 
-    var expected = {coll: "posts"};
+    let expected = {coll: 'posts'};
     test.equal(traceInfo.events[0].data, expected);
   }
 );
 
 Tinytest.add(
   'Tracer - Filters - filter end',
-  function(test) {
-    var tracer = new Tracer();
-    tracer.addFilter(function(type, data) {
-      test.equal(type, "dbend");
+  function (test) {
+    let tracer = new Tracer();
+    tracer.addFilter(function (type, data) {
+      test.equal(type, 'dbend');
       return _.pick(data, 'coll');
     });
 
-    var traceInfo = startTrace(tracer);
-    var id = tracer.event(traceInfo, 'db');
-    tracer.eventEnd(traceInfo, id, {coll: "posts", secret: ""});
+    let traceInfo = startTrace(tracer);
+    let id = tracer.event(traceInfo, 'db');
+    tracer.eventEnd(traceInfo, id, {coll: 'posts', secret: ''});
 
-    var expected = {coll: "posts"};
+    let expected = {coll: 'posts'};
     test.equal(traceInfo.events[0].data, expected);
   }
 );
 
 Tinytest.add(
   'Tracer - Filters - ignore side effects',
-  function(test) {
-    var tracer = new Tracer();
-    tracer.addFilter(function(type, data) {
-      data.someOtherField = "value";
+  function (test) {
+    let tracer = new Tracer();
+    tracer.addFilter(function (type, data) {
+      data.someOtherField = 'value';
       return _.pick(data, 'coll');
     });
 
-    var traceInfo = startTrace(tracer);
-    tracer.event(traceInfo, 'db', {coll: "posts", secret: ""});
+    let traceInfo = startTrace(tracer);
+    tracer.event(traceInfo, 'db', {coll: 'posts', secret: ''});
 
-    var expected = {coll: "posts"};
+    let expected = {coll: 'posts'};
     test.equal(traceInfo.events[0].data, expected);
   }
 );
 
 Tinytest.add(
   'Tracer - Filters - multiple filters',
-  function(test) {
-    var tracer = new Tracer();
-    tracer.addFilter(function(type, data) {
+  function (test) {
+    let tracer = new Tracer();
+    tracer.addFilter(function (type, data) {
       return _.pick(data, 'coll');
     });
-    tracer.addFilter(function(type, data) {
-      data.newField = "value";
+    tracer.addFilter(function (type, data) {
+      data.newField = 'value';
       return data;
     });
 
-    var traceInfo = startTrace(tracer);
-    tracer.event(traceInfo, 'db', {coll: "posts", secret: ""});
+    let traceInfo = startTrace(tracer);
+    tracer.event(traceInfo, 'db', {coll: 'posts', secret: ''});
 
-    var expected = {coll: "posts", newField: "value"};
+    let expected = {coll: 'posts', newField: 'value'};
     test.equal(traceInfo.events[0].data, expected);
   }
 );
 
 Tinytest.add(
   'Tracer - Filters - Filter by method name',
-  function(test) {
-    var tracer = new Tracer();
-    tracer.addFilter(function(type, data, info) {
-      if(info.type === 'method' && info.name === 'method-name'){
+  function (test) {
+    let tracer = new Tracer();
+    tracer.addFilter(function (type, data, info) {
+      if (info.type === 'method' && info.name === 'method-name') {
         return _.pick(data, 'coll');
       }
       return data;
     });
 
-    var ddpMessage = {
+    let ddpMessage = {
       id: 'the-id',
       msg: 'method',
       method: 'method-name'
     };
-    var info = {id: 'session-id', userId: 'uid'};
-    var traceInfo = Kadira.tracer.start(info, ddpMessage);
+    let info = {id: 'session-id', userId: 'uid'};
+    let traceInfo = Kadira.tracer.start(info, ddpMessage);
 
-    tracer.event(traceInfo, 'db', {coll: "posts", secret: ""});
+    tracer.event(traceInfo, 'db', {coll: 'posts', secret: ''});
 
-    var expected = {coll: "posts"};
+    let expected = {coll: 'posts'};
     test.equal(traceInfo.events[0].data, expected);
   }
 );
 
 Tinytest.add(
   'Tracer - Filters - Filter by sub name',
-  function(test) {
-    var tracer = new Tracer();
-    tracer.addFilter(function(type, data, info) {
-      if(info.type === 'sub' && info.name === 'sub-name'){
+  function (test) {
+    let tracer = new Tracer();
+    tracer.addFilter(function (type, data, info) {
+      if (info.type === 'sub' && info.name === 'sub-name') {
         return _.pick(data, 'coll');
       }
       return data;
     });
 
-    var ddpMessage = {
+    let ddpMessage = {
       id: 'the-id',
       msg: 'sub',
       name: 'sub-name'
     };
-    var info = {id: 'session-id', userId: 'uid'};
-    var traceInfo = Kadira.tracer.start(info, ddpMessage);
+    let info = {id: 'session-id', userId: 'uid'};
+    let traceInfo = Kadira.tracer.start(info, ddpMessage);
 
-    tracer.event(traceInfo, 'db', {coll: "posts", secret: ""});
+    tracer.event(traceInfo, 'db', {coll: 'posts', secret: ''});
 
-    var expected = {coll: "posts"};
+    let expected = {coll: 'posts'};
     test.equal(traceInfo.events[0].data, expected);
   }
 );
 
-function startTrace(tracer) {
-  var ddpMessage = {
+function startTrace (tracer) {
+  let ddpMessage = {
     id: 'the-id',
     msg: 'method',
     method: 'method-name'
   };
-  var info = {id: 'session-id', userId: 'uid'};
-  var traceInfo = Kadira.tracer.start(info, ddpMessage);
+  let info = {id: 'session-id', userId: 'uid'};
+  let traceInfo = Kadira.tracer.start(info, ddpMessage);
 
   return traceInfo;
 }
 
 function cleanTrace (traceInfo) {
-  cleanEvents(traceInfo.events)
+  cleanEvents(traceInfo.events);
 }
 
-function cleanEvents(events) {
-  events.forEach(function(event) {
+function cleanEvents (events) {
+  events.forEach(function (event) {
     if (event.endAt > event.at) {
       event.endAt = 10;
     } else if (event.endAt) {

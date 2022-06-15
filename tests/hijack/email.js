@@ -3,13 +3,13 @@ Tinytest.add(
   function (test) {
     EnableTrackingMethods();
     const Email = Package['email'].Email;
-    var methodId = RegisterMethod(function () {
+    let methodId = RegisterMethod(function () {
       Email.send({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
     });
-    var client = GetMeteorClient();
-    var result = client.call(methodId);
-    var events = GetLastMethodEvents([0]);
-    var expected = [
+    let client = GetMeteorClient();
+    let result = client.call(methodId);
+    let events = GetLastMethodEvents([0]);
+    let expected = [
       ['start'],
       ['wait'],
       ['email'],
