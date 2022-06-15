@@ -1,18 +1,19 @@
+import { Meteor } from 'meteor/meteor';
 
 Tinytest.add(
   'Async - track with Meteor._wrapAsync',
   function (test) {
     EnableTrackingMethods();
-    var methodId = RegisterMethod(function () {
-      var wait = Meteor._wrapAsync(function(waitTime, callback) {
+    const methodId = RegisterMethod(function () {
+      const wait = Meteor._wrapAsync(function (waitTime, callback) {
         setTimeout(callback, waitTime);
       });
       wait(100);
     });
-    var client = GetMeteorClient();
-    var result = client.call(methodId);
-    var events = GetLastMethodEvents([0]);
-    var expected = [
+    const client = GetMeteorClient();
+    const result = client.call(methodId);
+    const events = GetLastMethodEvents([0]);
+    const expected = [
       ['start'],
       ['wait'],
       ['async'],
@@ -27,8 +28,8 @@ Tinytest.add(
   'Async - track with Meteor._wrapAsync with error',
   function (test) {
     EnableTrackingMethods();
-    var methodId = RegisterMethod(function () {
-      var wait = Meteor._wrapAsync(function(waitTime, callback) {
+    const methodId = RegisterMethod(function () {
+      const wait = Meteor._wrapAsync(function (waitTime, callback) {
         setTimeout(function () {
           callback(new Error('error'));
         }, waitTime);
@@ -39,10 +40,10 @@ Tinytest.add(
 
       }
     });
-    var client = GetMeteorClient();
-    var result = client.call(methodId);
-    var events = GetLastMethodEvents([0]);
-    var expected = [
+    const client = GetMeteorClient();
+    const result = client.call(methodId);
+    const events = GetLastMethodEvents([0]);
+    const expected = [
       ['start'],
       ['wait'],
       ['async'],

@@ -1,25 +1,27 @@
+/* global Kadira */
 import { Meteor } from 'meteor/meteor';
+import { DDP } from 'meteor/ddp';
 import { Random } from 'meteor/random';
-const Future = Npm.require('fibers/future');
+import Future from 'fibers/future';
 
 GetMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
   return DDP.connect(url, {retry: false});
-}
+};
 
 RegisterMethod = function (F) {
-  const id = 'test_' + Random.id();
-  var methods = {};
+  const id = `test_${Random.id()}`;
+  const methods = {};
   methods[id] = F;
   Meteor.methods(methods);
   return id;
-}
+};
 
 RegisterPublication = function (F) {
-  var id = 'test_' + Random.id();
+  const id = `test_${Random.id()}`;
   Meteor.publish(id, F);
   return id;
-}
+};
 
 EnableTrackingMethods = function () {
   // var original = Kadira.models.methods.processMethod;
@@ -27,10 +29,12 @@ EnableTrackingMethods = function () {
   //   MethodStore.push(method);
   //   original.call(Kadira.models.methods, method);
   // };
-}
+};
 
 GetLastMethodEvents = function (_indices) {
-  if (MethodStore.length < 1) return [];
+  if (MethodStore.length < 1) {
+    return [];
+  }
   var indices = _indices || [0];
   var events = MethodStore[MethodStore.length - 1].events;
   events = Array.prototype.slice.call(events, 0);
@@ -60,29 +64,28 @@ GetPubSubMetrics = function () {
 }
 
 FindMetricsForPub = function (pubname) {
-  var metrics = GetPubSubMetrics();
-  var candidates = [];
-  for(var lc=0; lc < metrics.length; lc++) {
-    var pm = metrics[lc].pubs[pubname];
-    if(pm) {
+  const metrics = GetPubSubMetrics();
+  const candidates = [];
+  fo r(let lc = 0; lc < metrics.length; lc++) {
+    const pm = metrics[lc].pubs[pubname];
+    if (pm) {
       candidates.push(pm);
     }
   }
 
   return candidates[candidates.length - 1];
-}
+};
 
 GetPubSubPayload = function (detailInfoNeeded) {
   return Kadira.models.pubsub.buildPayload(detailInfoNeeded).pubMetrics;
-}
+};
 
-Wait = function (time) {
-  var f = new Future();
+export function Wait (time) {
+  const f = new Future();
   Meteor.setTimeout(function () {
     f.return();
   }, time);
   f.wait();
-  return;
 }
 
 CleanTestData = function () {
@@ -91,7 +94,7 @@ CleanTestData = function () {
   Kadira.models.pubsub.metricsByMinute
   Kadira.models.pubsub.metricsByMinute = {};
   Kadira.models.pubsub.subscriptions = {};
-}
+};
 
 SubscribeAndWait = function(client, name, args) {
   var f = new Future();

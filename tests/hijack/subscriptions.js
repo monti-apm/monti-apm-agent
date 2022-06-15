@@ -1,16 +1,16 @@
-var Future = Npm.require('fibers/future');
+import { Wait } from '../_helpers/helpers';
 
 Tinytest.add(
   'Subscriptions - Sub/Unsub - subscribe only',
   function (test) {
     CleanTestData();
     EnableTrackingMethods();
-    var client = GetMeteorClient();
+    let client = GetMeteorClient();
 
-    var h1 = SubscribeAndWait(client, 'tinytest-data');
-    var h2 = SubscribeAndWait(client, 'tinytest-data');
+    let h1 = SubscribeAndWait(client, 'tinytest-data');
+    let h2 = SubscribeAndWait(client, 'tinytest-data');
 
-    var metrics = GetPubSubMetrics();
+    let metrics = GetPubSubMetrics();
     test.equal(metrics.length, 1);
     test.equal(metrics[0].pubs['tinytest-data'].subs, 2);
     h1.stop();
@@ -25,15 +25,15 @@ Tinytest.add(
   function (test) {
     CleanTestData();
     EnableTrackingMethods();
-    var client = GetMeteorClient();
+    let client = GetMeteorClient();
 
-    var h1 = SubscribeAndWait(client, 'tinytest-data');
-    var h2 = SubscribeAndWait(client, 'tinytest-data');
+    let h1 = SubscribeAndWait(client, 'tinytest-data');
+    let h2 = SubscribeAndWait(client, 'tinytest-data');
     h1.stop();
     h2.stop();
     Wait(100);
 
-    var metrics = GetPubSubMetrics();
+    let metrics = GetPubSubMetrics();
     test.equal(metrics.length, 1);
     test.equal(metrics[0].pubs['tinytest-data'].subs, 2);
     test.equal(metrics[0].pubs['tinytest-data'].unsubs, 2);
@@ -45,14 +45,14 @@ Tinytest.add(
   'Subscriptions - Response Time - single',
   function (test) {
     CleanTestData();
-    var client = GetMeteorClient();
-    var pubName = "pub-" + Random.id();
-    Meteor.publish(pubName, function() {
+    let client = GetMeteorClient();
+    let pubName = `pub-${Random.id()}`;
+    Meteor.publish(pubName, function () {
       Wait(200);
       this.ready();
     });
-    var h1 = SubscribeAndWait(client, pubName);
-    var metrics = FindMetricsForPub(pubName);
+    let h1 = SubscribeAndWait(client, pubName);
+    let metrics = FindMetricsForPub(pubName);
     test.isTrue(CompareNear(metrics.resTime, 200, 100));
     h1.stop();
     CloseClient(client);
@@ -93,12 +93,12 @@ Tinytest.add(
   function (test) {
     CleanTestData();
     EnableTrackingMethods();
-    var client = GetMeteorClient();
-    var h1 = SubscribeAndWait(client, 'tinytest-data');
+    let client = GetMeteorClient();
+    let h1 = SubscribeAndWait(client, 'tinytest-data');
     Wait(50);
     h1.stop();
     CloseClient(client);
-    var metrics = FindMetricsForPub('tinytest-data');
+    let metrics = FindMetricsForPub('tinytest-data');
     test.isTrue(CompareNear(metrics.lifeTime, 50, 75));
   }
 );
@@ -131,14 +131,14 @@ Tinytest.add(
   function (test) {
     CleanTestData();
     EnableTrackingMethods();
-    var client = GetMeteorClient();
-    var Future = Npm.require('fibers/future');
-    var f = new Future();
-    var h1 = SubscribeAndWait(client, 'tinytest-data');
+    let client = GetMeteorClient();
+    let Future = Npm.require('fibers/future');
+    let f = new Future();
+    let h1 = SubscribeAndWait(client, 'tinytest-data');
     Wait(100);
     h1.stop();
     Wait(100);
-    var metrics = FindMetricsForPub('tinytest-data');
+    let metrics = FindMetricsForPub('tinytest-data');
 
     test.isTrue(CompareNear(metrics.observerLifetime, 100));
     CloseClient(client);
@@ -151,14 +151,14 @@ Tinytest.add(
   function (test) {
     CleanTestData();
     EnableTrackingMethods();
-    var client = GetMeteorClient();
-    var Future = Npm.require('fibers/future');
-    var f = new Future();
-    var h1 = SubscribeAndWait(client, 'tinytest-data');
-    var h2 = SubscribeAndWait(client, 'tinytest-data');
-    var h3 = SubscribeAndWait(client, 'tinytest-data-2');
+    let client = GetMeteorClient();
+    let Future = Npm.require('fibers/future');
+    let f = new Future();
+    let h1 = SubscribeAndWait(client, 'tinytest-data');
+    let h2 = SubscribeAndWait(client, 'tinytest-data');
+    let h3 = SubscribeAndWait(client, 'tinytest-data-2');
 
-    var payload = GetPubSubPayload();
+    let payload = GetPubSubPayload();
     test.equal(payload[0].pubs['tinytest-data'].activeSubs == 2, true);
     test.equal(payload[0].pubs['tinytest-data-2'].activeSubs == 1, true);
     h1.stop();
@@ -174,18 +174,18 @@ Tinytest.add(
     CleanTestData();
     EnableTrackingMethods();
     ReadyCounts = 0;
-    var pubId = RegisterPublication(function () {
+    let pubId = RegisterPublication(function () {
       this.ready();
       this.ready();
     });
-    var original = Kadira.models.pubsub._trackReady;
-    Kadira.models.pubsub._trackReady = function(session, sub) {
-      if(sub._name == pubId) {
+    let original = Kadira.models.pubsub._trackReady;
+    Kadira.models.pubsub._trackReady = function (session, sub) {
+      if (sub._name == pubId) {
         ReadyCounts++;
       }
     };
-    var client = GetMeteorClient();
-    var h1 = SubscribeAndWait(client, pubId);
+    let client = GetMeteorClient();
+    let h1 = SubscribeAndWait(client, pubId);
 
     test.equal(ReadyCounts, 1);
     Kadira.models.pubsub._trackReady = original;
@@ -198,11 +198,11 @@ Tinytest.add(
   function (test) {
     CleanTestData();
     EnableTrackingMethods();
-    var client = GetMeteorClient();
-    var h1 = SubscribeAndWait(client, 'tinytest-data');
+    let client = GetMeteorClient();
+    let h1 = SubscribeAndWait(client, 'tinytest-data');
 
     Wait(100);
-    var metrics = GetPubSubPayload();
+    let metrics = GetPubSubPayload();
     test.equal(metrics[0].pubs['tinytest-data'].totalObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data'].cachedObservers, 0);
     test.equal(metrics[0].pubs['tinytest-data'].avgObserverReuse, 0);
@@ -217,13 +217,13 @@ Tinytest.add(
   function (test) {
     CleanTestData();
     EnableTrackingMethods();
-    var client = GetMeteorClient();
+    let client = GetMeteorClient();
 
-    var h1 = SubscribeAndWait(client, 'tinytest-data');
-    var h2 = SubscribeAndWait(client, 'tinytest-data');
+    let h1 = SubscribeAndWait(client, 'tinytest-data');
+    let h2 = SubscribeAndWait(client, 'tinytest-data');
 
     Wait(100);
-    var metrics = GetPubSubPayload();
+    let metrics = GetPubSubPayload();
     test.equal(metrics[0].pubs['tinytest-data'].totalObservers, 2);
     test.equal(metrics[0].pubs['tinytest-data'].cachedObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data'].avgObserverReuse, 0.5);
@@ -238,12 +238,12 @@ Tinytest.add(
   function (test) {
     CleanTestData();
     EnableTrackingMethods();
-    var client = GetMeteorClient();
-    var h1 = SubscribeAndWait(client, 'tinytest-data');
-    var h2 = SubscribeAndWait(client, 'tinytest-data-2');
+    let client = GetMeteorClient();
+    let h1 = SubscribeAndWait(client, 'tinytest-data');
+    let h2 = SubscribeAndWait(client, 'tinytest-data-2');
 
     Wait(100);
-    var metrics = GetPubSubPayload();
+    let metrics = GetPubSubPayload();
     test.equal(metrics[0].pubs['tinytest-data'].totalObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data'].cachedObservers, 0);
     test.equal(metrics[0].pubs['tinytest-data'].avgObserverReuse, 0);
