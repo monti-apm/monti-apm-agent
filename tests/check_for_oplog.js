@@ -1,4 +1,9 @@
-if(typeof Minimongo == 'undefined') {
+/* global Kadira, Minimongo */
+
+import { Meteor } from 'meteor/meteor';
+import { OplogCheck } from '../lib/check_for_oplog';
+
+if (typeof Minimongo === 'undefined') {
   return;
 }
 
@@ -64,7 +69,7 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.env - MONGO_OPLOG_URL exists',
   function (test) {
-    WithMongoOplogUrl(function() {
+    WithMongoOplogUrl(function () {
       test.equal(OplogCheck.env(), true);
     });
   }
@@ -87,7 +92,7 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.disableOplog - with _disableOplog',
   function (test) {
-    var result = OplogCheck.disableOplog({options: {_disableOplog: true}});
+    const result = OplogCheck.disableOplog({options: {_disableOplog: true}});
     test.equal(result.code, 'DISABLE_OPLOG');
   }
 );
@@ -106,7 +111,7 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.miniMongoMatcher - no MiniMongo.Matcher',
   function (test) {
-    var originalMiniMongoMatcher = Minimongo.Matcher;
+    const originalMiniMongoMatcher = Minimongo.Matcher;
     Minimongo.Matcher = null;
     test.equal(OplogCheck.miniMongoMatcher({
       options: {},
@@ -120,7 +125,7 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.miniMongoMatcher - with incorrect selector',
   function (test) {
-    var result = OplogCheck.miniMongoMatcher({
+    const result = OplogCheck.miniMongoMatcher({
       options: {},
       selector: {aa: {$in: null}}
     });
@@ -149,7 +154,7 @@ Tinytest.add(
   function (test) {
     test.equal(OplogCheck.fields({options: {
       fields: {$elemMatch: {aa: 10}}
-    }}).code, "NOT_SUPPORTED_FIELDS");
+    }}).code, 'NOT_SUPPORTED_FIELDS');
   }
 );
 
@@ -159,16 +164,14 @@ Tinytest.add(
   function (test) {
     test.equal(OplogCheck.skip({options: {
       skip: 10
-    }}).code, "SKIP_NOT_SUPPORTED");
+    }}).code, 'SKIP_NOT_SUPPORTED');
   }
 );
 
 Tinytest.add(
   'CheckForOplog - OplogCheck.skip - no skip',
   function (test) {
-    test.equal(OplogCheck.skip({options: {
-
-    }}), true);
+    test.equal(OplogCheck.skip({options: {}}), true);
   }
 );
 
@@ -176,17 +179,15 @@ Tinytest.add(
   'CheckForOplog - OplogCheck.where - with having where',
   function (test) {
     test.equal(OplogCheck.where({selector: {
-      $where: function() {}
-    }}).code, "WHERE_NOT_SUPPORTED");
+      $where () {}
+    }}).code, 'WHERE_NOT_SUPPORTED');
   }
 );
 
 Tinytest.add(
   'CheckForOplog - OplogCheck.where - without having where',
   function (test) {
-    test.equal(OplogCheck.where({selector: {
-
-    }}), true);
+    test.equal(OplogCheck.where({selector: {}}), true);
   }
 );
 
@@ -195,16 +196,14 @@ Tinytest.add(
   function (test) {
     test.equal(OplogCheck.geo({selector: {
       loc: {$near: [50, 50]}
-    }}).code, "GEO_NOT_SUPPORTED");
+    }}).code, 'GEO_NOT_SUPPORTED');
   }
 );
 
 Tinytest.add(
   'CheckForOplog - OplogCheck.geo - without having geo operators',
   function (test) {
-    test.equal(OplogCheck.geo({selector: {
-
-    }}), true);
+    test.equal(OplogCheck.geo({selector: {}}), true);
   }
 );
 
@@ -213,7 +212,7 @@ Tinytest.add(
   function (test) {
     test.equal(OplogCheck.limitButNoSort({options: {
       limit: 20
-    }}).code, "LIMIT_NO_SORT");
+    }}).code, 'LIMIT_NO_SORT');
   }
 );
 
@@ -230,11 +229,11 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.miniMongoSorter - supported sort specifier',
   function (test) {
-    var result = OplogCheck.miniMongoSorter({
+    const result = OplogCheck.miniMongoSorter({
       selector: {},
       options: {
         sort: {aa: 1}
-    }});
+      }});
     test.equal(result, true);
   }
 );
@@ -242,28 +241,28 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.miniMongoSorter - unsupported sort specifier',
   function (test) {
-    var result = OplogCheck.miniMongoSorter({options: {
+    const result = OplogCheck.miniMongoSorter({options: {
       sort: {$natural: 1}
     }});
-    test.equal(result.code, "MINIMONGO_SORTER_ERROR");
+    test.equal(result.code, 'MINIMONGO_SORTER_ERROR');
   }
 );
 
 Tinytest.add(
   'CheckForOplog - OplogCheck.olderVersion - older version',
   function (test) {
-    var driver = function() {};
-    test.equal(OplogCheck.olderVersion(null, driver).code, "OLDER_VERSION");
+    const driver = function () {};
+    test.equal(OplogCheck.olderVersion(null, driver).code, 'OLDER_VERSION');
   }
 );
 
 Tinytest.add(
   'CheckForOplog - OplogCheck.olderVersion - newer version',
   function (test) {
-    function Observer() {};
-    Observer.cursorSupported = function() {}
+    function Observer () {}
+    Observer.cursorSupported = function () {};
 
-    var driver = new Observer();
+    const driver = new Observer();
     test.equal(OplogCheck.olderVersion(null, driver), true);
   }
 );
@@ -278,7 +277,7 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.gitCheckout - cloned from git',
   function (test) {
-    var originalRelease = Meteor.release;
+    const originalRelease = Meteor.release;
     Meteor.release = null;
     test.equal(OplogCheck.gitCheckout().code, 'GIT_CHECKOUT');
     Meteor.release = originalRelease;
@@ -288,11 +287,11 @@ Tinytest.add(
 Tinytest.addAsync(
   'CheckForOplog - Kadira.checkWhyNoOplog - version 0.7.0',
   function (test, done) {
-    var originalRelease = Meteor.release;
-    Meteor.release = "0.7.0.1";
+    const originalRelease = Meteor.release;
+    Meteor.release = '0.7.0.1';
 
-    WithMongoOplogUrl(function() {
-      var result = Kadira.checkWhyNoOplog({
+    WithMongoOplogUrl(function () {
+      const result = Kadira.checkWhyNoOplog({
         selector: {aa: {$gt: 20}},
         options: {}
       });
@@ -307,11 +306,11 @@ Tinytest.addAsync(
 Tinytest.addAsync(
   'CheckForOplog - Kadira.checkWhyNoOplog - version 0.7.1',
   function (test, done) {
-    var originalRelease = Meteor.release;
-    Meteor.release = "0.7.1";
+    const originalRelease = Meteor.release;
+    Meteor.release = '0.7.1';
 
     WithMongoOplogUrl(function () {
-      var result = Kadira.checkWhyNoOplog({
+      const result = Kadira.checkWhyNoOplog({
         selector: {aa: {$gt: 20}},
         options: {limit: 20}
       });
@@ -326,8 +325,7 @@ Tinytest.addAsync(
 Tinytest.add(
   'CheckForOplog - Kadira.checkWhyNoOplog - no env',
   function (test) {
-
-    var result = Kadira.checkWhyNoOplog({
+    const result = Kadira.checkWhyNoOplog({
       selector: {aa: {$gt: 20}},
       options: {limit: 20},
     });
@@ -338,9 +336,8 @@ Tinytest.add(
 Tinytest.addAsync(
   'CheckForOplog - Kadira.checkWhyNoOplog - limitNoSort',
   function (test, done) {
-
-    WithMongoOplogUrl(function() {
-      var result = Kadira.checkWhyNoOplog({
+    WithMongoOplogUrl(function () {
+      const result = Kadira.checkWhyNoOplog({
         selector: {aa: {$gt: 20}},
         options: {limit: 20},
       });
@@ -353,12 +350,12 @@ Tinytest.addAsync(
 Tinytest.addAsync(
   'CheckForOplog - Kadira.checkWhyNoOplog - supportting query',
   function (test, done) {
-    function Observer() {};
-    Observer.cursorSupported = function() {}
-    var driver = new Observer();
+    function Observer () {}
+    Observer.cursorSupported = function () {};
+    const driver = new Observer();
 
-    WithMongoOplogUrl(function() {
-      var result = Kadira.checkWhyNoOplog({
+    WithMongoOplogUrl(function () {
+      const result = Kadira.checkWhyNoOplog({
         selector: {aa: {$gt: 20}},
         options: {limit: 20, sort: {aa: 1}},
       }, driver);
@@ -371,11 +368,11 @@ Tinytest.addAsync(
 Tinytest.addAsync(
   'CheckForOplog - Kadira.checkWhyNoOplog - with invalid MiniMongo.Matcher',
   function (test, done) {
-    var originalRelease = Meteor.release;
-    Meteor.release = "0.7.1";
+    const originalRelease = Meteor.release;
+    Meteor.release = '0.7.1';
 
     WithMongoOplogUrl(function () {
-      var result = Kadira.checkWhyNoOplog({
+      let result = Kadira.checkWhyNoOplog({
         selector: {aa: {$in: null}},
         options: {limit: 20}
       });
@@ -388,8 +385,8 @@ Tinytest.addAsync(
 );
 
 
-function WithMongoOplogUrl(fn) {
-  process.env.MONGO_OPLOG_URL="mongodb://ssdsd";
+function WithMongoOplogUrl (fn) {
+  process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd';
   fn();
   delete process.env.MONGO_OPLOG_URL;
 }
