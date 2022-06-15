@@ -1,3 +1,5 @@
+import { Random } from 'meteor/random';
+
 Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - window.onunhandledrejection - error object',
   TestWithErrorTrackingAsync(function (test, next) {

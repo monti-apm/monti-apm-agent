@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 
 Tinytest.add(
   'Info - Meteor.EnvironmentVariable',

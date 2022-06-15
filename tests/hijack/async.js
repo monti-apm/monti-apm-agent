@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 
 Tinytest.add(
   'Async - track with Meteor._wrapAsync',

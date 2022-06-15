@@ -1,3 +1,5 @@
+import { Meteor } from 'meteor/meteor';
+
 Tinytest.add(
   'Default Error Filters - filterValidationErrors - filtered',
   function (test) {

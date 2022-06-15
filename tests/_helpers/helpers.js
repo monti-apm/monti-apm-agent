@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
+import { DDP } from 'meteor/ddp';
 const Future = Npm.require('fibers/future');
 
 GetMeteorClient = function (_url) {

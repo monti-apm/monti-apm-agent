@@ -1,3 +1,5 @@
+import { Random } from 'meteor/random';
+
 Tinytest.addAsync(
   'Utils - OptimizedApply - calling arguments',
   function (test, done) {

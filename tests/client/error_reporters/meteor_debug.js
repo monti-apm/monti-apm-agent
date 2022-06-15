@@ -1,3 +1,5 @@
+import { Meteor } from 'meteor/meteor';
+import { Random } from 'meteor/random';
 
 Tinytest.add(
   'Client Side - Error Manager - Reporters - meteor._debug - with zone',

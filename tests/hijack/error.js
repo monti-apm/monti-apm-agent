@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 
 Tinytest.add(
   'Errors - Meteor._debug - track with Meteor._debug',

@@ -1,3 +1,5 @@
+import { Random } from 'meteor/random';
+import { Tracker } from 'meteor/tracker';
 
 Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - tracker - afterFlush',

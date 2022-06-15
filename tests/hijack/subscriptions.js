@@ -1,4 +1,5 @@
-let Future = Npm.require('fibers/future');
+import { Meteor } from 'meteor/meteor';
+import { Random } from 'meteor/random';
 
 Tinytest.add(
   'Subscriptions - Sub/Unsub - subscribe only',
@@ -152,7 +153,7 @@ Tinytest.add(
     CleanTestData();
     EnableTrackingMethods();
     let client = GetMeteorClient();
-    let Future = Npm.require('fibers/future');
+    const Future = Npm.require('fibers/future');
     let f = new Future();
     let h1 = SubscribeAndWait(client, 'tinytest-data');
     let h2 = SubscribeAndWait(client, 'tinytest-data');

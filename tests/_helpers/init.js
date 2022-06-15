@@ -1,3 +1,6 @@
+import { Meteor } from 'meteor/meteor';
+import { Random } from 'meteor/random';
+
 Kadira.connect('foo', 'bar', {enableErrorTracking: true});
 let http = Npm.require('http');
 let Future = Npm.require('fibers/future');
@@ -17,7 +20,7 @@ http.createServer(function (req, res) {
   });
 
   req.on('end', function () {
-    if (req.url == '/echo') {
+    if (req.url === '/echo') {
       let sendData = {success: true};
       res.writeHead(200, {
         'Content-Type': 'application/json',
@@ -26,7 +29,7 @@ http.createServer(function (req, res) {
         'Access-Control-Allow-Headers': 'Content-Type'
       });
 
-      if (req.headers['content-type'] == 'application/json') {
+      if (req.headers['content-type'] === 'application/json') {
         data = JSON.parse(data);
         sendData = {echo: data};
       }

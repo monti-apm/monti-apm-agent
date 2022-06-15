@@ -1,3 +1,4 @@
+import { EJSON } from 'meteor/ejson';
 
 Tinytest.add(
   'Models - Method - buildPayload simple',

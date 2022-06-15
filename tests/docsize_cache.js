@@ -1,4 +1,5 @@
-let LRU = Npm.require('lru-cache');
+import { Random } from 'meteor/random';
+const LRU = Npm.require('lru-cache');
 
 Tinytest.add(
   'DocSize Cache - DocSzCache - constructor',

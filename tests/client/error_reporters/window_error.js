@@ -1,3 +1,4 @@
+import { Random } from 'meteor/random';
 
 Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - window.onerror - with all args',

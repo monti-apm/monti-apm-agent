@@ -1,3 +1,5 @@
+import { Meteor } from 'meteor/meteor';
+
 Tinytest.add(
   'Kadira Send - Kadira._getSendFunction',
   function (test) {

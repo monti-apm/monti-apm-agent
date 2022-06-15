@@ -1,3 +1,5 @@
+import { Meteor } from 'meteor/meteor';
+import { Random } from 'meteor/random';
 
 Tinytest.addAsync(
   'Client Side - Settings - publication',
