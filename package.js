@@ -1,24 +1,26 @@
+/* global Npm */
+
 Package.describe({
-  "summary": "Performance Monitoring for Meteor",
-  "version": "2.45.2-beta.2",
-  "git": "https://github.com/monti-apm/monti-apm-agent.git",
-  "name": "montiapm:agent"
+  summary: 'Performance Monitoring for Meteor',
+  version: '2.45.2-beta.2',
+  git: 'https://github.com/monti-apm/monti-apm-agent.git',
+  name: 'montiapm:agent'
 });
 
-var npmModules = {
-  "debug": "0.8.1",
-  "monti-apm-core": "1.7.5",
-  "evloop-monitor": "0.1.0",
-  "lru-cache": "4.1.5",
-  "json-stringify-safe": "5.0.1",
-  "monti-apm-sketches-js": "0.0.3",
+let npmModules = {
+  debug: '0.8.1',
+  'monti-apm-core': '1.7.5',
+  'evloop-monitor': '0.1.0',
+  'lru-cache': '4.1.5',
+  'json-stringify-safe': '5.0.1',
+  'monti-apm-sketches-js': '0.0.3',
 
   // parseurl is also used by WebApp.
   // Since it caches the parsed url on
   // `req`, we should make sure we use a
   // version that is compatible with the version
   // used by WebApp.
-  "parseurl": "1.3.3"
+  parseurl: '1.3.3'
 };
 
 Npm.depends(npmModules);
@@ -43,7 +45,6 @@ Package.onTest(function (api) {
   // common server
   api.addFiles([
     'tests/utils.js',
-    'tests/ntp.js',
     'tests/jobs.js',
     'tests/_helpers/globals.js',
     'tests/_helpers/helpers.js',
@@ -94,26 +95,31 @@ Package.onTest(function (api) {
   // common after
   api.addFiles([
     'tests/common/default_error_filters.js',
-    'tests/common/send.js'
+    'tests/common/send.js',
+    'tests/common/utils.js',
   ], ['client', 'server']);
 });
 
 // use meteor/fetch in tests only for NodeJS 8.11+ (Meteor 1.7+)
-function canRunTestsWithFetch() {
-  const nums = process.versions.node.split(".").map(Number);
+function canRunTestsWithFetch () {
+  const nums = process.versions.node.split('.').map(Number);
 
   const major = nums[0];
   const minor = nums[1];
 
-  if (major < 8) return false;
+  if (major < 8) {
+    return false;
+  }
 
-  if (major > 8) return true;
+  if (major > 8) {
+    return true;
+  }
 
-  //major === 8 and ...
+  // major === 8 and ...
   return minor >= 11;
 }
 
-function configurePackage(api, isTesting) {
+function configurePackage (api, isTesting) {
   api.versionsFrom('METEOR@1.4');
   api.use('montiapm:meteorx@2.2.0', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
