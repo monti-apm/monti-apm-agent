@@ -1,5 +1,3 @@
-/* global Kadira */
-
 import { Meteor } from 'meteor/meteor';
 import { SystemModel } from '../../lib/models/system';
 import { Wait } from '../_helpers/helpers';

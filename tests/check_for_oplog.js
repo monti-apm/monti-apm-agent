@@ -1,4 +1,4 @@
-/* global Kadira, Minimongo */
+/* global Minimongo */
 
 import { Meteor } from 'meteor/meteor';
 import { OplogCheck } from '../lib/check_for_oplog';

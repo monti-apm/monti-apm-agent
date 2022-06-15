@@ -1,6 +1,5 @@
-/* global Kadira */
-
 import { Meteor } from 'meteor/meteor';
+import { ErrorModel } from '../../lib/models/errors';
 
 Tinytest.add(
   'Errors - Meteor._debug - track with Meteor._debug',

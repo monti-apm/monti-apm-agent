@@ -1,4 +1,3 @@
-/* global Kadira */
 import { Meteor } from 'meteor/meteor';
 import { DDP } from 'meteor/ddp';
 import { Random } from 'meteor/random';

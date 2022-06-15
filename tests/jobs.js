@@ -1,5 +1,3 @@
-/* global Kadira */
-
 Tinytest.addAsync(
   'Jobs - get',
   function (test, done) {

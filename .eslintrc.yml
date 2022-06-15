@@ -10,6 +10,10 @@ env:
 globals:
   Tinytest: readonly
   Package: readonly
+  Kadira: readonly
+  MeteorX: readonly
+  Npm: readonly
+  __meteor_runtime_config__: readonly
 parserOptions:
   requireConfigFile: false
   sourceType: 'module'

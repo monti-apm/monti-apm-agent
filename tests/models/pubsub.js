@@ -1,5 +1,3 @@
-/* global Kadira */
-
 import { Wait } from '../_helpers/helpers';
 import { PubsubModel } from '../../lib/models/pubsub';
 

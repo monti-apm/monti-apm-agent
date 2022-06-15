@@ -1,5 +1,3 @@
-/* global Kadira */
-
 import { EJSON } from 'meteor/ejson';
 import { Wait } from '../_helpers/helpers';
 import { MethodsModel } from '../../lib/models/methods';

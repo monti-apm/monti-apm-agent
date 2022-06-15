@@ -1,5 +1,3 @@
-/* global Kadira */
-
 import http from 'http';
 import Future from 'fibers/future';
 import { Meteor } from 'meteor/meteor';

@@ -1,5 +1,3 @@
-/* global Kadira */
-
 import { getClientArch } from '../../../lib/client/utils';
 import { getClientArchVersion } from '../../../lib/common/utils';
 import { ErrorModel } from '../../../lib/client/models/errors';
