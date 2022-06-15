@@ -12,9 +12,9 @@ Tinytest.addAsync(
       }
       ran = true;
 
-      test.equal(Boolean(options.appId), true);
-      test.equal(Boolean(options.endpoint), true);
-      test.equal(Boolean(options.clientEngineSyncDelay), true);
+      test.equal(!!options.appId, true);
+      test.equal(!!options.endpoint, true);
+      test.equal(!!options.clientEngineSyncDelay, true);
       done();
     }});
   }

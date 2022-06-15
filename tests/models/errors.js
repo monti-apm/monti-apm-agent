@@ -93,9 +93,9 @@ Tinytest.add(
     let error = {name: '_name', message: '_message', stack: '_stack'};
     let trace = {type: '_type', subType: '_subType', name: '_name'};
     model.trackError(error, trace);
-    test.equal(true, Boolean(model.errors['_type:_message']));
+    test.equal(true, !!model.errors['_type:_message']);
     let metrics = model.buildPayload().errors;
-    test.equal(false, Boolean(model.errors['_type:_message']));
+    test.equal(false, !!model.errors['_type:_message']);
   }
 );
 

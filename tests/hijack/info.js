@@ -13,7 +13,7 @@ Tinytest.add(
     function testMethod () {
       Meteor.setTimeout(function () {
         let kadirainfo = Kadira._getInfo(null, true);
-        test.equal(Boolean(kadirainfo), true);
+        test.equal(!!kadirainfo, true);
       }, 0);
     }
   }
