@@ -52,7 +52,7 @@ rules:
   eqeqeq: 2
   func-names: 0
   func-style: 0
-  global-require: 2
+  global-require: 1
   generator-star-spacing:
     - 2
     - before: true
@@ -78,7 +78,7 @@ rules:
   lines-around-comment: 0
   max-depth: 0
   max-len:
-    - 2
+    - 0
     - ignoreTemplateLiterals: true
       ignoreStrings: true
   max-nested-callbacks: 0
@@ -263,3 +263,7 @@ rules:
   class-methods-use-this: 0
   no-empty-function: 0
   sort-imports: 0
+  line-comment-position: 1
+  prefer-rest-params: 0
+  symbol-description: 1
+  callback-return: 0

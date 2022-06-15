@@ -1,15 +1,16 @@
+/* global Kadira */
+
 Tinytest.addAsync(
   'Jobs - get',
   function (test, done) {
-    var value = 10;
-    var id = 'the-id';
+    const id = 'the-id';
 
-    var newSend = function(_id) {
+    const newSend = function (_id) {
       test.equal(_id, id);
       done();
     };
 
-    hijackCoreApi('getJob', newSend, function() {
+    hijackCoreApi('getJob', newSend, function () {
       Kadira.Jobs.get(id);
     });
   }
@@ -18,23 +19,23 @@ Tinytest.addAsync(
 Tinytest.addAsync(
   'Jobs - set',
   function (test, done) {
-    var value = 10;
-    var id = 'the-id';
+    const value = 10;
+    const id = 'the-id';
 
-    var newSend = function(_id, _params) {
+    const newSend = function (_id, _params) {
       test.equal(_id, id);
       test.equal(_params, {val: value});
       done();
     };
 
-    hijackCoreApi('updateJob', newSend, function() {
+    hijackCoreApi('updateJob', newSend, function () {
       Kadira.Jobs.set(id, {val: value});
     });
   }
 );
 
-function hijackCoreApi(fnName, newFn, fn) {
-  var originaSend = Kadira.send;
+function hijackCoreApi (fnName, newFn, fn) {
+  const originaSend = Kadira.send;
   Kadira.coreApi[fnName] = newFn;
   fn();
   Kadira.coreApi[fnName] = originaSend;
