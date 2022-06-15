@@ -1,8 +1,8 @@
 Tinytest.add(
   'Default Error Filters - filterValidationErrors - filtered',
   function (test) {
-    var err = new Meteor.Error('hello');
-    var validated = Kadira.errorFilters.filterValidationErrors(null, null, err);
+    let err = new Meteor.Error('hello');
+    let validated = Kadira.errorFilters.filterValidationErrors(null, null, err);
     test.equal(validated, false);
   }
 );
@@ -10,8 +10,8 @@ Tinytest.add(
 Tinytest.add(
   'Default Error Filters - filterValidationErrors - not filtered',
   function (test) {
-    var err = new Error('hello');
-    var validated = Kadira.errorFilters.filterValidationErrors(null, null, err);
+    let err = new Error('hello');
+    let validated = Kadira.errorFilters.filterValidationErrors(null, null, err);
     test.equal(validated, true);
   }
 );
@@ -19,8 +19,8 @@ Tinytest.add(
 Tinytest.add(
   'Default Error Filters - filterCommonMeteorErrors - not filtered',
   function (test) {
-    var message = "this is something else"
-    var validated = Kadira.errorFilters.filterValidationErrors(null, message);
+    let message = 'this is something else';
+    let validated = Kadira.errorFilters.filterValidationErrors(null, message);
     test.equal(validated, true);
   }
 );
@@ -28,8 +28,8 @@ Tinytest.add(
 Tinytest.add(
   'Default Error Filters - filterCommonMeteorErrors - ddp heartbeats',
   function (test) {
-    var message = "Connection timeout. No DDP heartbeat received.";
-    var validated = Kadira.errorFilters.filterCommonMeteorErrors(null, message);
+    let message = 'Connection timeout. No DDP heartbeat received.';
+    let validated = Kadira.errorFilters.filterCommonMeteorErrors(null, message);
     test.equal(validated, false);
   }
 );
@@ -37,8 +37,8 @@ Tinytest.add(
 Tinytest.add(
   'Default Error Filters - filterCommonMeteorErrors - sockjs heartbeats',
   function (test) {
-    var message = "Connection timeout. No sockjs heartbeat received.";
-    var validated = Kadira.errorFilters.filterCommonMeteorErrors(null, message);
+    let message = 'Connection timeout. No sockjs heartbeat received.';
+    let validated = Kadira.errorFilters.filterCommonMeteorErrors(null, message);
     test.equal(validated, false);
   }
 );
@@ -46,8 +46,8 @@ Tinytest.add(
 Tinytest.add(
   'Default Error Filters - filterCommonMeteorErrors - sockjs invalid state',
   function (test) {
-    var message = "INVALID_STATE_ERR";
-    var validated = Kadira.errorFilters.filterCommonMeteorErrors(null, message);
+    let message = 'INVALID_STATE_ERR';
+    let validated = Kadira.errorFilters.filterCommonMeteorErrors(null, message);
     test.equal(validated, false);
   }
 );

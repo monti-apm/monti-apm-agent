@@ -3,16 +3,16 @@ Tinytest.add(
   'Info - Meteor.EnvironmentVariable',
   function (test) {
     EnableTrackingMethods();
-    var methodId = RegisterMethod(testMethod);
-    var client = GetMeteorClient();
-    var result = client.call(methodId, 10, 'abc');
+    let methodId = RegisterMethod(testMethod);
+    let client = GetMeteorClient();
+    let result = client.call(methodId, 10, 'abc');
     CleanTestData();
 
 
-    function testMethod() {
+    function testMethod () {
       Meteor.setTimeout(function () {
-        var kadirainfo = Kadira._getInfo(null, true);
-        test.equal(!!kadirainfo, true);
+        let kadirainfo = Kadira._getInfo(null, true);
+        test.equal(Boolean(kadirainfo), true);
       }, 0);
     }
   }

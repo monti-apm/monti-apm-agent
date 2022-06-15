@@ -4,10 +4,10 @@ Tinytest.add(
   function (test) {
     CreateMethodCompleted('aa', 'hello', 1, 100, 5);
     CreateMethodCompleted('aa', 'hello', 2, 800 , 10);
-    var payload = model.buildPayload();
+    let payload = model.buildPayload();
     payload.methodRequests = [];
 
-    var expected = {
+    let expected = {
       methodMetrics: [
         {
           startTime: 100,
@@ -42,7 +42,7 @@ Tinytest.add(
       methodRequests: []
     };
 
-    var startTime = expected.methodMetrics[0].startTime;
+    let startTime = expected.methodMetrics[0].startTime;
     expected.methodMetrics[0].startTime = Kadira.syncedDate.syncTime(startTime);
     // TODO comparing without parsing and stringifing fails
     test.equal(EJSON.parse(EJSON.stringify(payload)), EJSON.parse(EJSON.stringify(expected)));
@@ -55,8 +55,8 @@ Tinytest.add(
   function (test) {
     CreateMethodCompleted('aa', 'hello', 1, 100, 5);
     CreateMethodErrored('aa', 'hello', 2, 'the-error', 800, 10);
-    var payload = model.buildPayload();
-    var expected = [{
+    let payload = model.buildPayload();
+    let expected = [{
       startTime: 100,
       methods: {
         hello: {
@@ -95,23 +95,21 @@ Tinytest.add(
 Tinytest.add(
   'Models - Method - Metrics - fetchedDocSize',
   function (test) {
-    var docs = [{data: 'data1'}, {data: 'data2'}];
-    docs.forEach(function(doc) {TestData.insert(doc)});
+    let docs = [{data: 'data1'}, {data: 'data2'}];
+    docs.forEach(function (doc) { TestData.insert(doc); });
 
-    var methodId = RegisterMethod(function(){
-      var data = TestData.find({}).fetch();
+    let methodId = RegisterMethod(function () {
+      let data = TestData.find({}).fetch();
     });
 
-    var client = GetMeteorClient();
+    let client = GetMeteorClient();
     WithDocCacheGetSize(function () {
       client.call(methodId);
     }, 30);
     Wait(100);
 
-    var payload = Kadira.models.methods.buildPayload();
-    var index = payload.methodMetrics.findIndex(methodMetrics => {
-      return methodId in methodMetrics.methods;
-    });
+    let payload = Kadira.models.methods.buildPayload();
+    let index = payload.methodMetrics.findIndex(methodMetrics => methodId in methodMetrics.methods);
 
     test.equal(payload.methodMetrics[index].methods[methodId].fetchedDocSize, 60);
     CleanTestData();
@@ -121,22 +119,22 @@ Tinytest.add(
 Tinytest.add(
   'Models - Method - Metrics - sentMsgSize',
   function (test) {
-    var docs = [{data: 'data1'}, {data: 'data2'}];
-    docs.forEach(function(doc) {TestData.insert(doc)});
+    let docs = [{data: 'data1'}, {data: 'data2'}];
+    docs.forEach(function (doc) { TestData.insert(doc); });
 
-    var returnValue = "Some return value";
-    var methodId = RegisterMethod(function(){
-      var data = TestData.find({}).fetch();
+    let returnValue = 'Some return value';
+    let methodId = RegisterMethod(function () {
+      let data = TestData.find({}).fetch();
       return returnValue;
     });
 
-    var client = GetMeteorClient();
+    let client = GetMeteorClient();
     client.call(methodId);
 
-    var payload = Kadira.models.methods.buildPayload();
+    let payload = Kadira.models.methods.buildPayload();
 
-    var expected = (JSON.stringify({ msg: 'updated', methods: [ '1' ] }) +
-        JSON.stringify({ msg: 'result', id: '1', result: returnValue })).length
+    let expected = (JSON.stringify({ msg: 'updated', methods: ['1'] }) +
+        JSON.stringify({ msg: 'result', id: '1', result: returnValue })).length;
 
     test.equal(payload.methodMetrics[0].methods[methodId].sentMsgSize, expected);
     CleanTestData();
@@ -147,15 +145,15 @@ Tinytest.add(
   'Models - Method - Trace - filter params',
   function (test) {
     Kadira.tracer.redactField('__test1');
-    var methodId = RegisterMethod(function(){
+    let methodId = RegisterMethod(function () {
     });
 
-    var client = GetMeteorClient();
+    let client = GetMeteorClient();
     client.call(methodId, { __test1: 'value', abc: true }, { xyz: false, __test1: 'value2' });
 
-    var trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
+    let trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
 
-    var expected = JSON.stringify([{ __test1: 'Monti: redacted', abc: true }, { xyz: false, __test1: 'Monti: redacted'}]);
+    let expected = JSON.stringify([{ __test1: 'Monti: redacted', abc: true }, { xyz: false, __test1: 'Monti: redacted'}]);
     test.equal(trace.events[0][2].params, expected);
     CleanTestData();
   }
@@ -165,15 +163,15 @@ Tinytest.add(
   'Models - Method - Trace - filter params with null',
   function (test) {
     Kadira.tracer.redactField('__test1');
-    var methodId = RegisterMethod(function () {
+    let methodId = RegisterMethod(function () {
     });
 
-    var client = GetMeteorClient();
+    let client = GetMeteorClient();
     client.call(methodId, { __test1: 'value', abc: true }, null, { xyz: false, __test1: 'value2' });
 
-    var trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
+    let trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
 
-    var expected = JSON.stringify([{ __test1: 'Monti: redacted', abc: true }, null, { xyz: false, __test1: 'Monti: redacted' }]);
+    let expected = JSON.stringify([{ __test1: 'Monti: redacted', abc: true }, null, { xyz: false, __test1: 'Monti: redacted' }]);
     test.equal(trace.events[0][2].params, expected);
     CleanTestData();
   }
@@ -184,11 +182,11 @@ function GetPayload (buildDetailInfo) {
 }
 
 function CreateMethodCompleted (sessionName, methodName, methodId, startTime, methodDelay) {
-  if(typeof model == 'undefined') {
+  if (typeof model === 'undefined') {
     model = new MethodsModel();
   }
   methodDelay = methodDelay || 5;
-  var method = {session: sessionName, name: methodName, id: methodId, events: []};
+  let method = {session: sessionName, name: methodName, id: methodId, events: []};
   method.events.push({type: 'start', at: startTime});
   method.events.push({type: 'complete', at: startTime + methodDelay});
   method = Kadira.tracer.buildTrace(method);
@@ -196,25 +194,25 @@ function CreateMethodCompleted (sessionName, methodName, methodId, startTime, me
 }
 
 function CreateMethodWithEvent (sessionName, methodName, methodId, startTime, eventName, eventDelay) {
-  if(typeof model == 'undefined') {
+  if (typeof model === 'undefined') {
     model = new MethodsModel();
   }
-  var time = startTime;
-  var method = {session: sessionName, name: methodName, id: methodId, events: []};
+  let time = startTime;
+  let method = {session: sessionName, name: methodName, id: methodId, events: []};
   method.events.push({type: 'start', at: time});
   method.events.push({type: eventName, at: time += 5});
-  method.events.push({type: eventName + 'end', at: time += eventDelay});
+  method.events.push({type: `${eventName}end`, at: time += eventDelay});
   method.events.push({type: 'complete', at: time += 5});
   method = Kadira.tracer.buildTrace(method);
   model.processMethod(method);
 }
 
 function CreateMethodErrored (sessionName, methodName, methodId, errorMessage, startTime, methodDelay) {
-  if(typeof model == 'undefined') {
+  if (typeof model === 'undefined') {
     model = new MethodsModel();
   }
   methodDelay = methodDelay || 5;
-  var method = {session: sessionName, name: methodName, id: methodId, events: []};
+  let method = {session: sessionName, name: methodName, id: methodId, events: []};
   method.events.push({type: 'start', at: startTime});
   method.events.push({type: 'error', at: startTime + methodDelay, data: {error: errorMessage}});
   method = Kadira.tracer.buildTrace(method);
@@ -223,8 +221,8 @@ function CreateMethodErrored (sessionName, methodName, methodId, errorMessage, s
 
 
 function Pick (doc, fields) {
-  var newDoc = {};
-  fields.forEach(function(field) {
+  let newDoc = {};
+  fields.forEach(function (field) {
     newDoc[field] = doc[field];
   });
   return newDoc;
