@@ -13,6 +13,7 @@ globals:
   Kadira: readonly
   MeteorX: readonly
   Npm: readonly
+  window: readonly
   __meteor_runtime_config__: readonly
 parserOptions:
   requireConfigFile: false
