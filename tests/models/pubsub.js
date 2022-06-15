@@ -1,16 +1,17 @@
 /* global Kadira */
 
 import { Wait } from '../_helpers/helpers';
+import { PubsubModel } from '../../lib/models/pubsub';
 
 Tinytest.add(
   'Models - PubSub - Metrics - same date',
   function (test) {
-    let pub = 'postsList';
-    let d = new Date('2013 Dec 10 20:30').getTime();
-    let model = new PubsubModel();
+    const pub = 'postsList';
+    const d = new Date('2013 Dec 10 20:30').getTime();
+    const model = new PubsubModel();
     model._getMetrics(d, pub).subs++;
     model._getMetrics(d, pub).subs++;
-    let metrics = model._getMetrics(d, pub);
+    const metrics = model._getMetrics(d, pub);
     test.equal(metrics.subs, 2);
   }
 );
@@ -99,10 +100,10 @@ Tinytest.add(
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let model = new PubsubModel();
-    var metrics = model._getMetrics(d1, pub);
+    let metrics = model._getMetrics(d1, pub);
     metrics.resTime = 3000;
     metrics.subs = 3;
-    var metrics = [
+    metrics = [
       model.buildPayload(),
       model.metricsByMinute
     ];
@@ -117,10 +118,10 @@ Tinytest.add(
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let model = new PubsubModel();
-    var metrics = model._getMetrics(d1, pub);
+    let metrics = model._getMetrics(d1, pub);
     metrics.lifeTime = 4000;
     metrics.unsubs = 2;
-    var metrics = [
+    metrics = [
       model.buildPayload(),
       model.metricsByMinute
     ];
@@ -577,16 +578,16 @@ Tinytest.add(
   'Models - PubSub - Observers - liveSentMsgSize',
   function (test) {
     CleanTestData();
-    let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data-random');
+    const client = GetMeteorClient();
+    const h1 = SubscribeAndWait(client, 'tinytest-data-random');
     Wait(50);
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
     Wait(100);
-    let payload = GetPubSubPayload();
+    const payload = GetPubSubPayload();
 
-    let templateMsg = '{"msg":"added","collection":"tinytest-data","id":"17digitslongidxxx","fields":{"aa":10}}';
-    let expectedMsgSize = templateMsg.length * 2;
+    const templateMsg = '{"msg":"added","collection":"tinytest-data","id":"17digitslongidxxx","fields":{"aa":10}}';
+    const expectedMsgSize = templateMsg.length * 2;
 
     test.equal(payload[0].pubs['tinytest-data-random'].liveSentMsgSize, expectedMsgSize);
     CloseClient(client);
