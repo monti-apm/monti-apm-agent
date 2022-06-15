@@ -2,6 +2,7 @@
 
 import { EJSON } from 'meteor/ejson';
 import { Wait } from '../_helpers/helpers';
+import { MethodsModel } from '../../lib/models/methods';
 
 Tinytest.add(
   'Models - Method - buildPayload simple',
@@ -221,13 +222,4 @@ function CreateMethodErrored (sessionName, methodName, methodId, errorMessage, s
   method.events.push({type: 'error', at: startTime + methodDelay, data: {error: errorMessage}});
   method = Kadira.tracer.buildTrace(method);
   model.processMethod(method);
-}
-
-
-function Pick (doc, fields) {
-  let newDoc = {};
-  fields.forEach(function (field) {
-    newDoc[field] = doc[field];
-  });
-  return newDoc;
 }
