@@ -35,8 +35,8 @@ GetLastMethodEvents = function (_indices) {
   if (MethodStore.length < 1) {
     return [];
   }
-  var indices = _indices || [0];
-  var events = MethodStore[MethodStore.length - 1].events;
+  let indices = _indices || [0];
+  let events = MethodStore[MethodStore.length - 1].events;
   events = Array.prototype.slice.call(events, 0);
   events = events.filter(isNotCompute);
   events = events.map(filterFields);
@@ -47,26 +47,26 @@ GetLastMethodEvents = function (_indices) {
   }
 
   function filterFields (event) {
-    var filteredEvent = [];
+    let filteredEvent = [];
     indices.forEach(function (index) {
-      if (event[index]) filteredEvent[index] = event[index];
+      if (event[index]) { filteredEvent[index] = event[index]; }
     });
     return filteredEvent;
   }
-}
+};
 
 GetPubSubMetrics = function () {
-  var metricsArr = [];
-  for(var dateId in Kadira.models.pubsub.metricsByMinute) {
+  let metricsArr = [];
+  for (let dateId in Kadira.models.pubsub.metricsByMinute) {
     metricsArr.push(Kadira.models.pubsub.metricsByMinute[dateId]);
   }
   return metricsArr;
-}
+};
 
 FindMetricsForPub = function (pubname) {
   const metrics = GetPubSubMetrics();
   const candidates = [];
-  fo r(let lc = 0; lc < metrics.length; lc++) {
+  for (let lc = 0; lc < metrics.length; lc++) {
     const pm = metrics[lc].pubs[pubname];
     if (pm) {
       candidates.push(pm);
@@ -91,55 +91,56 @@ export function Wait (time) {
 CleanTestData = function () {
   MethodStore = [];
   TestData.remove({});
-  Kadira.models.pubsub.metricsByMinute
+  Kadira.models.pubsub.metricsByMinute;
   Kadira.models.pubsub.metricsByMinute = {};
   Kadira.models.pubsub.subscriptions = {};
 };
 
-SubscribeAndWait = function(client, name, args) {
-  var f = new Future();
+SubscribeAndWait = function (client, name, args) {
+  let f = new Future();
   var args = Array.prototype.splice.call(arguments, 1);
   args.push({
-    onError: function(err) {
+    onError (err) {
       f.return(err);
     },
-    onReady: function() {
+    onReady () {
       f.return();
     }
   });
 
-  var handler = client.subscribe.apply(client, args);
-  var error = f.wait();
+  let handler = client.subscribe.apply(client, args);
+  let error = f.wait();
 
-  if(error) {
+  if (error) {
     throw error;
   } else {
     return handler;
   }
 };
 
-CompareNear = function(v1, v2, maxDifference) {
+CompareNear = function (v1, v2, maxDifference) {
   maxDifference = maxDifference || 30;
-  var diff = Math.abs(v1 - v2);
+  let diff = Math.abs(v1 - v2);
   return diff < maxDifference;
 };
 
-CloseClient = function(client) {
-  var sessionId = client._lastSessionId;
+CloseClient = function (client) {
+  const sessionId = client._lastSessionId;
   client.disconnect();
-  var f = new Future();
-  function checkClientExtence(sessionId) {
+  let f = new Future();
+  function checkClientExtence (sId) {
+    const sessions = Meteor.server.sessions;
     let sessionExists;
-    if (Meteor.server.sessions instanceof Map) {
+    if (sessions instanceof Map) {
       // Meteor 1.8.1 and newer
-      sessionExists = Meteor.server.sessions.has(sessionId);
+      sessionExists = sessions.has(sId);
     } else {
-      sessionExists = Meteor.server.sessions[sessionId];
+      sessionExists = sessions[sId];
     }
 
-    if(sessionExists) {
-      setTimeout(function() {
-        checkClientExtence(sessionId);
+    if (sessionExists) {
+      setTimeout(function () {
+        checkClientExtence(sId);
       }, 20);
     } else {
       f.return();
@@ -149,16 +150,16 @@ CloseClient = function(client) {
   return f.wait();
 };
 
-WithDocCacheGetSize = function(fn, patchedSize){
-  var original = Kadira.docSzCache.getSize
-  Kadira.docSzCache.getSize = function(){return patchedSize}
+WithDocCacheGetSize = function (fn, patchedSize) {
+  const original = Kadira.docSzCache.getSize;
+  Kadira.docSzCache.getSize = function () {
+    return patchedSize;
+  };
   try {
     fn();
   } finally {
-    Kadira.docSzCache.getSize = original
+    Kadira.docSzCache.getSize = original;
   }
-}
+};
 
-export const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => {
-  return parseInt(num, 10)
-});
+export const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => parseInt(num, 10));
