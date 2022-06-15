@@ -8,11 +8,11 @@ const app = http.createServer((req, res) => {
 
   res.writeHead(200);
 
-  function ondata(d) {
+  function ondata (d) {
     data += d.toString();
   }
 
-  function onend() {
+  function onend () {
     console.log('DATA:', data);
     req.removeListener('data', ondata);
     res.end();

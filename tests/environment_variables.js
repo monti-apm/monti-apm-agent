@@ -1,8 +1,8 @@
 Tinytest.add(
   'AutoConnect - connect with environment variables',
   function (test) {
-    var originalEnv = process.env;
-    var originalConnect = Kadira.connect;
+    let originalEnv = process.env;
+    let originalConnect = Kadira.connect;
 
     process.env = {
       KADIRA_APP_ID: 'rcZSEaSgMaxH4c2df',
@@ -18,10 +18,10 @@ Tinytest.add(
       KADIRA_OPTIONS_PROXY: 'http://localhost:3128',
     };
 
-    var connectArgs;
+    let connectArgs;
     Kadira.connect = function () {
       connectArgs = Array.prototype.slice.call(arguments);
-    }
+    };
 
     Kadira._connectWithEnv();
 

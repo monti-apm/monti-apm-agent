@@ -2,15 +2,15 @@ Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - window.onunhandledrejection - error object',
   TestWithErrorTrackingAsync(function (test, next) {
     hijackKadiraSendErrors(mock_KadiraSendErrors);
-    var message = Random.id();
-    var error = new Error(message);
+    let message = Random.id();
+    let error = new Error(message);
     let timeout = setTimeout(() => {
       test.equal('false', 'browser supports onunhandledrejection');
       next();
     }, 500);
-    Promise.reject(error)
+    Promise.reject(error);
 
-    function mock_KadiraSendErrors(error) {
+    function mock_KadiraSendErrors (error) {
       clearTimeout(timeout);
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
@@ -29,14 +29,14 @@ Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - window.onunhandledrejection - string',
   TestWithErrorTrackingAsync(function (test, next) {
     hijackKadiraSendErrors(mock_KadiraSendErrors);
-    var message = Random.id();
+    let message = Random.id();
     let timeout = setTimeout(() => {
       test.equal('false', 'browser supports onunhandledrejection');
       next();
     }, 500);
-    Promise.reject(message)
+    Promise.reject(message);
 
-    function mock_KadiraSendErrors(error) {
+    function mock_KadiraSendErrors (error) {
       clearTimeout(timeout);
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
@@ -51,21 +51,21 @@ Tinytest.addAsync(
   })
 );
 
-var original_KadiraSendErrors;
+let original_KadiraSendErrors;
 
-function hijackKadiraSendErrors(mock) {
-  original_KadiraSendErrors = Kadira.errors.sendError
+function hijackKadiraSendErrors (mock) {
+  original_KadiraSendErrors = Kadira.errors.sendError;
   Kadira.errors.sendError = mock;
 }
 
-function restoreKadiraSendErrors() {
+function restoreKadiraSendErrors () {
   Kadira.errors.sendError = original_KadiraSendErrors;
 }
 
 function TestWithErrorTrackingAsync (testFunction) {
   return function (test, next) {
-    var status = Kadira.options.enableErrorTracking;
-    var appId = Kadira.options.appId;
+    let status = Kadira.options.enableErrorTracking;
+    let appId = Kadira.options.appId;
     Kadira.options.appId = 'app';
     Kadira.enableErrorTracking();
     testFunction(test, function () {
@@ -73,5 +73,5 @@ function TestWithErrorTrackingAsync (testFunction) {
       status ? Kadira.enableErrorTracking() : Kadira.disableErrorTracking();
       next();
     });
-  }
+  };
 }
