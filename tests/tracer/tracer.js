@@ -2,8 +2,9 @@
 
 import { _ } from 'meteor/underscore';
 import { Wait } from '../_helpers/helpers';
+import { Tracer } from '../../lib/tracer/tracer';
 
-let eventDefaults = {
+const eventDefaults = {
   endAt: 0,
   nested: [],
 };
