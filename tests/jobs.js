@@ -1,7 +1,6 @@
 Tinytest.addAsync(
   'Jobs - get',
   function (test, done) {
-    let value = 10;
     let id = 'the-id';
 
     let newSend = function (_id) {

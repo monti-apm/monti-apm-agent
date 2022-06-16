@@ -1,3 +1,5 @@
+import { _ } from 'meteor/underscore';
+
 let eventDefaults = {
   endAt: 0,
   nested: [],
