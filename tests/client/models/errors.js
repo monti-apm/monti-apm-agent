@@ -1,5 +1,7 @@
-let arch = getClientArch();
-let archVersion = getClientArchVersion(arch);
+import { ErrorModel } from '../../../lib/client/models/errors';
+
+const arch = getClientArch();
+const archVersion = getClientArchVersion(arch);
 
 Tinytest.add(
   'Client Side - Error Model - sends errors',
@@ -58,8 +60,8 @@ Tinytest.add(
   'Client Side - Error Model - isErrorExists',
   function (test) {
     let em = new ErrorModel();
-    let payloadReceived;
-    var resetSend = onKadiraSend(function (payload) {
+
+    var resetSend = onKadiraSend(function () {
       resetSend();
     });
 
@@ -75,8 +77,8 @@ Tinytest.add(
   'Client Side - Error Model - increamentErrorCount',
   function (test) {
     let em = new ErrorModel();
-    let payloadReceived;
-    var resetSend = onKadiraSend(function (payload) {
+
+    var resetSend = onKadiraSend(function () {
       resetSend();
     });
 

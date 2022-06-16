@@ -1,3 +1,5 @@
+import { BaseErrorModel } from '../../lib/models/base_error';
+
 Tinytest.add(
   'Models - BaseErrorModel - add filters - pass errors',
   function (test) {
@@ -35,8 +37,8 @@ Tinytest.add(
   'Models - BaseErrorModel - add filters - multiple errors',
   function (test) {
     let model = new BaseErrorModel();
-    model.addFilter(function () { return true; });
-    model.addFilter(function () { return false; });
+    model.addFilter(() => true);
+    model.addFilter(() => false);
 
     let validated = model.applyFilters('type', 'message', {}, 'subType');
     test.equal(validated, false);
@@ -47,8 +49,8 @@ Tinytest.add(
   'Models - BaseErrorModel - remove filters - multiple errors',
   function (test) {
     let model = new BaseErrorModel();
-    let falseFilter = function () { return false; };
-    model.addFilter(function () { return true; });
+    let falseFilter = () => false;
+    model.addFilter(() => true);
     model.addFilter(falseFilter);
     model.removeFilter(falseFilter);
 
@@ -64,9 +66,8 @@ Tinytest.add(
     try {
       model.addFilter({});
       test.fail('expect an error');
-    } catch (ex) {
-
-    }
+      // eslint-disable-next-line no-empty
+    } catch (ex) { }
   }
 );
 

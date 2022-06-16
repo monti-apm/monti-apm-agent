@@ -1,3 +1,5 @@
+import { PubsubModel } from '../../lib/models/pubsub';
+
 Tinytest.add(
   'Models - PubSub - Metrics - same date',
   function (test) {
