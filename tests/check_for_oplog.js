@@ -1,6 +1,4 @@
-/* global Minimongo */
-
-import { Meteor } from 'meteor/meteor';
+/* global Minimongo, Meteor */
 
 if (typeof Minimongo === 'undefined') {
   return;
