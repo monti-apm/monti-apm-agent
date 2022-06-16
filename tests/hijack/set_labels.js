@@ -1,3 +1,5 @@
+import { DDPServer } from 'meteor/ddp-server';
+
 Tinytest.add(
   'CPU Profiler - set labels - Session.prototype.send',
   function (test) {
