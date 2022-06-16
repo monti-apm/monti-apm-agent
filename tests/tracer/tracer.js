@@ -442,7 +442,7 @@ Tinytest.add(
   }
 );
 
-function startTrace (tracer) {
+function startTrace () {
   let ddpMessage = {
     id: 'the-id',
     msg: 'method',

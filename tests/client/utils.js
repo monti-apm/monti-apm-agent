@@ -1,5 +1,11 @@
+/* eslint-disable camelcase */
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
+import {
+  checkSizeAndPickFields,
+  getBrowserInfo,
+  getErrorStack
+} from '../../lib/client/utils';
 
 Tinytest.addAsync(
   'Client Side - Settings - publication',

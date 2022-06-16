@@ -1,4 +1,6 @@
 import { ErrorModel } from '../../../lib/client/models/errors';
+import { getClientArch } from '../../../lib/client/utils';
+import { getClientArchVersion } from '../../../lib/common/utils';
 
 const arch = getClientArch();
 const archVersion = getClientArchVersion(arch);
@@ -98,8 +100,8 @@ Tinytest.add(
   'Client Side - Error Model - canSendErrors',
   function (test) {
     let em = new ErrorModel({maxErrorsPerInterval: 2});
-    let payloadReceived;
-    var resetSend = onKadiraSend(function (payload) {
+
+    var resetSend = onKadiraSend(function () {
       resetSend();
     });
 
