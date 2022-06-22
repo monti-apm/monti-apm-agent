@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
+import { ErrorModel } from '../../lib/models/errors';
 
 Tinytest.add(
   'Models - Errors - empty',

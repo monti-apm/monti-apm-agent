@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import { SystemModel } from '../../lib/models/system';
 
 Tinytest.add(
   'Models - System - buildPayload',

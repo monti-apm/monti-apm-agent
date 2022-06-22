@@ -1,4 +1,7 @@
+/* global model */
+
 import { EJSON } from 'meteor/ejson';
+import { MethodsModel } from '../../lib/models/methods';
 
 Tinytest.add(
   'Models - Method - buildPayload simple',
@@ -178,10 +181,6 @@ Tinytest.add(
   }
 );
 
-function GetPayload (buildDetailInfo) {
-  return model.buildPayload(buildDetailInfo);
-}
-
 function CreateMethodCompleted (sessionName, methodName, methodId, startTime, methodDelay) {
   if (typeof model === 'undefined') {
     model = new MethodsModel();
@@ -190,20 +189,6 @@ function CreateMethodCompleted (sessionName, methodName, methodId, startTime, me
   let method = {session: sessionName, name: methodName, id: methodId, events: []};
   method.events.push({type: 'start', at: startTime});
   method.events.push({type: 'complete', at: startTime + methodDelay});
-  method = Kadira.tracer.buildTrace(method);
-  model.processMethod(method);
-}
-
-function CreateMethodWithEvent (sessionName, methodName, methodId, startTime, eventName, eventDelay) {
-  if (typeof model === 'undefined') {
-    model = new MethodsModel();
-  }
-  let time = startTime;
-  let method = {session: sessionName, name: methodName, id: methodId, events: []};
-  method.events.push({type: 'start', at: time});
-  method.events.push({type: eventName, at: time += 5});
-  method.events.push({type: `${eventName}end`, at: time += eventDelay});
-  method.events.push({type: 'complete', at: time += 5});
   method = Kadira.tracer.buildTrace(method);
   model.processMethod(method);
 }
@@ -218,13 +203,4 @@ function CreateMethodErrored (sessionName, methodName, methodId, errorMessage, s
   method.events.push({type: 'error', at: startTime + methodDelay, data: {error: errorMessage}});
   method = Kadira.tracer.buildTrace(method);
   model.processMethod(method);
-}
-
-
-function Pick (doc, fields) {
-  let newDoc = {};
-  fields.forEach(function (field) {
-    newDoc[field] = doc[field];
-  });
-  return newDoc;
 }
