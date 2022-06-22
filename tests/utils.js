@@ -1,4 +1,5 @@
 import { Random } from 'meteor/random';
+import { _ } from 'meteor/underscore';
 
 Tinytest.addAsync(
   'Utils - OptimizedApply - calling arguments',
