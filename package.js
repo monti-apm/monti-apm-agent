@@ -179,6 +179,7 @@ function configurePackage(api, isTesting) {
   api.addFiles([
     'lib/retry.js',
     'lib/ntp.js',
+    'lib/client/httpRequest.js',
     'lib/client/utils.js',
     'lib/client/models/errors.js',
     'lib/client/error_reporters/zone.js',
