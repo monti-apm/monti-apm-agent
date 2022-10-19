@@ -5,6 +5,14 @@
 * Instrument fetch package (@afrokick)
 * Handle `RangeError: Invalid string length` error 
 
+## 2.46
+
+October 19, 2022
+
+* Remove extra instrumentation log
+* Change to only connect after instrumentation is ready
+* Return from `Kadira.connect` if already conncted
+
 ## 2.45.1
 February 13, 2022
 
