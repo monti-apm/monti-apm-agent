@@ -1,5 +1,5 @@
 import { TimeoutManager } from '../lib/hijack/timeout_manager';
-import {expect } from 'chai';
+import assert from 'assert';
 
 Tinytest.add(
   'Method Timeout',
@@ -26,8 +26,9 @@ Tinytest.add(
 
     let result = client.call(methodId);
 
-    expect(TimeoutManager.id).to.be.greaterThan(lastId);
-    expect(error).to.be.an('error').and.to.have.property('message', `Method Timeout (500ms): ${methodId}`);
+    assert(lastId < TimeoutManager.id, 'The timeout id must be incremented');
+    assert(error.constructor.name === 'Error');
+    assert(error.message === `Method Timeout (250ms): ${methodId}`);
 
     test.equal(result, 'pong');
 
