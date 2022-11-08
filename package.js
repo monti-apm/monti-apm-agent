@@ -1,3 +1,5 @@
+'use strict';
+
 Package.describe({
   summary: 'Performance Monitoring for Meteor',
   version: '2.45.2-beta.2',
