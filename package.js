@@ -73,6 +73,7 @@ Package.onTest(function (api) {
     'tests/hijack/set_labels.js',
     'tests/environment_variables.js',
     'tests/docsize_cache.js',
+    'tests/timeout.js',
   ], 'server');
 
   if (canRunTestsWithFetch()) {
