@@ -1,11 +1,12 @@
 # Changelog
 
-## Next
+## 2.46.0
+November 8, 2022
 
 * Instrument fetch package (@afrokick)
 * Remove `Monti APM: completed instrumenting the app` logged every time the app starts
 * When already connected, calling `Monti.connect` again does nothing
-* Change to only connect after instrumentation is ready
+* Change to only auto-connect after instrumentation is finished
 * Handle `RangeError: Invalid string length` error
 
 ## 2.45.1
