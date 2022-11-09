@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.46.1
+November 8, 2022
+
+* Publish again without dev npm dependencies
+
 ## 2.46.0
 November 8, 2022
 
