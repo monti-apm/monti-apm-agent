@@ -99,7 +99,7 @@ You should use the same method that you used to give the agent the app id and se
 | uploadSourceMaps    | UPLOAD_SOURCE_MAPS            | true                        | Enables sending source maps to Monti APM to improve error stack traces                                                                       |
 | recordIPAddress     | RECORD_IP_ADDRESS             | 'full'                      | Set to 'full' to record IP Address, 'anonymized' to anonymize last octet of address, or 'none' to not record an IP Address for client errors |
 | eventStackTrace     | EVENT_STACK_TRACE             | false                       | If true, records a stack trace when an event starts. Slightly decreases server performance.                                                  |
-| disableNtp          | OPTIONS_DISABLE_NTP           | false                       | Disable NTP time synchronization                                                                                                             |
+| disableNtp          | OPTIONS_DISABLE_NTP           | false                       | Disable NTP time synchronization used to get the accurate time in case the server or client's clock is wrong                                                                                                            |
 
 
 ### Traces
