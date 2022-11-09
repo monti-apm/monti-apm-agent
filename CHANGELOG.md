@@ -1,9 +1,18 @@
 # Changelog
 
-## Next
+## 2.46.1
+November 8, 2022
+
+* Publish again without dev npm dependencies
+
+## 2.46.0
+November 8, 2022
 
 * Instrument fetch package (@afrokick)
-* Handle `RangeError: Invalid string length` error 
+* Remove `Monti APM: completed instrumenting the app` logged every time the app starts
+* When already connected, calling `Monti.connect` again does nothing
+* Change to only auto-connect after instrumentation is finished
+* Handle `RangeError: Invalid string length` error
 
 ## 2.45.1
 February 13, 2022
