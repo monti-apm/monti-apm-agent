@@ -8,6 +8,7 @@
     "publish": "npm prune --production && meteor publish"
   },
   "devDependencies": {
+    "@babel/core": "^7.20.2",
     "@babel/eslint-parser": "^7.16.5",
     "@types/meteor": "^1.4.87",
     "eslint": "^8.6.0",
@@ -15,7 +16,8 @@
     "eslint-plugin-babel": "^5.3.1",
     "pseudomap": "^1.0.2"
   },
-  "dependencies": {
-    "@babel/core": "^7.16.12"
+  "dependencies": {},
+  "volta": {
+    "node": "14.20.1"
   }
 }

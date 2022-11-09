@@ -1,10 +1,10 @@
 'use strict';
 
 Package.describe({
-  summary: 'Performance Monitoring for Meteor',
-  version: '2.45.2-beta.2',
-  git: 'https://github.com/monti-apm/monti-apm-agent.git',
-  name: 'montiapm:agent'
+  "summary": "Performance Monitoring for Meteor",
+  "version": "2.46.1",
+  "git": "https://github.com/monti-apm/monti-apm-agent.git",
+  "name": "montiapm:agent"
 });
 
 let npmModules = {
