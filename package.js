@@ -1,17 +1,17 @@
 'use strict';
 
 Package.describe({
-  "summary": "Performance Monitoring for Meteor",
-  "version": "2.46.1",
-  "git": "https://github.com/monti-apm/monti-apm-agent.git",
-  "name": "montiapm:agent"
+  summary: 'Performance Monitoring for Meteor',
+  version: '2.46.1',
+  git: 'https://github.com/monti-apm/monti-apm-agent.git',
+  name: 'montiapm:agent'
 });
 
 let npmModules = {
   debug: '0.8.1',
   'monti-apm-core': '1.7.5',
   'evloop-monitor': '0.1.0',
-  'lru-cache': '4.1.5',
+  'lru-cache': '7.14.1',
   'json-stringify-safe': '5.0.1',
   'monti-apm-sketches-js': '0.0.3',
 
