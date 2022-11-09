@@ -11,7 +11,7 @@ let npmModules = {
   debug: '0.8.1',
   'monti-apm-core': '1.7.5',
   'evloop-monitor': '0.1.0',
-  'lru-cache': '7.14.1',
+  'lru-cache': '5.1.1',
   'json-stringify-safe': '5.0.1',
   'monti-apm-sketches-js': '0.0.3',
 
