@@ -3,15 +3,10 @@
 ## Next
 
 * Instrument fetch package (@afrokick)
-* Handle `RangeError: Invalid string length` error 
-
-## 2.46
-
-October 19, 2022
-
-* Remove extra instrumentation log
+* Remove `Monti APM: completed instrumenting the app` logged every time the app starts
+* When already connected, calling `Monti.connect` again does nothing
 * Change to only connect after instrumentation is ready
-* Return from `Kadira.connect` if already conncted
+* Handle `RangeError: Invalid string length` error
 
 ## 2.45.1
 February 13, 2022
