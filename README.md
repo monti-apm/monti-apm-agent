@@ -100,7 +100,7 @@ You should use the same method that you used to give the agent the app id and se
 | recordIPAddress     | RECORD_IP_ADDRESS             | 'full'                      | Set to 'full' to record IP Address, 'anonymized' to anonymize last octet of address, or 'none' to not record an IP Address for client errors |
 | eventStackTrace     | EVENT_STACK_TRACE             | false                       | If true, records a stack trace when an event starts. Slightly decreases server performance.                                                  |
 | disableNtp          | OPTIONS_DISABLE_NTP           | false                       | Disable NTP time synchronization used to get the accurate time in case the server or client's clock is wrong                                 |
-| trackingTimeout     | TRACKING_TIMEOUT              | 600000 (10m)                | Tracking timeout for methods and subscriptions, can be disabled by setting it to 0                                                           |
+| stalledTimeout     | STALLED_TIMEOUT              | 600000 (10m)                | Timeout used to detect when methods and subscriptions might be stalled (have been running for a long time and might never return). The value is in milliseconds, and can be disabled by setting it to 0                                                           |
 
 
 ### Traces
