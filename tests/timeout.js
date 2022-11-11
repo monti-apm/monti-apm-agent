@@ -28,7 +28,7 @@ Tinytest.add(
 
     assert(lastId < TimeoutManager.id, 'The timeout id must be incremented');
     assert(error && error.constructor.name === 'Error');
-    assert(error && error.message === `Method Timeout (250ms): ${methodId}`);
+    assert(error && error.message === `Method still running after 250ms: ${methodId}`);
 
     test.equal(result, 'pong');
 
