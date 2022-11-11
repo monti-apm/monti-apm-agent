@@ -4,9 +4,9 @@ import assert from 'assert';
 Tinytest.add(
   'Method Timeout',
   function (test) {
-    const oldTimeout = Kadira.options.trackingTimeout;
+    const oldTimeout = Kadira.options.stalledTimeout;
 
-    Kadira.options.trackingTimeout = 250;
+    Kadira.options.stalledTimeout = 250;
 
     let methodId = RegisterMethod(function () {
       Meteor._sleepForMs(500);
@@ -32,6 +32,6 @@ Tinytest.add(
 
     test.equal(result, 'pong');
 
-    Kadira.options.trackingTimeout = oldTimeout;
+    Kadira.options.stalledTimeout = oldTimeout;
   }
 );
