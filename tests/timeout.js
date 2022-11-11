@@ -18,7 +18,7 @@ Tinytest.add(
 
     let error = null;
 
-    Kadira.EventBus.once('timeout', (kadiraInfo, err) => {
+    Kadira.EventBus.__emitter.once('timeout', (kadiraInfo, err) => {
       error = err;
     });
 
@@ -27,8 +27,8 @@ Tinytest.add(
     let result = client.call(methodId);
 
     assert(lastId < TimeoutManager.id, 'The timeout id must be incremented');
-    assert(error.constructor.name === 'Error');
-    assert(error.message === `Method Timeout (250ms): ${methodId}`);
+    assert(error && error.constructor.name === 'Error');
+    assert(error && error.message === `Method Timeout (250ms): ${methodId}`);
 
     test.equal(result, 'pong');
 
