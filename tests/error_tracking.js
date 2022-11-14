@@ -37,7 +37,7 @@ Tinytest.add(
         // at: 123,
         events: [
           ['start', 0, {}],
-          ['error', 0, {error: {message: 'msg', stack: err.stack}}, {forcedEnd: true}]
+          ['error', 0, {error: {message: 'msg', stack: err.stack}}]
         ],
         metrics: {total: 0}
       });
@@ -65,7 +65,7 @@ Tinytest.add(
         // at: 123,
         events: [
           ['start', 0, {}],
-          ['error', 0, {error: {message: 'msg', stack: 's'}}, {forcedEnd: true}]
+          ['error', 0, {error: {message: 'msg', stack: 's'}}]
         ],
         metrics: {total: 0}
       });
@@ -94,7 +94,7 @@ Tinytest.add(
         // at: 123,
         events: [
           ['start', 0, {}],
-          ['error', 0, {error: {message: 'test', stack: error.stack}}, {forcedEnd: true}]
+          ['error', 0, {error: {message: 'test', stack: error.stack}}]
         ],
         metrics: {total: 0}
       });
@@ -123,7 +123,7 @@ Tinytest.add(
         // at: 123,
         events: [
           ['start', 0, {}],
-          ['error', 0, {error: {message: 'error-message', stack: error.stack}}, {forcedEnd: true}]
+          ['error', 0, {error: {message: 'error-message', stack: error.stack}}]
         ],
         metrics: {total: 0}
       });
@@ -152,7 +152,7 @@ Tinytest.add(
         // at: 123,
         events: [
           ['start', 0, {}],
-          ['error', 0, {error: {message: 'error-message', stack: err.stack}}, {forcedEnd: true}]
+          ['error', 0, {error: {message: 'error-message', stack: err.stack}}]
         ],
         metrics: {total: 0}
       });
@@ -181,7 +181,7 @@ Tinytest.add(
         // at: 123,
         events: [
           ['start', 0, {}],
-          ['error', 0, {error: {message: 'error-message', stack: err.stack}}, {forcedEnd: true}]
+          ['error', 0, {error: {message: 'error-message', stack: err.stack}}]
         ],
         metrics: {total: 0}
       });
