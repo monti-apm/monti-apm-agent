@@ -20,7 +20,8 @@ let npmModules = {
   // `req`, we should make sure we use a
   // version that is compatible with the version
   // used by WebApp.
-  parseurl: '1.3.3'
+  parseurl: '1.3.3',
+  'pretty-ms': '8.0.0'
 };
 
 Npm.depends(npmModules);

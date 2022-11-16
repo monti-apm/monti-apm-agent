@@ -18,7 +18,7 @@ Tinytest.add(
 
     let error = null;
 
-    Kadira.EventBus.__emitter.once('timeout', (kadiraInfo, err) => {
+    Kadira.EventBus.once('method', 'timeout', (kadiraInfo, err) => {
       error = err;
     });
 
