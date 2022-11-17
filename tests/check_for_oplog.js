@@ -3,65 +3,6 @@ if(typeof Minimongo == 'undefined') {
 }
 
 Tinytest.add(
-  'CheckForOplog - OplogCheck._070 - no limit supported',
-  function (test) {
-    test.equal(OplogCheck._070({
-      options: {limit: 20}
-    }).code, '070_LIMIT_NOT_SUPPORTED');
-  }
-);
-
-Tinytest.add(
-  'CheckForOplog - OplogCheck._070 - $ operators',
-  function (test) {
-    test.equal(OplogCheck._070({
-      options: {},
-      selector: {$and: {}}
-    }).code, '070_$_NOT_SUPPORTED');
-  }
-);
-
-Tinytest.add(
-  'CheckForOplog - OplogCheck._070 - not scaler values',
-  function (test) {
-    test.equal(OplogCheck._070({
-      options: {},
-      selector: {aa: {$gt: 20}}
-    }).code, '070_ONLY_SCALERS');
-  }
-);
-
-Tinytest.add(
-  'CheckForOplog - OplogCheck._070 - support oplog',
-  function (test) {
-    test.equal(OplogCheck._070({
-      options: {},
-      selector: {}
-    }), true);
-  }
-);
-
-
-Tinytest.add(
-  'CheckForOplog - OplogCheck._071 - no limit supported',
-  function (test) {
-    test.equal(OplogCheck._071({
-      options: {limit: 20}
-    }).code, '071_LIMIT_NOT_SUPPORTED');
-  }
-);
-
-Tinytest.add(
-  'CheckForOplog - OplogCheck._071 - supports oplog',
-  function (test) {
-    test.equal(OplogCheck._071({
-      options: {},
-      selector: {aa: {$gt: 20}}
-    }), true);
-  }
-);
-
-Tinytest.add(
   'CheckForOplog - OplogCheck.env - MONGO_OPLOG_URL exists',
   function (test) {
     WithMongoOplogUrl(function() {
