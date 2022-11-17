@@ -269,61 +269,6 @@ Tinytest.add(
 );
 
 Tinytest.add(
-  'CheckForOplog - OplogCheck.gitCheckout - meteor version',
-  function (test) {
-    test.equal(OplogCheck.gitCheckout(), true);
-  }
-);
-
-Tinytest.add(
-  'CheckForOplog - OplogCheck.gitCheckout - cloned from git',
-  function (test) {
-    var originalRelease = Meteor.release;
-    Meteor.release = null;
-    test.equal(OplogCheck.gitCheckout().code, 'GIT_CHECKOUT');
-    Meteor.release = originalRelease;
-  }
-);
-
-Tinytest.addAsync(
-  'CheckForOplog - Kadira.checkWhyNoOplog - version 0.7.0',
-  function (test, done) {
-    var originalRelease = Meteor.release;
-    Meteor.release = "0.7.0.1";
-
-    WithMongoOplogUrl(function() {
-      var result = Kadira.checkWhyNoOplog({
-        selector: {aa: {$gt: 20}},
-        options: {}
-      });
-      test.equal(result.code, '070_ONLY_SCALERS');
-      done();
-    });
-
-    Meteor.release = originalRelease;
-  }
-);
-
-Tinytest.addAsync(
-  'CheckForOplog - Kadira.checkWhyNoOplog - version 0.7.1',
-  function (test, done) {
-    var originalRelease = Meteor.release;
-    Meteor.release = "0.7.1";
-
-    WithMongoOplogUrl(function () {
-      var result = Kadira.checkWhyNoOplog({
-        selector: {aa: {$gt: 20}},
-        options: {limit: 20}
-      });
-      test.equal(result.code, '071_LIMIT_NOT_SUPPORTED');
-      done();
-    });
-
-    Meteor.release = originalRelease;
-  }
-);
-
-Tinytest.add(
   'CheckForOplog - Kadira.checkWhyNoOplog - no env',
   function (test) {
 
@@ -367,26 +312,6 @@ Tinytest.addAsync(
     });
   }
 );
-
-Tinytest.addAsync(
-  'CheckForOplog - Kadira.checkWhyNoOplog - with invalid MiniMongo.Matcher',
-  function (test, done) {
-    var originalRelease = Meteor.release;
-    Meteor.release = "0.7.1";
-
-    WithMongoOplogUrl(function () {
-      var result = Kadira.checkWhyNoOplog({
-        selector: {aa: {$in: null}},
-        options: {limit: 20}
-      });
-      test.equal(result.code, 'MINIMONGO_MATCHER_ERROR');
-      done();
-    });
-
-    Meteor.release = originalRelease;
-  }
-);
-
 
 function WithMongoOplogUrl(fn) {
   process.env.MONGO_OPLOG_URL="mongodb://ssdsd";
