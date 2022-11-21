@@ -191,32 +191,21 @@ Tinytest.add(
 );
 
 Tinytest.add(
-  'CheckForOplog - OplogCheck.olderVersion - older version',
+  'CheckForOplog - OplogCheck.unknownReason - unknown reason',
   function (test) {
     var driver = function() {};
-    test.equal(OplogCheck.olderVersion(null, driver).code, "OLDER_VERSION");
-  }
-);
-
-Tinytest.add(
-  'CheckForOplog - OplogCheck.olderVersion - newer version',
-  function (test) {
-    function Observer() {};
-    Observer.cursorSupported = function() {}
-
-    var driver = new Observer();
-    test.equal(OplogCheck.olderVersion(null, driver), true);
+    test.equal(OplogCheck.unknownReason(null, driver).code, "UNKNOWN_REASON");
   }
 );
 
 Tinytest.add(
   'CheckForOplog - Kadira.checkWhyNoOplog - no env',
   function (test) {
-
     var result = Kadira.checkWhyNoOplog({
       selector: {aa: {$gt: 20}},
       options: {limit: 20},
     });
+
     test.equal(result.code, 'NO_ENV');
   }
 );
@@ -237,17 +226,18 @@ Tinytest.addAsync(
 );
 
 Tinytest.addAsync(
-  'CheckForOplog - Kadira.checkWhyNoOplog - supportting query',
+  'CheckForOplog - Kadira.checkWhyNoOplog - supporting query',
   function (test, done) {
-    function Observer() {};
-    Observer.cursorSupported = function() {}
-    var driver = new Observer();
+    function OplogObserveDriver() {};
+    OplogObserveDriver.cursorSupported = function() {}
+    var driver = new OplogObserveDriver();
 
     WithMongoOplogUrl(function() {
       var result = Kadira.checkWhyNoOplog({
         selector: {aa: {$gt: 20}},
         options: {limit: 20, sort: {aa: 1}},
       }, driver);
+
       test.equal(result.code, 'OPLOG_SUPPORTED');
       done();
     });
