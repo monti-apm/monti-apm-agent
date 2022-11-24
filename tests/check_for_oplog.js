@@ -1,11 +1,7 @@
-if(typeof Minimongo == 'undefined') {
-  return;
-}
-
 Tinytest.add(
   'CheckForOplog - OplogCheck.env - MONGO_OPLOG_URL exists',
   function (test) {
-    WithMongoOplogUrl(function() {
+    WithMongoOplogUrl(function () {
       test.equal(OplogCheck.env(), true);
     });
   }
@@ -28,7 +24,7 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.disableOplog - with _disableOplog',
   function (test) {
-    var result = OplogCheck.disableOplog({options: {_disableOplog: true}});
+    let result = OplogCheck.disableOplog({options: {_disableOplog: true}});
     test.equal(result.code, 'DISABLE_OPLOG');
   }
 );
@@ -47,7 +43,7 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.miniMongoMatcher - no MiniMongo.Matcher',
   function (test) {
-    var originalMiniMongoMatcher = Minimongo.Matcher;
+    let originalMiniMongoMatcher = Minimongo.Matcher;
     Minimongo.Matcher = null;
     test.equal(OplogCheck.miniMongoMatcher({
       options: {},
@@ -61,7 +57,7 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.miniMongoMatcher - with incorrect selector',
   function (test) {
-    var result = OplogCheck.miniMongoMatcher({
+    let result = OplogCheck.miniMongoMatcher({
       options: {},
       selector: {aa: {$in: null}}
     });
@@ -90,7 +86,7 @@ Tinytest.add(
   function (test) {
     test.equal(OplogCheck.fields({options: {
       fields: {$elemMatch: {aa: 10}}
-    }}).code, "NOT_SUPPORTED_FIELDS");
+    }}).code, 'NOT_SUPPORTED_FIELDS');
   }
 );
 
@@ -100,7 +96,7 @@ Tinytest.add(
   function (test) {
     test.equal(OplogCheck.skip({options: {
       skip: 10
-    }}).code, "SKIP_NOT_SUPPORTED");
+    }}).code, 'SKIP_NOT_SUPPORTED');
   }
 );
 
@@ -117,8 +113,8 @@ Tinytest.add(
   'CheckForOplog - OplogCheck.where - with having where',
   function (test) {
     test.equal(OplogCheck.where({selector: {
-      $where: function() {}
-    }}).code, "WHERE_NOT_SUPPORTED");
+      $where () {}
+    }}).code, 'WHERE_NOT_SUPPORTED');
   }
 );
 
@@ -136,7 +132,7 @@ Tinytest.add(
   function (test) {
     test.equal(OplogCheck.geo({selector: {
       loc: {$near: [50, 50]}
-    }}).code, "GEO_NOT_SUPPORTED");
+    }}).code, 'GEO_NOT_SUPPORTED');
   }
 );
 
@@ -154,7 +150,7 @@ Tinytest.add(
   function (test) {
     test.equal(OplogCheck.limitButNoSort({options: {
       limit: 20
-    }}).code, "LIMIT_NO_SORT");
+    }}).code, 'LIMIT_NO_SORT');
   }
 );
 
@@ -171,11 +167,11 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.miniMongoSorter - supported sort specifier',
   function (test) {
-    var result = OplogCheck.miniMongoSorter({
+    let result = OplogCheck.miniMongoSorter({
       selector: {},
       options: {
         sort: {aa: 1}
-    }});
+      }});
     test.equal(result, true);
   }
 );
@@ -183,25 +179,25 @@ Tinytest.add(
 Tinytest.add(
   'CheckForOplog - OplogCheck.miniMongoSorter - unsupported sort specifier',
   function (test) {
-    var result = OplogCheck.miniMongoSorter({options: {
+    let result = OplogCheck.miniMongoSorter({options: {
       sort: {$natural: 1}
     }});
-    test.equal(result.code, "MINIMONGO_SORTER_ERROR");
+    test.equal(result.code, 'MINIMONGO_SORTER_ERROR');
   }
 );
 
 Tinytest.add(
   'CheckForOplog - OplogCheck.unknownReason - unknown reason',
   function (test) {
-    var driver = function() {};
-    test.equal(OplogCheck.unknownReason(null, driver).code, "UNKNOWN_REASON");
+    let driver = function () {};
+    test.equal(OplogCheck.unknownReason(null, driver).code, 'UNKNOWN_REASON');
   }
 );
 
 Tinytest.add(
   'CheckForOplog - Kadira.checkWhyNoOplog - no env',
   function (test) {
-    var result = Kadira.checkWhyNoOplog({
+    let result = Kadira.checkWhyNoOplog({
       selector: {aa: {$gt: 20}},
       options: {limit: 20},
     });
@@ -213,9 +209,8 @@ Tinytest.add(
 Tinytest.addAsync(
   'CheckForOplog - Kadira.checkWhyNoOplog - limitNoSort',
   function (test, done) {
-
-    WithMongoOplogUrl(function() {
-      var result = Kadira.checkWhyNoOplog({
+    WithMongoOplogUrl(function () {
+      let result = Kadira.checkWhyNoOplog({
         selector: {aa: {$gt: 20}},
         options: {limit: 20},
       });
@@ -228,12 +223,12 @@ Tinytest.addAsync(
 Tinytest.addAsync(
   'CheckForOplog - Kadira.checkWhyNoOplog - supporting query',
   function (test, done) {
-    function OplogObserveDriver() {};
-    OplogObserveDriver.cursorSupported = function() {}
-    var driver = new OplogObserveDriver();
+    function OplogObserveDriver () {}
+    OplogObserveDriver.cursorSupported = function () {};
+    let driver = new OplogObserveDriver();
 
-    WithMongoOplogUrl(function() {
-      var result = Kadira.checkWhyNoOplog({
+    WithMongoOplogUrl(function () {
+      let result = Kadira.checkWhyNoOplog({
         selector: {aa: {$gt: 20}},
         options: {limit: 20, sort: {aa: 1}},
       }, driver);
@@ -244,7 +239,7 @@ Tinytest.addAsync(
   }
 );
 
-Tinytest.add('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', function (test){
+Tinytest.add('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', function (test) {
   CleanTestData();
 
   let observeChangesEvent;
@@ -264,7 +259,7 @@ Tinytest.add('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', functi
       observeChangesEvent = _.first(event.nested);
 
       return TestData.find({});
-    })
+    });
   });
 
   const client = GetMeteorClient();
@@ -278,10 +273,10 @@ Tinytest.add('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', functi
 
   test.equal(observeChangesEvent.data.func, 'observeChanges');
   test.equal(observeChangesEvent.data.noOplogCode, 'TRACKER_ACTIVE');
-})
+});
 
-function WithMongoOplogUrl(fn) {
-  process.env.MONGO_OPLOG_URL="mongodb://ssdsd";
+function WithMongoOplogUrl (fn) {
+  process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd';
   fn();
   delete process.env.MONGO_OPLOG_URL;
 }
