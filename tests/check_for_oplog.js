@@ -25,8 +25,6 @@ Tinytest.addAsync('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', f
 
   const sub = SubscribeAndWait(client, pubId);
 
-  console.log(observeChangesEvent);
-
   const { data } = observeChangesEvent;
 
   test.equal(data.oplog, false);
