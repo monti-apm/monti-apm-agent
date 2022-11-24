@@ -67,9 +67,9 @@ Tinytest.add(
             }, 100);
           }),
         );
-      } catch {}
-
-      return Kadira._getInfo();
+      } catch (err) {
+        return Kadira._getInfo();
+      }
     });
 
 
