@@ -1,3 +1,44 @@
+Tinytest.addAsync('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', function (test, done) {
+  CleanTestData();
+
+  let observeChangesEvent;
+
+  TestData.insert({ foo: 'bar'});
+
+  const pubId = RegisterPublication(function () {
+    this.autorun(function () {
+      TestData.findOne({ foo: 'bar' }, {
+        fields: { _id: 1},
+        sort: { _id: 1 }
+      });
+
+      const info = Kadira._getInfo();
+
+      const event = _.last(info.trace.events);
+      observeChangesEvent = _.first(event.nested);
+
+      return TestData.find({});
+    });
+  });
+
+  const client = GetMeteorClient();
+
+  const sub = SubscribeAndWait(client, pubId);
+
+  console.log(observeChangesEvent);
+
+  const { data } = observeChangesEvent;
+
+  test.equal(data.oplog, false);
+  test.equal(data.func, 'observeChanges');
+  test.equal(data.noOplogCode, 'TRACKER_ACTIVE');
+
+  sub.stop();
+  CloseClient(client);
+
+  done();
+});
+
 Tinytest.add(
   'CheckForOplog - OplogCheck.env - MONGO_OPLOG_URL exists',
   function (test) {
@@ -238,42 +279,6 @@ Tinytest.addAsync(
     });
   }
 );
-
-Tinytest.add('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', function (test) {
-  CleanTestData();
-
-  let observeChangesEvent;
-
-  TestData.insert({ foo: 'bar'});
-
-  const pubId = RegisterPublication(function () {
-    this.autorun(function () {
-      TestData.findOne({ foo: 'bar' }, {
-        fields: { _id: 1},
-        sort: { _id: 1 }
-      });
-
-      const info = Kadira._getInfo();
-
-      const event = _.last(info.trace.events);
-      observeChangesEvent = _.first(event.nested);
-
-      return TestData.find({});
-    });
-  });
-
-  const client = GetMeteorClient();
-
-  const sub = SubscribeAndWait(client, pubId);
-
-  sub.stop();
-  CloseClient(client);
-
-  console.log(observeChangesEvent);
-
-  test.equal(observeChangesEvent.data.func, 'observeChanges');
-  test.equal(observeChangesEvent.data.noOplogCode, 'TRACKER_ACTIVE');
-});
 
 function WithMongoOplogUrl (fn) {
   process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd';
