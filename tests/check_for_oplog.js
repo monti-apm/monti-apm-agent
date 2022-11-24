@@ -244,6 +244,42 @@ Tinytest.addAsync(
   }
 );
 
+Tinytest.add('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', function (test){
+  CleanTestData();
+
+  let observeChangesEvent;
+
+  TestData.insert({ foo: 'bar'});
+
+  const pubId = RegisterPublication(function () {
+    this.autorun(function () {
+      TestData.findOne({ foo: 'bar' }, {
+        fields: { _id: 1},
+        sort: { _id: 1 }
+      });
+
+      const info = Kadira._getInfo();
+
+      const event = _.last(info.trace.events);
+      observeChangesEvent = _.first(event.nested);
+
+      return TestData.find({});
+    })
+  });
+
+  const client = GetMeteorClient();
+
+  const sub = SubscribeAndWait(client, pubId);
+
+  sub.stop();
+  CloseClient(client);
+
+  console.log(observeChangesEvent);
+
+  test.equal(observeChangesEvent.data.func, 'observeChanges');
+  test.equal(observeChangesEvent.data.noOplogCode, 'TRACKER_ACTIVE');
+})
+
 function WithMongoOplogUrl(fn) {
   process.env.MONGO_OPLOG_URL="mongodb://ssdsd";
   fn();

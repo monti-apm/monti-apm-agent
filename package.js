@@ -33,6 +33,7 @@ Package.onUse(function (api) {
 Package.onTest(function (api) {
   configurePackage(api, true);
   api.use([
+    'peerlibrary:reactive-publish',
     'tinytest',
     'test-helpers',
   ], ['client', 'server']);
