@@ -6,6 +6,15 @@ Tinytest.addAsync(
   function (test, done) {
     const monitor = new EventLoopMonitor(100);
     monitor.start();
+
+    setTimeout(() => {}, 10);
+    setTimeout(() => {}, 10);
+    setTimeout(() => {}, 10);
+    setTimeout(() => {}, 10);
+    setTimeout(() => {}, 10);
+    setTimeout(() => {}, 10);
+    setTimeout(() => {}, 10);
+
     Meteor.setTimeout(function () {
       const status = monitor.status();
 
