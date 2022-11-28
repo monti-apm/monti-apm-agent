@@ -12,6 +12,11 @@ Tinytest.addAsync(
       console.log(process.version);
       console.log(status);
 
+      console.log({
+        now1: Date.now(),
+        now2: monitor._now()
+      });
+
       test.isTrue(status.pctBlock > 0);
       test.isTrue(status.totalLag > 0);
       test.isTrue(status.elapsedTime > 0);
@@ -40,11 +45,13 @@ Tinytest.addAsync(
     monitor.start();
 
     console.log(process.version);
-    console.log(monitor.status());
 
     Meteor.setTimeout(function () {
+      console.log('before', monitor.status());
       test.isTrue(monitor.status().pctBlock > 0);
       monitor.stop();
+
+      console.log('after', monitor.status());
       test.isTrue(monitor.status().pctBlock === 0);
       done();
     }, 200);
