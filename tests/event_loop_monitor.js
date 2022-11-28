@@ -47,12 +47,14 @@ Tinytest.addAsync(
     console.log(process.version);
 
     Meteor.setTimeout(function () {
-      console.log('before', monitor.status());
-      test.isTrue(monitor.status().pctBlock > 0);
+      let status = monitor.status();
+      console.log('before', status);
+      test.isTrue(status.pctBlock > 0);
       monitor.stop();
 
-      console.log('after', monitor.status());
-      test.isTrue(monitor.status().pctBlock === 0);
+      status = monitor.status();
+      console.log('after', status);
+      test.isTrue(status.pctBlock === 0);
       done();
     }, 200);
   }
