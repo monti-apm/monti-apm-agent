@@ -9,6 +9,9 @@ Tinytest.addAsync(
     Meteor.setTimeout(function () {
       const status = monitor.status();
 
+      console.log(process.version);
+      console.log(status);
+
       test.isTrue(status.pctBlock > 0);
       test.isTrue(status.totalLag > 0);
       test.isTrue(status.elapsedTime > 0);
@@ -35,6 +38,9 @@ Tinytest.addAsync(
   function (test, done) {
     let monitor = new EventLoopMonitor(100);
     monitor.start();
+
+    console.log(process.version);
+    console.log(monitor.status());
 
     Meteor.setTimeout(function () {
       test.isTrue(monitor.status().pctBlock > 0);
