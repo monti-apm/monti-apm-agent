@@ -40,6 +40,7 @@ jobs:
         run: |
           curl https://install.meteor.com | /bin/sh
           npm i -g @zodern/mtest
+          meteor npm install
 
       - name: Run Tests
         run: |
@@ -47,4 +48,4 @@ jobs:
           export NODE_TLS_REJECT_UNAUTHORIZED=0
 
           # Retry tests since some of them are flaky
-          mtest --package ./ --once ${{ matrix.meteorRelease }} || (sleep 5 && mtest --package ./ --once ${{ matrix.meteorRelease }}) 
+          mtest --package ./ --once ${{ matrix.meteorRelease }} || (sleep 5 && mtest --package ./ --once ${{ matrix.meteorRelease }})
