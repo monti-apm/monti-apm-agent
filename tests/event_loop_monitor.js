@@ -7,13 +7,10 @@ Tinytest.addAsync(
     const monitor = new EventLoopMonitor(100);
     monitor.start();
 
-    setTimeout(() => {}, 10);
-    setTimeout(() => {}, 10);
-    setTimeout(() => {}, 10);
-    setTimeout(() => {}, 10);
-    setTimeout(() => {}, 10);
-    setTimeout(() => {}, 10);
-    setTimeout(() => {}, 10);
+    // Saturate the event loop so that we can detect lag.
+    for ( let i = 0; i < 10000; i++ ) {
+      setTimeout(() => {}, 99);
+    }
 
     Meteor.setTimeout(function () {
       const status = monitor.status();
@@ -54,6 +51,11 @@ Tinytest.addAsync(
     monitor.start();
 
     console.log(process.version);
+
+    // Saturate the event loop so that we can detect lag.
+    for ( let i = 0; i < 10000; i++ ) {
+      setTimeout(() => {}, 99);
+    }
 
     Meteor.setTimeout(function () {
       let status = monitor.status();
