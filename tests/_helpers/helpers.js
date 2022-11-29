@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { DDP } from 'meteor/ddp';
 const Future = Npm.require('fibers/future');
+import sinon from 'sinon';
 
 GetMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
@@ -157,3 +158,19 @@ WithDocCacheGetSize = function (fn, patchedSize) {
 };
 
 export const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => parseInt(num, 10));
+
+export const withRoundedTime = (fn) => (test) => {
+  const date = new Date();
+
+  date.setSeconds(0,0);
+
+  const clock = sinon.useFakeTimers({ now: date.getTime(), shouldClearNativeTimers: true, shouldAdvanceTime: true });
+
+  fn(test);
+
+  clock.restore();
+};
+
+export function addTestWithRoundedTime (name, fn) {
+  Tinytest.add(name, withRoundedTime(fn));
+}
