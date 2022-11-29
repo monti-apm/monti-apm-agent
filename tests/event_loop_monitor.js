@@ -8,7 +8,7 @@ Tinytest.addAsync(
     monitor.start();
 
     // Saturate the event loop so that we can detect lag.
-    for ( let i = 0; i < 10000; i++ ) {
+    for ( let i = 0; i < 100000; i++ ) {
       setTimeout(() => {}, 99);
     }
 
@@ -53,7 +53,7 @@ Tinytest.addAsync(
     console.log(process.version);
 
     // Saturate the event loop so that we can detect lag.
-    for ( let i = 0; i < 10000; i++ ) {
+    for ( let i = 0; i < 100000; i++ ) {
       setTimeout(() => {}, 99);
     }
 
