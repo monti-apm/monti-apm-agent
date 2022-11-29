@@ -14,7 +14,7 @@
     "eslint": "^8.6.0",
     "eslint-config-es": "^0.8.12",
     "eslint-plugin-babel": "^5.3.1",
-    "sinon": "^7.5.0"
+    "sinon": "^5.1.1"
   },
   "dependencies": {},
   "volta": {
