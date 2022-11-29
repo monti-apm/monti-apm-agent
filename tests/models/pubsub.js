@@ -516,18 +516,32 @@ Tinytest.add(
   'Models - PubSub - Observers - liveChangedDocuments',
   function (test) {
     CleanTestData();
+
     let client = GetMeteorClient();
+
     // This will create two observers
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
+
     Wait(50);
+
     let h1 = SubscribeAndWait(client, 'tinytest-data-random');
     let h2 = SubscribeAndWait(client, 'tinytest-data-random');
+
     Wait(100);
-    TestData.update({}, {$set: {kk: 20}}, {multi: true});
+
+    console.log(TestData.update({}, {$set: {kk: 20}}, {multi: true}));
+
     Wait(50);
+
     let payload = GetPubSubPayload();
+
+    if (!payload[0].pubs['tinytest-data-random']) {
+      console.log(JSON.stringify(payload, null, 2));
+    }
+
     test.equal(payload[0].pubs['tinytest-data-random'].liveChangedDocuments, 4);
+
     CloseClient(client);
   }
 );
