@@ -133,11 +133,27 @@ Tinytest.addAsync(
   })
 );
 
+Tinytest.addAsync('Errors - client error - disable error tracking', testWithClientErrorTrackingDisabled(function (test, done) {
+  let hasBeenCalled = false;
+
+  hijackSendErrorOnce(function (err) {
+    console.log(err);
+
+    hasBeenCalled = true;
+  });
+
+  Kadira.trackError('error-message', { subType: 'job' });
+
+  test.isFalse(hasBeenCalled);
+
+  done();
+}));
+
 function hijackSendErrorOnce (sendError) {
-  const origional = Kadira.errors.sendError;
+  const original = Kadira.errors.sendError;
   Kadira.errors.sendError = function () {
     sendError.apply(Kadira.errors, arguments);
-    Kadira.errors.sendError = origional;
+    Kadira.errors.sendError = original;
   };
 }
 
@@ -150,6 +166,22 @@ function TestWithErrorTracking (testFunction) {
     testFunction(test, () => {
       Kadira.options.appId = appId;
       _resetErrorTracking(status);
+      done();
+    });
+  };
+}
+
+function testWithClientErrorTrackingDisabled (testFn) {
+  return function (test, done) {
+    let appId = Kadira.options.appId;
+
+    Kadira.options.appId = 'app';
+
+    Kadira.disableClientErrorTracking();
+
+    testFn(test, () => {
+      Kadira.options.appId = appId;
+      Kadira.enableClientErrorTracking();
       done();
     });
   };
