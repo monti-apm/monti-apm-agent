@@ -181,7 +181,11 @@ Tinytest.add(
     Kadira.tracer.event(traceInfo, 'db');
     Kadira.tracer.eventEnd(traceInfo, eventId);
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
+
+    console.log(JSON.stringify({ traceInfo }, null, 2));
+
     cleanTrace(traceInfo);
+
     let expected = {
       _id: 'session-id::the-id',
       id: 'the-id',

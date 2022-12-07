@@ -157,3 +157,21 @@ WithDocCacheGetSize = function (fn, patchedSize) {
 };
 
 export const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => parseInt(num, 10));
+
+export const withRoundedTime = (fn) => (test) => {
+  const date = new Date();
+  date.setSeconds(0,0);
+  const timestamp = date.getTime();
+
+  const old = Date.now;
+
+  Date.now = () => timestamp;
+
+  fn(test);
+
+  Date.now = old;
+};
+
+export function addTestWithRoundedTime (name, fn) {
+  Tinytest.add(name, withRoundedTime(fn));
+}
