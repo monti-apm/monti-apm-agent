@@ -1,6 +1,9 @@
 name: Test
-on: [push, pull_request]
-
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -47,4 +50,4 @@ jobs:
           export NODE_TLS_REJECT_UNAUTHORIZED=0
 
           # Retry tests since some of them are flaky
-          mtest --package ./ --once ${{ matrix.meteorRelease }} || (sleep 5 && mtest --package ./ --once ${{ matrix.meteorRelease }}) 
+          mtest --package ./ --once ${{ matrix.meteorRelease }} || (sleep 5 && mtest --package ./ --once ${{ matrix.meteorRelease }})

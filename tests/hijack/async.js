@@ -53,3 +53,35 @@ Tinytest.add(
     CleanTestData();
   }
 );
+
+
+Tinytest.add(
+  'Async - end event on throwInto',
+  function (test) {
+    const methodId = RegisterMethod(function () {
+      try {
+        Promise.await(
+          new Promise((resolve, reject) => {
+            setTimeout(() => {
+              reject(new Error('Fake Error'));
+            }, 100);
+          }),
+        );
+      } catch (err) {
+        return Kadira._getInfo();
+      }
+    });
+
+
+    let client = GetMeteorClient();
+    let result = client.call(methodId);
+
+    const events = result.trace.events.reduce((acc, [type, duration]) => {
+      acc[type] = duration;
+      return acc;
+    }, {});
+
+    test.isTrue(events.compute > 0);
+    test.isTrue(events.async >= 100 && events.async <= 102);
+  }
+);
