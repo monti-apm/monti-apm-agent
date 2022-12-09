@@ -150,10 +150,10 @@ Tinytest.addAsync(
 // }));
 
 function hijackSendErrorOnce (sendError) {
-  const original = Kadira.errors.sendError;
+  const __originalSendError = Kadira.errors.sendError;
   Kadira.errors.sendError = function () {
     sendError.apply(Kadira.errors, arguments);
-    Kadira.errors.sendError = original;
+    Kadira.errors.sendError = __originalSendError;
   };
 }
 
