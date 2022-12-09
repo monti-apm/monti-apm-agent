@@ -173,6 +173,7 @@ function TestWithErrorTracking (testFunction) {
 
 function testWithClientErrorTrackingDisabled (testFn) {
   return function (test, done) {
+    let status = Kadira.options.enableErrorTracking;
     let appId = Kadira.options.appId;
 
     Kadira.options.appId = 'app';
@@ -181,7 +182,9 @@ function testWithClientErrorTrackingDisabled (testFn) {
 
     testFn(test, () => {
       Kadira.options.appId = appId;
-      Kadira.enableErrorTracking();
+      if (status) {
+        Kadira.enableErrorTracking();
+      }
       done();
     });
   };
