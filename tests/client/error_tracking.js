@@ -177,11 +177,11 @@ function testWithClientErrorTrackingDisabled (testFn) {
 
     Kadira.options.appId = 'app';
 
-    Kadira.disableClientErrorTracking();
+    Kadira.disableErrorTracking();
 
     testFn(test, () => {
       Kadira.options.appId = appId;
-      Kadira.enableClientErrorTracking();
+      Kadira.enableErrorTracking();
       done();
     });
   };

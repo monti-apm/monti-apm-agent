@@ -1,10 +1,10 @@
 import { Meteor } from 'meteor/meteor';
 import { EventLoopMonitor } from '../lib/event_loop_monitor';
-import crypto from 'crypto';
 
-function blockingOperation () {
-  const salt = crypto.randomBytes(128).toString('base64');
-  crypto.pbkdf2Sync('myPassword', salt, 10000, 512, 'sha512');
+function blockEventLoop () {
+  let start = Date.now();
+  // eslint-disable-next-line no-empty
+  while (Date.now() - start < 100) {}
 }
 
 Tinytest.addAsync(
@@ -14,9 +14,7 @@ Tinytest.addAsync(
     monitor.start();
 
     // Saturate the event loop so that we can detect lag.
-    for ( let i = 0; i < 5; i++ ) {
-      blockingOperation();
-    }
+    blockEventLoop();
 
     Meteor.setTimeout(function () {
       const status = monitor.status();
@@ -50,9 +48,7 @@ Tinytest.addAsync(
 
 
     // Saturate the event loop so that we can detect lag.
-    for ( let i = 0; i < 5; i++ ) {
-      blockingOperation();
-    }
+    blockEventLoop();
 
     Meteor.setTimeout(function () {
       let status = monitor.status();

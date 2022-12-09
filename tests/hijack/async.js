@@ -68,6 +68,9 @@ Tinytest.add(
           }),
         );
       } catch (err) {
+        const start = Date.now();
+        // eslint-disable-next-line no-empty
+        while (Date.now() - start < 100) {}
         return Kadira._getInfo();
       }
     });
@@ -80,6 +83,9 @@ Tinytest.add(
       acc[type] = duration;
       return acc;
     }, {});
+
+    console.log('compute', events.compute);
+    console.log('async', events.async);
 
     test.isTrue(events.compute > 0);
     test.isTrue(events.async >= 100 && events.async <= 102);
