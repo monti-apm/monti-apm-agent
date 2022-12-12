@@ -133,21 +133,21 @@ Tinytest.addAsync(
   })
 );
 
-// Tinytest.addAsync('Errors - client error - disable error tracking', testWithClientErrorTrackingDisabled(function (test, done) {
-//   let hasBeenCalled = false;
-//
-//   hijackSendErrorOnce(function (err) {
-//     console.log(err);
-//
-//     hasBeenCalled = true;
-//   });
-//
-//   Kadira.trackError('error-message', { subType: 'job' });
-//
-//   test.isFalse(hasBeenCalled);
-//
-//   done();
-// }));
+Tinytest.addAsync('Errors - client error - disable error tracking', testWithClientErrorTrackingDisabled(function (test, done) {
+  let hasBeenCalled = false;
+
+  hijackSendErrorOnce(function (err) {
+    console.log(err);
+
+    hasBeenCalled = true;
+  });
+
+  Kadira.trackError('error-message', { subType: 'job' });
+
+  test.isFalse(hasBeenCalled);
+
+  done();
+}));
 
 function hijackSendErrorOnce (sendError) {
   const __originalSendError = Kadira.errors.sendError;
