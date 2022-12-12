@@ -118,7 +118,14 @@ SubscribeAndWait = function (client, name, args) {
 CompareNear = function (v1, v2, maxDifference) {
   maxDifference = maxDifference || 30;
   let diff = Math.abs(v1 - v2);
-  return diff < maxDifference;
+
+  const isNear = diff < maxDifference;
+
+  if (!isNear) {
+    console.log(`Expected ${v1} to be near ${v2}, with a max difference of ${maxDifference}`);
+  }
+
+  return isNear;
 };
 
 CloseClient = function (client) {
