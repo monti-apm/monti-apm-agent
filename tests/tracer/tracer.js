@@ -179,6 +179,7 @@ Tinytest.add(
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
     let eventId = Kadira.tracer.event(traceInfo, 'db');
     Kadira.tracer.event(traceInfo, 'db');
+    Wait(20);
     Kadira.tracer.eventEnd(traceInfo, eventId);
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
 
