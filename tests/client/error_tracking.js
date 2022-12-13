@@ -136,9 +136,7 @@ Tinytest.addAsync(
 Tinytest.addAsync('Errors - client error - disable error tracking', testWithClientErrorTrackingDisabled(function (test, done) {
   let hasBeenCalled = false;
 
-  hijackSendErrorOnce(function (err) {
-    console.log(err);
-
+  hijackSendErrorOnce(function () {
     hasBeenCalled = true;
   });
 
