@@ -123,6 +123,7 @@ function configurePackage (api, isTesting) {
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
   api.use('zodern:meteor-package-versions@0.2.0');
+  api.use('zodern:types@1.0.9');
 
   api.use([
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',
@@ -205,4 +206,7 @@ function configurePackage (api, isTesting) {
     'lib/common/default_error_filters.js',
     'lib/common/send.js'
   ], ['client', 'server']);
+
+
+  api.addAssets('types.d.ts', 'server');
 }
