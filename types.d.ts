@@ -1,7 +1,29 @@
-type MontiEvent = {}
+type MontiEvent = any
+
+type ConnectOptions = {
+    enableErrorTracking?: boolean
+    endpoint?: string
+    hostname?: string
+    uploadSourceMaps?: boolean
+    recordIPAddress?: boolean
+    eventStackTrace?: boolean
+    disableNtp?: boolean
+    stalledTimeout?: number
+}
+
+type TraceInfo = {
+    type?: string
+    name?: string
+}
+
+interface Tracer {
+    addFilter(filterFunction: (eventType: string, data: any, info: TraceInfo) => any): void
+}
 
 interface Kadira {
-    connect: (endpoint: string, appId: string, appSecret: string) => void;
+    tracer: Tracer
+
+    connect: (appId: string, appSecret: string, options?: ConnectOptions) => void;
 
     startContinuousProfiling: () => void;
     enableErrorTracking: () => void;
