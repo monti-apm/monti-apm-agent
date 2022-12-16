@@ -16,41 +16,31 @@ type TraceInfo = {
     name?: string
 }
 
-interface Tracer {
-    addFilter(filterFunction: (eventType: string, data: any, info: TraceInfo) => any): void
+export namespace Tracer {
+    function addFilter(filterFunction: (eventType: string, data: any, info: TraceInfo) => any): void
 }
 
-interface Kadira {
-    tracer: Tracer
+export namespace Monti {
+    var tracer: typeof Tracer
 
-    connect: (appId: string, appSecret: string, options?: ConnectOptions) => void;
+    function connect(appId: string, appSecret: string, options?: ConnectOptions): void;
 
-    startContinuousProfiling: () => void;
-    enableErrorTracking: () => void;
-    disableErrorTracking: () => void;
+    function startContinuousProfiling(): void;
+    function enableErrorTracking(): void;
+    function disableErrorTracking(): void;
 
-    trackError: (error: Error, options: any) => void;
+    function trackError(error: Error, options?: any): void;
 
-    ignoreErrorTracking: (error: Error) => void;
+    function ignoreErrorTracking(error: Error): void;
 
-    startEvent: (name: string, data: any) => MontiEvent | false;
-    endEvent: (event: MontiEvent, data: any) => void;
+    function startEvent(name: string, data?: any): MontiEvent | false;
+    function endEvent(event: MontiEvent, data?: any): void;
 }
+
+declare var MontiNamespace: typeof Monti
 
 declare global {
-    var Kadira: Kadira;
-    var Monti: Kadira;
-
-    interface Window {
-        Kadira: Kadira;
-        Monti: Kadira;
-    }
-
-    interface Global {
-        Kadira: Kadira;
-        Monti: Kadira;
-    }
+    var Monti: typeof MontiNamespace
+    var Kadira: typeof MontiNamespace
 }
 
-
-export {}
