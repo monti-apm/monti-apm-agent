@@ -1,4 +1,7 @@
 Tinytest.addAsync('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', function (test, done) {
+  const old = process.env.MONGO_OPLOG_URL;
+  process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd';
+
   CleanTestData();
 
   let observeChangesEvent;
@@ -34,6 +37,7 @@ Tinytest.addAsync('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', f
   sub.stop();
   CloseClient(client);
 
+  process.env.MONGO_OPLOG_URL = old;
   done();
 });
 
