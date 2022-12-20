@@ -1,23 +1,32 @@
 type MontiEvent = any
+type KadiraInfo = any
 
 type ConnectOptions = {
     enableErrorTracking?: boolean
     endpoint?: string
     hostname?: string
     uploadSourceMaps?: boolean
-    recordIPAddress?: boolean
+    recordIPAddress?: string
     eventStackTrace?: boolean
     disableNtp?: boolean
     stalledTimeout?: number
 }
 
-type TraceInfo = {
+type TrackErrorOptions = {
     type?: string
-    name?: string
+    subType?: string
+    kadiraInfo?: KadiraInfo
 }
 
+type TraceInfo = {
+    type: string
+    name: string
+}
+
+type EventType = 'start' | 'end' | 'email' | 'db' | 'http' | 'fs' | 'compute' | 'custom'
+
 export namespace Tracer {
-    function addFilter(filterFunction: (eventType: string, data: any, info: TraceInfo) => any): void
+    function addFilter(filterFunction: (eventType: EventType, data: Record<string, any>, info: TraceInfo) => any): void
 }
 
 export namespace Monti {
@@ -29,12 +38,12 @@ export namespace Monti {
     function enableErrorTracking(): void;
     function disableErrorTracking(): void;
 
-    function trackError(error: Error, options?: any): void;
+    function trackError(error: Error, options?: TrackErrorOptions): void;
 
     function ignoreErrorTracking(error: Error): void;
 
-    function startEvent(name: string, data?: any): MontiEvent | false;
-    function endEvent(event: MontiEvent, data?: any): void;
+    function startEvent(name: string, data?: Record<string, any>): MontiEvent | false;
+    function endEvent(event: MontiEvent | false, data?: any): void;
 }
 
 declare var MontiNamespace: typeof Monti

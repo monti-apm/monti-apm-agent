@@ -206,7 +206,4 @@ function configurePackage (api, isTesting) {
     'lib/common/default_error_filters.js',
     'lib/common/send.js'
   ], ['client', 'server']);
-
-
-  api.addAssets('types.d.ts', 'server');
 }
