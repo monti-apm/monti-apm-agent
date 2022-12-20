@@ -1,7 +1,7 @@
-type MontiEvent = any
-type KadiraInfo = any
+export type MontiEvent = any
+export type KadiraInfo = any
 
-type ConnectOptions = {
+export type ConnectOptions = {
     enableErrorTracking?: boolean
     endpoint?: string
     hostname?: string
@@ -12,18 +12,18 @@ type ConnectOptions = {
     stalledTimeout?: number
 }
 
-type TrackErrorOptions = {
+export type TrackErrorOptions = {
     type?: string
     subType?: string
     kadiraInfo?: KadiraInfo
 }
 
-type TraceInfo = {
+export type TraceInfo = {
     type: string
     name: string
 }
 
-type EventType = 'start' | 'end' | 'email' | 'db' | 'http' | 'fs' | 'compute' | 'custom'
+export type EventType = 'start' | 'end' | 'email' | 'db' | 'http' | 'fs' | 'compute' | 'custom'
 
 export namespace Tracer {
     function addFilter(filterFunction: (eventType: EventType, data: Record<string, any>, info: TraceInfo) => any): void
