@@ -135,15 +135,13 @@ Tinytest.add(
     let client = GetMeteorClient();
     let Future = Npm.require('fibers/future');
     let f = new Future();
-    console.time('start');
     let h1 = SubscribeAndWait(client, 'tinytest-data');
-    console.timeEnd('start');
     Wait(100);
     h1.stop();
     Wait(100);
     let metrics = FindMetricsForPub('tinytest-data');
 
-    test.isTrue(CompareNear(metrics.observerLifetime, 100, 40));
+    test.isTrue(CompareNear(metrics.observerLifetime, 100, 60));
     CloseClient(client);
   }
 );
