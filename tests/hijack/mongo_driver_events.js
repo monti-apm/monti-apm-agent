@@ -30,11 +30,15 @@ Tinytest.addAsync(
     resetMongoDriverStats();
 
     const promises = [];
+    console.time('count')
+    let raw = TestData.rawCollection();
+    let countFn = raw.estimatedDocumentCount.bind(raw) || raw.count.bind(raw);
     for (let i = 0; i < 200; i++) {
-      promises.push(TestData.rawCollection().count());
+      promises.push(countFn());
     }
-
+    
     await Promise.all(promises);
+    console.timeEnd('count')
 
     const stats = getMongoDriverStats();
 
@@ -44,7 +48,7 @@ Tinytest.addAsync(
     checkRange(stats.checkoutTime, 0, 100, 20000);
     checkRange(stats.maxCheckoutTime, 0, 10, 200);
     checkRange(stats.pending, 0, 0, 200);
-    checkRange(stats.checkedOut, 0, 0, 1);
+    checkRange(stats.checkedOut, 0, 0, 15);
     checkRange(stats.created, 0, 1, 100);
     done();
   }
