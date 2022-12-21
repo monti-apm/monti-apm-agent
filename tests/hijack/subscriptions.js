@@ -141,7 +141,7 @@ Tinytest.add(
     Wait(100);
     let metrics = FindMetricsForPub('tinytest-data');
 
-    test.isTrue(CompareNear(metrics.observerLifetime, 100));
+    test.isTrue(CompareNear(metrics.observerLifetime, 100, 40));
     CloseClient(client);
   }
 );
