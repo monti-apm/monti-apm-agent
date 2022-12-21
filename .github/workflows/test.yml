@@ -30,7 +30,7 @@ jobs:
           - '--release 2.6.1'
           - '--release 2.7.3'
           - '--release 2.8.2'
-          - '--release 2.9'
+          - '--release 2.9.0'
           # Latest version
           -
     steps:
