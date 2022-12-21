@@ -68,11 +68,8 @@ Tinytest.add(
           }),
         );
       } catch (err) {
-        TestData.find({}).fetch();
+        TestData.find({});
 
-        const start = Date.now();
-        // eslint-disable-next-line no-empty
-        while (Date.now() - start < 100) {}
         return Kadira._getInfo();
       }
     });
@@ -80,18 +77,20 @@ Tinytest.add(
 
     let client = GetMeteorClient();
     let result = client.call(methodId);
+    const events = result.trace.events.filter(event => event[0] !== 'compute');
 
-    const events = result.trace.events.reduce((acc, [type, duration]) => {
-      acc[type] = duration;
-      return acc;
-    }, {});
+    // remove complete event
+    events.pop();
 
-    console.log('db', events.db);
-    console.log('compute', events.compute);
-    console.log('async', events.async);
+    const dbEvent = events.pop();
+    const asyncEvent = events.pop();
 
-    test.isTrue(events.db > 0);
-    test.isTrue(events.compute > 99);
-    test.isTrue(events.async >= 100 && events.async <= 102);
+    // If the async event was not ended in throwInto,
+    // the db event will be nested in the async event
+    test.equal(asyncEvent[0], 'async');
+    // If there are nested events or forcedEnd is true, then [3] will be an object
+    test.equal(asyncEvent[3], undefined);
+
+    test.equal(dbEvent[0], 'db');
   }
 );
