@@ -1,6 +1,7 @@
 ## [Monti APM - Performance Monitoring for Meteor](https://montiapm.com)
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/monti-apm/monti-apm-agent/Test?style=flat-square)
+![Github Workflow Status](https://img.shields.io/github/actions/workflow/status/monti-apm/monti-apm-agent/test.yml?branch=master&style=flat-square)
+
 
 [![Monti APM - Performance Monitoring for Meteor](https://docs.montiapm.com/images/overview-2.png)](https://montiapm.com)
 
