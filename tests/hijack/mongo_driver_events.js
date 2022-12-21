@@ -32,7 +32,9 @@ Tinytest.addAsync(
     const promises = [];
     console.time('count')
     let raw = TestData.rawCollection();
-    let countFn = raw.estimatedDocumentCount.bind(raw) || raw.count.bind(raw);
+    let countFn = raw.estimatedDocumentCount ?
+      raw.estimatedDocumentCount.bind(raw) :
+      raw.count.bind(raw);
     for (let i = 0; i < 200; i++) {
       promises.push(countFn());
     }
