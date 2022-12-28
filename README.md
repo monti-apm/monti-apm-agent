@@ -1,6 +1,7 @@
 ## [Monti APM - Performance Monitoring for Meteor](https://montiapm.com)
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/monti-apm/monti-apm-agent/Test?style=flat-square)
+![Github Workflow Status](https://img.shields.io/github/actions/workflow/status/monti-apm/monti-apm-agent/test.yml?branch=master&style=flat-square)
+
 
 [![Monti APM - Performance Monitoring for Meteor](https://docs.montiapm.com/images/overview-2.png)](https://montiapm.com)
 
@@ -94,6 +95,7 @@ You should use the same method that you used to give the agent the app id and se
 | appId               | APP_ID                        | none                        |                                                                                                                                                                                                         |
 | appSecret           | APP_SECRET                    | none                        |                                                                                                                                                                                                         |
 | enableErrorTracking | OPTIONS_ENABLE_ERROR_TRACKING | true                        | Enable sending errors to Monti APM                                                                                                                                                                      |
+| disableClientErrorTracking | OPTIONS_DISABLE_CLIENT_ERROR_TRACKING | false        | Disable sending client errors to Monti APM                                                                                                                                                              |
 | endpoint            | OPTIONS_ENDPOINT              | https://engine.montiapm.com | Monti / Kadira engine url                                                                                                                                                                               |
 | hostname            | OPTIONS_HOSTNAME              | Server's hostname           | What the instance is named in Monti APM                                                                                                                                                                 |
 | uploadSourceMaps    | UPLOAD_SOURCE_MAPS            | true                        | Enables sending source maps to Monti APM to improve error stack traces                                                                                                                                  |
