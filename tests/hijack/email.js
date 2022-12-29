@@ -1,21 +1,31 @@
+import { TestHelpers } from '../_helpers/helpers';
+
 Tinytest.add(
   'Email - success',
   function (test) {
-    EnableTrackingMethods();
+    TestHelpers.enableTrackingMethods();
+
     const Email = Package['email'].Email;
-    let methodId = RegisterMethod(function () {
+
+    const methodId = TestHelpers.registerMethod(function () {
       Email.send({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
     });
-    let client = GetMeteorClient();
-    let result = client.call(methodId);
-    let events = GetLastMethodEvents([0]);
-    let expected = [
+
+    const client = TestHelpers.getMeteorClient();
+
+    client.call(methodId);
+
+    const events = TestHelpers.getLastMethodEvents([0]);
+
+    const expected = [
       ['start'],
       ['wait'],
       ['email'],
       ['complete']
     ];
+
     test.equal(events, expected);
-    CleanTestData();
+
+    TestHelpers.cleanTestData();
   }
 );
