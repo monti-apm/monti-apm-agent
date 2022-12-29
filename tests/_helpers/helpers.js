@@ -182,3 +182,20 @@ export const withRoundedTime = (fn) => (test) => {
 export function addTestWithRoundedTime (name, fn) {
   Tinytest.add(name, withRoundedTime(fn));
 }
+
+export const TestHelpers = {
+  getMeteorClient: GetMeteorClient,
+  registerMethod: RegisterMethod,
+  registerPublication: RegisterPublication,
+  enableTrackingMethods: EnableTrackingMethods,
+  getLastMethodEvents: GetLastMethodEvents,
+  getPubSubMetrics: GetPubSubMetrics,
+  findMetricsForPub: FindMetricsForPub,
+  getPubSubPayload: GetPubSubPayload,
+  wait: Wait,
+  cleanTestData: CleanTestData,
+  subscribeAndWait: SubscribeAndWait,
+  compareNear: CompareNear,
+  closeClient: CloseClient,
+  withDocCacheGetSize: WithDocCacheGetSize,
+};
