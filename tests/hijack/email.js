@@ -1,5 +1,5 @@
 import { TestHelpers } from '../_helpers/helpers';
-import { expect } from 'chai';
+const { expect } = require('chai');
 
 function sendTestEmailThroughMethod () {
   const Email = Package['email'].Email;
