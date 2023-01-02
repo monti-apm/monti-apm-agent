@@ -45,7 +45,7 @@ Tinytest.add(
 
     const events = TestHelpers.getLatestEventsFromMethodStore();
 
-    const emailEvent = events[2];
+    const emailEvent = events.find(e => e[0] === 'email');
     const data = emailEvent[3] || {};
 
     const nested = data.nested;
