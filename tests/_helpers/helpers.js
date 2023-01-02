@@ -184,6 +184,8 @@ export function addTestWithRoundedTime (name, fn) {
 }
 
 export const TestHelpers = {
+  methodStore: MethodStore,
+  getLatestEventsFromMethodStore: () => MethodStore[MethodStore.length - 1].events,
   getMeteorClient: GetMeteorClient,
   registerMethod: RegisterMethod,
   registerPublication: RegisterPublication,
@@ -198,4 +200,6 @@ export const TestHelpers = {
   compareNear: CompareNear,
   closeClient: CloseClient,
   withDocCacheGetSize: WithDocCacheGetSize,
+  withRoundedTime,
+  addTestWithRoundedTime,
 };
