@@ -24,6 +24,9 @@ function checkRange (value, disabledValue, min, max) {
   }
 }
 
+/**
+ * @flaky
+ */
 Tinytest.addAsync(
   'Mongo Driver Events - getMongoDriverStats',
   async function (test, done) {
@@ -37,7 +40,7 @@ Tinytest.addAsync(
     for (let i = 0; i < 200; i++) {
       promises.push(countFn());
     }
-    
+
     await Promise.all(promises);
 
     const stats = getMongoDriverStats();
