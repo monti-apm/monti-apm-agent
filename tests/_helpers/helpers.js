@@ -115,7 +115,7 @@ SubscribeAndWait = function (client, name, args) {
   }
 };
 
-CompareNear = function (v1, v2, maxDifference) {
+function compareNear (v1, v2, maxDifference) {
   maxDifference = maxDifference || 30;
   let diff = Math.abs(v1 - v2);
 
@@ -126,7 +126,7 @@ CompareNear = function (v1, v2, maxDifference) {
   }
 
   return isNear;
-};
+}
 
 CloseClient = function (client) {
   let sessionId = client._lastSessionId;
@@ -197,7 +197,7 @@ export const TestHelpers = {
   wait: Wait,
   cleanTestData: CleanTestData,
   subscribeAndWait: SubscribeAndWait,
-  compareNear: CompareNear,
+  compareNear,
   closeClient: CloseClient,
   withDocCacheGetSize: WithDocCacheGetSize,
   withRoundedTime,
