@@ -50,10 +50,10 @@ Tinytest.add(
 
     const nested = data.nested;
 
+    console.log(events);
+
     expect(emailEvent[0]).to.equal('email');
     expect(nested).to.be.undefined;
-
-    console.log(events);
 
     TestHelpers.cleanTestData();
   }
