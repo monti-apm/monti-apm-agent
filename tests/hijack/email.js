@@ -1,5 +1,4 @@
 import { TestHelpers } from '../_helpers/helpers';
-const { expect } = require('chai');
 
 function sendTestEmailThroughMethod () {
   const Email = Package['email'].Email;
@@ -38,7 +37,7 @@ Tinytest.add(
 
 Tinytest.add(
   'Email - nested ignore nested async call',
-  function () {
+  function (test) {
     TestHelpers.enableTrackingMethods();
 
     sendTestEmailThroughMethod();
@@ -50,8 +49,8 @@ Tinytest.add(
 
     const nested = data.nested;
 
-    expect(emailEvent[0]).to.equal('email');
-    expect(nested).to.be.undefined;
+    test.equal(emailEvent[0], 'email');
+    test.equal(typeof nested, 'undefined');
 
     TestHelpers.cleanTestData();
   }
