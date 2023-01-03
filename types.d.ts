@@ -6,20 +6,20 @@ export type ConnectOptions = {
     endpoint?: string
     hostname?: string
     uploadSourceMaps?: boolean
-    recordIPAddress?: string
+    recordIPAddress?: 'full' | 'anonymized' | 'none'
     eventStackTrace?: boolean
     disableNtp?: boolean
     stalledTimeout?: number
 }
 
 export type TrackErrorOptions = {
-    type?: string
+    type?: 'method' | 'client' | 'sub' | 'server-crash' | 'server-internal'
     subType?: string
     kadiraInfo?: KadiraInfo
 }
 
 export type TraceInfo = {
-    type: string
+    type: 'sub' | 'method' | 'http'
     name: string
 }
 
@@ -43,7 +43,7 @@ export namespace Monti {
     function ignoreErrorTracking(error: Error): void;
 
     function startEvent(name: string, data?: Record<string, any>): MontiEvent | false;
-    function endEvent(event: MontiEvent | false, data?: any): void;
+    function endEvent(event: MontiEvent | false, data?: Record<string, any>): void;
 }
 
 declare var MontiNamespace: typeof Monti
