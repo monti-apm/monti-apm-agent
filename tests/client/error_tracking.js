@@ -29,7 +29,7 @@ Tinytest.addAsync(
       test.equal(typeof error.appId, 'string');
       test.equal(typeof error.startTime, 'number');
       test.equal(typeof error.info, 'object');
-      test.equal(JSON.parse(error.stacks)[0].stack.includes('TestCase.func'), true);
+      test.equal(JSON.parse(error.stacks)[0].stack.includes('tinytest.js'), true);
 
       done();
     });
@@ -124,8 +124,7 @@ Tinytest.addAsync(
       test.equal(typeof err.appId, 'string');
       test.equal(typeof err.startTime, 'number');
       test.equal(typeof err.info, 'object');
-      console.log(JSON.parse(err.stacks)[0].stack);
-      test.equal(JSON.parse(err.stacks)[0].stack.includes('TestCase.func'), true);
+      test.equal(JSON.parse(err.stacks)[0].stack.includes('tinytest.js'), true);
 
       done();
     });
@@ -133,11 +132,25 @@ Tinytest.addAsync(
   })
 );
 
+Tinytest.addAsync('Errors - client error - disable error tracking', testWithClientErrorTrackingDisabled(function (test, done) {
+  let hasBeenCalled = false;
+
+  hijackSendErrorOnce(function () {
+    hasBeenCalled = true;
+  });
+
+  Kadira.trackError('error-message', { subType: 'job' });
+
+  test.isFalse(hasBeenCalled);
+
+  done();
+}));
+
 function hijackSendErrorOnce (sendError) {
-  const origional = Kadira.errors.sendError;
+  const __originalSendError = Kadira.errors.sendError;
   Kadira.errors.sendError = function () {
     sendError.apply(Kadira.errors, arguments);
-    Kadira.errors.sendError = origional;
+    Kadira.errors.sendError = __originalSendError;
   };
 }
 
@@ -150,6 +163,25 @@ function TestWithErrorTracking (testFunction) {
     testFunction(test, () => {
       Kadira.options.appId = appId;
       _resetErrorTracking(status);
+      done();
+    });
+  };
+}
+
+function testWithClientErrorTrackingDisabled (testFn) {
+  return function (test, done) {
+    let status = Kadira.options.enableErrorTracking;
+    let appId = Kadira.options.appId;
+
+    Kadira.options.appId = 'app';
+
+    Kadira.disableErrorTracking();
+
+    testFn(test, () => {
+      Kadira.options.appId = appId;
+      if (status) {
+        Kadira.enableErrorTracking();
+      }
       done();
     });
   };

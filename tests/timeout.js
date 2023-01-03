@@ -2,7 +2,7 @@ import { TimeoutManager } from '../lib/hijack/timeout_manager';
 import assert from 'assert';
 
 Tinytest.add(
-  'Method Timeout',
+  'Stalled - Method Timeout',
   function (test) {
     const oldTimeout = Kadira.options.stalledTimeout;
 
