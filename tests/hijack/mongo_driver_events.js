@@ -37,7 +37,7 @@ Tinytest.addAsync(
     for (let i = 0; i < 200; i++) {
       promises.push(countFn());
     }
-    
+
     await Promise.all(promises);
 
     const stats = getMongoDriverStats();
