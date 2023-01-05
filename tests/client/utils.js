@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
+import { getErrorStack } from '../../lib/client/utils';
 
 Tinytest.addAsync(
   'Client Side - Settings - publication',
