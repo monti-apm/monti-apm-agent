@@ -1,4 +1,4 @@
-import { Tracer } from '../tracer/tracer';
+import { Tracer } from '../../lib/tracer/tracer';
 
 Tinytest.add(
   'Tracer - Default filters - Tracer.stripSensitive - filter db',
