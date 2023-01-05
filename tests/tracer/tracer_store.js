@@ -206,14 +206,13 @@ Tinytest.add(
 Tinytest.add(
   'TracerStore - _handleErrors - single error',
   function (test) {
-    var ts = new TracerStore({archiveEvery: 20});
     let trace = {name: 'one',
       type: 'method',
       events: [
         ['start'],
         ['end', 0, {error: {message: 'ERROR_MESSAGE'}}]
       ]};
-    var ts = new TracerStore();
+    let ts = new TracerStore();
     ts._handleErrors(trace);
     test.equal(ts.traceArchive, [trace]);
   }
@@ -222,14 +221,13 @@ Tinytest.add(
 Tinytest.add(
   'TracerStore - _handleErrors - single error no data',
   function (test) {
-    var ts = new TracerStore({archiveEvery: 20});
     let trace = {name: 'one',
       type: 'method',
       events: [
         ['start'],
         ['end', 0]
       ]};
-    var ts = new TracerStore();
+    const ts = new TracerStore();
     ts._handleErrors(trace);
     test.equal(ts.traceArchive, []);
   }
