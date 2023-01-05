@@ -1,4 +1,5 @@
 import { _ } from 'meteor/underscore';
+import { Tracer } from '../../lib/tracer/tracer';
 
 let eventDefaults = {
   endAt: 0,
@@ -446,7 +447,7 @@ Tinytest.add(
   }
 );
 
-function startTrace (tracer) {
+function startTrace () {
   let ddpMessage = {
     id: 'the-id',
     msg: 'method',
