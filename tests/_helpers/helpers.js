@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { DDP } from 'meteor/ddp';
 const Future = Npm.require('fibers/future');
+import { MethodStore, TestData } from './globals';
 
 GetMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
@@ -86,7 +87,7 @@ Wait = function (time) {
 };
 
 CleanTestData = function () {
-  MethodStore = [];
+  MethodStore.length = 0;
   TestData.remove({});
   Kadira.models.pubsub.metricsByMinute;
   Kadira.models.pubsub.metricsByMinute = {};

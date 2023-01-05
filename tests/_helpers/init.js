@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
+import { MethodStore, TestData } from './globals';
 
 Kadira.connect('foo', 'bar', {enableErrorTracking: true});
 let http = Npm.require('http');

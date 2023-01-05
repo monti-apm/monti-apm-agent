@@ -1,3 +1,5 @@
+import { TestData } from './_helpers/globals';
+
 Tinytest.addAsync('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', function (test, done) {
   const old = process.env.MONGO_OPLOG_URL;
   process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd';

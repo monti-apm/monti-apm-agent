@@ -1,3 +1,4 @@
+import { TestData } from '../_helpers/globals';
 
 Tinytest.add(
   'User - not logged in',

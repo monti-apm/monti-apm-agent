@@ -1,7 +1,6 @@
-/* global model */
-
 import { EJSON } from 'meteor/ejson';
 import { MethodsModel } from '../../lib/models/methods';
+import { TestData } from '../_helpers/globals';
 
 Tinytest.add(
   'Models - Method - buildPayload simple',

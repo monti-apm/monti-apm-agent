@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import { TestData } from '../_helpers/globals';
 
 Tinytest.add(
   'Async - track with Meteor._wrapAsync',

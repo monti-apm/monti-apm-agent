@@ -1,3 +1,5 @@
+import { TestData } from '../_helpers/globals';
+
 Tinytest.add(
   'Database - insert',
   function (test) {
