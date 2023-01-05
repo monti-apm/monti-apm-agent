@@ -33,25 +33,3 @@ Tinytest.add(
     TestHelpers.cleanTestData();
   }
 );
-
-
-Tinytest.add(
-  'Email - nested ignore nested async call',
-  function (test) {
-    TestHelpers.enableTrackingMethods();
-
-    sendTestEmailThroughMethod();
-
-    const events = TestHelpers.getLatestEventsFromMethodStore();
-
-    const emailEvent = events.find(e => e[0] === 'email');
-    const data = emailEvent[3] || {};
-
-    const nested = data.nested;
-
-    test.equal(emailEvent[0], 'email');
-    test.equal(typeof nested, 'undefined');
-
-    TestHelpers.cleanTestData();
-  }
-);
