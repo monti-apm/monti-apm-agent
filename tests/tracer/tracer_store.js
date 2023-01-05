@@ -1,3 +1,5 @@
+import { TracerStore } from '../../lib/tracer/tracer_store';
+
 Tinytest.add(
   'TracerStore - ._getMean',
   function (test) {
