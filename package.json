@@ -17,6 +17,6 @@
   },
   "dependencies": {},
   "volta": {
-    "node": "14.21.1"
+    "node": "14.21.2"
   }
 }
