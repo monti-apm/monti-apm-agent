@@ -1,5 +1,6 @@
 import { TimeoutManager } from '../lib/hijack/timeout_manager';
 import assert from 'assert';
+import { GetMeteorClient, RegisterMethod } from './_helpers/helpers';
 
 Tinytest.add(
   'Stalled - Method Timeout',

@@ -8,6 +8,7 @@ env:
   es6: true
   node: true
 globals:
+  Meteor: readonly
   Tinytest: readonly
   Package: readonly
   Kadira: readonly

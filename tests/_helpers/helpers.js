@@ -4,12 +4,12 @@ import { DDP } from 'meteor/ddp';
 const Future = Npm.require('fibers/future');
 import { MethodStore, TestData } from './globals';
 
-GetMeteorClient = function (_url) {
+export const GetMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
   return DDP.connect(url, {retry: false});
 };
 
-RegisterMethod = function (F) {
+export const RegisterMethod = function (F) {
   const id = `test_${Random.id()}`;
   let methods = {};
   methods[id] = F;
@@ -17,13 +17,13 @@ RegisterMethod = function (F) {
   return id;
 };
 
-RegisterPublication = function (F) {
+export const RegisterPublication = function (F) {
   let id = `test_${Random.id()}`;
   Meteor.publish(id, F);
   return id;
 };
 
-EnableTrackingMethods = function () {
+export const EnableTrackingMethods = function () {
   // var original = Kadira.models.methods.processMethod;
   // Kadira.models.methods.processMethod = function(method) {
   //   MethodStore.push(method);
@@ -31,7 +31,7 @@ EnableTrackingMethods = function () {
   // };
 };
 
-GetLastMethodEvents = function (_indices) {
+export const GetLastMethodEvents = function (_indices) {
   if (MethodStore.length < 1) { return []; }
   let indices = _indices || [0];
   let events = MethodStore[MethodStore.length - 1].events;
@@ -53,7 +53,7 @@ GetLastMethodEvents = function (_indices) {
   }
 };
 
-GetPubSubMetrics = function () {
+export const GetPubSubMetrics = function () {
   let metricsArr = [];
   for (let dateId in Kadira.models.pubsub.metricsByMinute) {
     metricsArr.push(Kadira.models.pubsub.metricsByMinute[dateId]);
@@ -61,7 +61,7 @@ GetPubSubMetrics = function () {
   return metricsArr;
 };
 
-FindMetricsForPub = function (pubname) {
+export const FindMetricsForPub = function (pubname) {
   let metrics = GetPubSubMetrics();
   let candidates = [];
   for (let lc = 0; lc < metrics.length; lc++) {
@@ -74,11 +74,11 @@ FindMetricsForPub = function (pubname) {
   return candidates[candidates.length - 1];
 };
 
-GetPubSubPayload = function (detailInfoNeeded) {
+export const GetPubSubPayload = function (detailInfoNeeded) {
   return Kadira.models.pubsub.buildPayload(detailInfoNeeded).pubMetrics;
 };
 
-Wait = function (time) {
+export const Wait = function (time) {
   let f = new Future();
   Meteor.setTimeout(function () {
     f.return();
@@ -86,15 +86,14 @@ Wait = function (time) {
   f.wait();
 };
 
-CleanTestData = function () {
+export const CleanTestData = function () {
   MethodStore.length = 0;
   TestData.remove({});
-  Kadira.models.pubsub.metricsByMinute;
   Kadira.models.pubsub.metricsByMinute = {};
   Kadira.models.pubsub.subscriptions = {};
 };
 
-SubscribeAndWait = function (client, name, args) {
+export const SubscribeAndWait = function (client, name, args) {
   let f = new Future();
   var args = Array.prototype.splice.call(arguments, 1);
   args.push({
@@ -116,7 +115,7 @@ SubscribeAndWait = function (client, name, args) {
   }
 };
 
-function compareNear (v1, v2, maxDifference) {
+export function compareNear (v1, v2, maxDifference) {
   maxDifference = maxDifference || 30;
   let diff = Math.abs(v1 - v2);
 
@@ -129,7 +128,7 @@ function compareNear (v1, v2, maxDifference) {
   return isNear;
 }
 
-CloseClient = function (client) {
+export const CloseClient = function (client) {
   let sessionId = client._lastSessionId;
   client.disconnect();
   let f = new Future();
@@ -154,9 +153,13 @@ CloseClient = function (client) {
   return f.wait();
 };
 
-WithDocCacheGetSize = function (fn, patchedSize) {
+export const WithDocCacheGetSize = function (fn, patchedSize) {
   let original = Kadira.docSzCache.getSize;
-  Kadira.docSzCache.getSize = function () { return patchedSize; };
+
+  Kadira.docSzCache.getSize = function () {
+    return patchedSize;
+  };
+
   try {
     fn();
   } finally {
