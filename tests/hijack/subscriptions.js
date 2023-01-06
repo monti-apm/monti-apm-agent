@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
+import { TestHelpers } from '../_helpers/helpers';
 
 Tinytest.add(
   'Subscriptions - Sub/Unsub - subscribe only',
@@ -54,7 +55,7 @@ Tinytest.add(
     });
     let h1 = SubscribeAndWait(client, pubName);
     let metrics = FindMetricsForPub(pubName);
-    test.isTrue(CompareNear(metrics.resTime, 200, 100));
+    test.isTrue(TestHelpers.compareNear(metrics.resTime, 200, 100));
     h1.stop();
     CloseClient(client);
   }
@@ -100,7 +101,7 @@ Tinytest.add(
     h1.stop();
     CloseClient(client);
     let metrics = FindMetricsForPub('tinytest-data');
-    test.isTrue(CompareNear(metrics.lifeTime, 50, 75));
+    test.isTrue(TestHelpers.compareNear(metrics.lifeTime, 50, 75));
   }
 );
 
@@ -127,22 +128,28 @@ Tinytest.add(
 // //   }
 // // );
 
+/**
+ * @flaky
+ */
 Tinytest.add(
   'Subscriptions - ObserverLifetime - sub',
   function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = GetMeteorClient();
-    let Future = Npm.require('fibers/future');
-    let f = new Future();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    Wait(100);
-    h1.stop();
-    Wait(100);
-    let metrics = FindMetricsForPub('tinytest-data');
+    TestHelpers.cleanTestData();
 
-    test.isTrue(CompareNear(metrics.observerLifetime, 100, 60));
-    CloseClient(client);
+    TestHelpers.enableTrackingMethods();
+
+    let client = TestHelpers.getMeteorClient();
+
+    let h1 = TestHelpers.subscribeAndWait(client, 'tinytest-data');
+
+    TestHelpers.wait(100);
+    h1.stop();
+    TestHelpers.wait(100);
+
+    let metrics = TestHelpers.findMetricsForPub('tinytest-data');
+
+    test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 100, 60));
+    TestHelpers.closeClient(client);
   }
 );
 

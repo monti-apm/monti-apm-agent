@@ -180,10 +180,9 @@ Tinytest.add(
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
     let eventId = Kadira.tracer.event(traceInfo, 'db');
     Kadira.tracer.event(traceInfo, 'db');
+    Wait(20);
     Kadira.tracer.eventEnd(traceInfo, eventId);
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
-
-    console.log(JSON.stringify({ traceInfo }, null, 2));
 
     cleanTrace(traceInfo);
 
@@ -195,7 +194,7 @@ Tinytest.add(
       name: 'method-name',
       events: [
         {type: 'start', data: {abc: 100}},
-        {type: 'db', nested: [{ type: 'db', endAt: null }]},
+        {type: 'db', endAt: 10, nested: [{ type: 'db', endAt: null }]},
         {type: 'end', data: {abc: 200}}
       ]
     };
