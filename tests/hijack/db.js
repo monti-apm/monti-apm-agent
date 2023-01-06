@@ -61,13 +61,11 @@ Tinytest.add(
       try {
         TestData.insert({_id: 'aa'});
         TestData.insert({_id: 'aa', aa: 10});
-      } catch (ex) {
-
-      }
+      } catch (ex) { /* empty */ }
       return 'insert';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     if (events && events[3] && events[3][2] && events[3][2].err) {
       events[3][2].err = events[3][2].err.indexOf('E11000') >= 0 ? 'E11000' : null;
@@ -94,7 +92,7 @@ Tinytest.add(
       return 'update';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
@@ -117,7 +115,7 @@ Tinytest.add(
       return 'remove';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
@@ -215,7 +213,7 @@ Tinytest.add(
       return 'upsert';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
@@ -239,7 +237,7 @@ Tinytest.add(
       return 'upsert';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
@@ -264,7 +262,7 @@ Tinytest.add(
       return 'indexes';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
@@ -464,7 +462,7 @@ Tinytest.add(
         }
       });
       let handle2 = TestData.find({}).observeChanges({
-        added (id, fields) {
+        added () {
           // body
         }
       });

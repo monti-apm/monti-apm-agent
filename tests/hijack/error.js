@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { ErrorModel } from '../../lib/models/errors';
+import { GetMeteorClient, RegisterMethod, RegisterPublication } from '../_helpers/helpers';
 
 Tinytest.add(
   'Errors - Meteor._debug - track with Meteor._debug',
@@ -69,7 +70,7 @@ Tinytest.add(
     let client = GetMeteorClient();
 
     try {
-      let result = client.call(method);
+      client.call(method);
     } catch (e) {
       // ignore the error
     }
@@ -82,6 +83,8 @@ Tinytest.add(
     _resetErrorTracking(originalErrorTrackingStatus);
 
     function causeError () {
+      const HTTP = Package['http'].HTTP;
+      // eslint-disable-next-line no-new-func
       HTTP.call('POST', 'localhost', Function());
     }
   }
@@ -95,7 +98,7 @@ Tinytest.addAsync(
     Kadira.models.error = new ErrorModel('foo');
     let pubsub = RegisterPublication(causeError);
     let client = GetMeteorClient();
-    let result = client.subscribe(pubsub, {
+    client.subscribe(pubsub, {
       onError () {
         let payload = Kadira.models.error.buildPayload();
         let error = payload.errors[0];
@@ -207,6 +210,7 @@ Tinytest.addAsync(
 
     Meteor.defer(function () {
       let payload = Kadira.models.error.buildPayload();
+      // eslint-disable-next-line no-shadow
       let error = payload.errors[0];
 
       test.equal(1, payload.errors.length);
@@ -228,7 +232,7 @@ Tinytest.addAsync(
     });
     let client = GetMeteorClient();
     try {
-      let result = client.call(methodId);
+      client.call(methodId);
     } catch (ex) {
       let errorMessage = 'reason [ERR_CODE]';
       test.equal(ex.message, errorMessage);
@@ -255,7 +259,7 @@ Tinytest.addAsync(
     });
     let client = GetMeteorClient();
     try {
-      let result = client.call(methodId);
+      client.call(methodId);
     } catch (ex) {
       let errorMessage = 'reason [ERR_CODE]';
       test.equal(ex.message, errorMessage);
@@ -284,7 +288,7 @@ Tinytest.addAsync(
     });
     let client = GetMeteorClient();
     try {
-      let result = client.call(methodId);
+      client.call(methodId);
     } catch (ex) {
       let errorMessage = 'the-message';
       test.isTrue(ex.message.match(/Internal server error/));

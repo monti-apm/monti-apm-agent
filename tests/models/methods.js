@@ -1,12 +1,14 @@
 import { EJSON } from 'meteor/ejson';
 import { MethodsModel } from '../../lib/models/methods';
 import { TestData } from '../_helpers/globals';
+import { CleanTestData, GetMeteorClient, RegisterMethod, Wait, WithDocCacheGetSize } from '../_helpers/helpers';
 
 Tinytest.add(
   'Models - Method - buildPayload simple',
   function (test) {
     CreateMethodCompleted('aa', 'hello', 1, 100, 5);
     CreateMethodCompleted('aa', 'hello', 2, 800 , 10);
+
     let payload = model.buildPayload();
     payload.methodRequests = [];
 
@@ -99,10 +101,12 @@ Tinytest.add(
   'Models - Method - Metrics - fetchedDocSize',
   function (test) {
     let docs = [{data: 'data1'}, {data: 'data2'}];
-    docs.forEach(function (doc) { TestData.insert(doc); });
+    docs.forEach(function (doc) {
+      TestData.insert(doc);
+    });
 
     let methodId = RegisterMethod(function () {
-      let data = TestData.find({}).fetch();
+      TestData.find({}).fetch();
     });
 
     let client = GetMeteorClient();
@@ -123,11 +127,13 @@ Tinytest.add(
   'Models - Method - Metrics - sentMsgSize',
   function (test) {
     let docs = [{data: 'data1'}, {data: 'data2'}];
-    docs.forEach(function (doc) { TestData.insert(doc); });
+    docs.forEach(function (doc) {
+      TestData.insert(doc);
+    });
 
     let returnValue = 'Some return value';
     let methodId = RegisterMethod(function () {
-      let data = TestData.find({}).fetch();
+      TestData.find({}).fetch();
       return returnValue;
     });
 
@@ -180,10 +186,9 @@ Tinytest.add(
   }
 );
 
+export const model = new MethodsModel();
+
 function CreateMethodCompleted (sessionName, methodName, methodId, startTime, methodDelay) {
-  if (typeof model === 'undefined') {
-    model = new MethodsModel();
-  }
   methodDelay = methodDelay || 5;
   let method = {session: sessionName, name: methodName, id: methodId, events: []};
   method.events.push({type: 'start', at: startTime});
@@ -193,9 +198,6 @@ function CreateMethodCompleted (sessionName, methodName, methodId, startTime, me
 }
 
 function CreateMethodErrored (sessionName, methodName, methodId, errorMessage, startTime, methodDelay) {
-  if (typeof model === 'undefined') {
-    model = new MethodsModel();
-  }
   methodDelay = methodDelay || 5;
   let method = {session: sessionName, name: methodName, id: methodId, events: []};
   method.events.push({type: 'start', at: startTime});

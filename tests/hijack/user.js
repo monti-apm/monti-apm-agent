@@ -1,4 +1,11 @@
 import { TestData } from '../_helpers/globals';
+import {
+  CleanTestData,
+  EnableTrackingMethods,
+  GetLastMethodEvents,
+  GetMeteorClient,
+  RegisterMethod
+} from '../_helpers/helpers';
 
 Tinytest.add(
   'User - not logged in',
@@ -8,7 +15,9 @@ Tinytest.add(
       TestData.insert({aa: 10});
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+
+    client.call(methodId);
+
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
       ['start',,{userId: null, params: '[]'}],

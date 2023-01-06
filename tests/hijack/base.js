@@ -1,4 +1,11 @@
 import { TestData } from '../_helpers/globals';
+import {
+  CleanTestData,
+  EnableTrackingMethods,
+  GetLastMethodEvents,
+  GetMeteorClient,
+  RegisterMethod
+} from '../_helpers/helpers';
 
 
 Tinytest.add(
@@ -17,9 +24,9 @@ Tinytest.add(
     let events = GetLastMethodEvents([0, 2]);
 
     let expected = [
-      ['start',, {userId: null, params: '[10,"abc"]'}],
-      ['wait',, {waitOn: []}],
-      ['db',, {coll: 'tinytest-data', func: 'insert'}],
+      ['start',undefined, {userId: null, params: '[10,"abc"]'}],
+      ['wait',undefined, {waitOn: []}],
+      ['db',undefined, {coll: 'tinytest-data', func: 'insert'}],
       ['complete']
     ];
 
