@@ -1,24 +1,25 @@
+'use strict';
+
 Package.describe({
-  "summary": "Performance Monitoring for Meteor",
-  "version": "2.45.2-beta.2",
-  "git": "https://github.com/monti-apm/monti-apm-agent.git",
-  "name": "montiapm:agent"
+  summary: 'Performance Monitoring for Meteor',
+  version: '2.47.0-beta.1',
+  git: 'https://github.com/monti-apm/monti-apm-agent.git',
+  name: 'montiapm:agent'
 });
 
-var npmModules = {
-  "debug": "0.8.1",
-  "monti-apm-core": "1.7.5",
-  "evloop-monitor": "0.1.0",
-  "lru-cache": "4.1.5",
-  "json-stringify-safe": "5.0.1",
-  "monti-apm-sketches-js": "0.0.3",
+let npmModules = {
+  debug: '0.8.1',
+  'monti-apm-core': '1.7.5',
+  'lru-cache': '5.1.1',
+  'json-stringify-safe': '5.0.1',
+  'monti-apm-sketches-js': '0.0.3',
 
   // parseurl is also used by WebApp.
   // Since it caches the parsed url on
   // `req`, we should make sure we use a
   // version that is compatible with the version
   // used by WebApp.
-  "parseurl": "1.3.3"
+  parseurl: '1.3.3',
 };
 
 Npm.depends(npmModules);
@@ -31,6 +32,7 @@ Package.onUse(function (api) {
 Package.onTest(function (api) {
   configurePackage(api, true);
   api.use([
+    'peerlibrary:reactive-publish',
     'tinytest',
     'test-helpers',
   ], ['client', 'server']);
@@ -73,6 +75,8 @@ Package.onTest(function (api) {
     'tests/hijack/set_labels.js',
     'tests/environment_variables.js',
     'tests/docsize_cache.js',
+    'tests/timeout.js',
+    'tests/event_loop_monitor.js',
   ], 'server');
 
   if (canRunTestsWithFetch()) {
@@ -99,8 +103,8 @@ Package.onTest(function (api) {
 });
 
 // use meteor/fetch in tests only for NodeJS 8.11+ (Meteor 1.7+)
-function canRunTestsWithFetch() {
-  const nums = process.versions.node.split(".").map(Number);
+function canRunTestsWithFetch () {
+  const nums = process.versions.node.split('.').map(Number);
 
   const major = nums[0];
   const minor = nums[1];
@@ -109,16 +113,17 @@ function canRunTestsWithFetch() {
 
   if (major > 8) return true;
 
-  //major === 8 and ...
+  // major === 8 and ...
   return minor >= 11;
 }
 
-function configurePackage(api, isTesting) {
+function configurePackage (api, isTesting) {
   api.versionsFrom('METEOR@1.4');
   api.use('montiapm:meteorx@2.2.0', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
   api.use('zodern:meteor-package-versions@0.2.0');
+  api.use('zodern:types@1.0.9');
 
   api.use([
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',

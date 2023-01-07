@@ -1,67 +1,47 @@
 /* global Minimongo, Meteor */
 
-if (typeof Minimongo === 'undefined') {
-  return;
-}
+Tinytest.addAsync('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', function (test, done) {
+  const old = process.env.MONGO_OPLOG_URL;
+  process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd';
 
-Tinytest.add(
-  'CheckForOplog - OplogCheck._070 - no limit supported',
-  function (test) {
-    test.equal(OplogCheck._070({
-      options: {limit: 20}
-    }).code, '070_LIMIT_NOT_SUPPORTED');
-  }
-);
+  CleanTestData();
 
-Tinytest.add(
-  'CheckForOplog - OplogCheck._070 - $ operators',
-  function (test) {
-    test.equal(OplogCheck._070({
-      options: {},
-      selector: {$and: {}}
-    }).code, '070_$_NOT_SUPPORTED');
-  }
-);
+  let observeChangesEvent;
 
-Tinytest.add(
-  'CheckForOplog - OplogCheck._070 - not scaler values',
-  function (test) {
-    test.equal(OplogCheck._070({
-      options: {},
-      selector: {aa: {$gt: 20}}
-    }).code, '070_ONLY_SCALERS');
-  }
-);
+  TestData.insert({ foo: 'bar'});
 
-Tinytest.add(
-  'CheckForOplog - OplogCheck._070 - support oplog',
-  function (test) {
-    test.equal(OplogCheck._070({
-      options: {},
-      selector: {}
-    }), true);
-  }
-);
+  const pubId = RegisterPublication(function () {
+    this.autorun(function () {
+      TestData.findOne({ foo: 'bar' }, {
+        fields: { _id: 1},
+        sort: { _id: 1 }
+      });
 
+      const info = Kadira._getInfo();
 
-Tinytest.add(
-  'CheckForOplog - OplogCheck._071 - no limit supported',
-  function (test) {
-    test.equal(OplogCheck._071({
-      options: {limit: 20}
-    }).code, '071_LIMIT_NOT_SUPPORTED');
-  }
-);
+      const event = _.last(info.trace.events);
+      observeChangesEvent = _.first(event.nested);
 
-Tinytest.add(
-  'CheckForOplog - OplogCheck._071 - supports oplog',
-  function (test) {
-    test.equal(OplogCheck._071({
-      options: {},
-      selector: {aa: {$gt: 20}}
-    }), true);
-  }
-);
+      return TestData.find({});
+    });
+  });
+
+  const client = GetMeteorClient();
+
+  const sub = SubscribeAndWait(client, pubId);
+
+  const { data } = observeChangesEvent;
+
+  test.equal(data.oplog, false);
+  test.equal(data.func, 'observeChanges');
+  test.equal(data.noOplogCode, 'TRACKER_ACTIVE');
+
+  sub.stop();
+  CloseClient(client);
+
+  process.env.MONGO_OPLOG_URL = old;
+  done();
+});
 
 Tinytest.add(
   'CheckForOplog - OplogCheck.env - MONGO_OPLOG_URL exists',
@@ -252,76 +232,10 @@ Tinytest.add(
 );
 
 Tinytest.add(
-  'CheckForOplog - OplogCheck.olderVersion - older version',
+  'CheckForOplog - OplogCheck.unknownReason - unknown reason',
   function (test) {
     let driver = function () {};
-    test.equal(OplogCheck.olderVersion(null, driver).code, 'OLDER_VERSION');
-  }
-);
-
-Tinytest.add(
-  'CheckForOplog - OplogCheck.olderVersion - newer version',
-  function (test) {
-    function Observer () {}
-    Observer.cursorSupported = function () {};
-
-    let driver = new Observer();
-    test.equal(OplogCheck.olderVersion(null, driver), true);
-  }
-);
-
-Tinytest.add(
-  'CheckForOplog - OplogCheck.gitCheckout - meteor version',
-  function (test) {
-    test.equal(OplogCheck.gitCheckout(), true);
-  }
-);
-
-Tinytest.add(
-  'CheckForOplog - OplogCheck.gitCheckout - cloned from git',
-  function (test) {
-    let originalRelease = Meteor.release;
-    Meteor.release = null;
-    test.equal(OplogCheck.gitCheckout().code, 'GIT_CHECKOUT');
-    Meteor.release = originalRelease;
-  }
-);
-
-Tinytest.addAsync(
-  'CheckForOplog - Kadira.checkWhyNoOplog - version 0.7.0',
-  function (test, done) {
-    let originalRelease = Meteor.release;
-    Meteor.release = '0.7.0.1';
-
-    WithMongoOplogUrl(function () {
-      let result = Kadira.checkWhyNoOplog({
-        selector: {aa: {$gt: 20}},
-        options: {}
-      });
-      test.equal(result.code, '070_ONLY_SCALERS');
-      done();
-    });
-
-    Meteor.release = originalRelease;
-  }
-);
-
-Tinytest.addAsync(
-  'CheckForOplog - Kadira.checkWhyNoOplog - version 0.7.1',
-  function (test, done) {
-    let originalRelease = Meteor.release;
-    Meteor.release = '0.7.1';
-
-    WithMongoOplogUrl(function () {
-      let result = Kadira.checkWhyNoOplog({
-        selector: {aa: {$gt: 20}},
-        options: {limit: 20}
-      });
-      test.equal(result.code, '071_LIMIT_NOT_SUPPORTED');
-      done();
-    });
-
-    Meteor.release = originalRelease;
+    test.equal(OplogCheck.unknownReason(null, driver).code, 'UNKNOWN_REASON');
   }
 );
 
@@ -332,6 +246,7 @@ Tinytest.add(
       selector: {aa: {$gt: 20}},
       options: {limit: 20},
     });
+
     test.equal(result.code, 'NO_ENV');
   }
 );
@@ -351,42 +266,23 @@ Tinytest.addAsync(
 );
 
 Tinytest.addAsync(
-  'CheckForOplog - Kadira.checkWhyNoOplog - supportting query',
+  'CheckForOplog - Kadira.checkWhyNoOplog - supporting query',
   function (test, done) {
-    function Observer () {}
-    Observer.cursorSupported = function () {};
-    let driver = new Observer();
+    function OplogObserveDriver () {}
+    OplogObserveDriver.cursorSupported = function () {};
+    let driver = new OplogObserveDriver();
 
     WithMongoOplogUrl(function () {
       let result = Kadira.checkWhyNoOplog({
         selector: {aa: {$gt: 20}},
         options: {limit: 20, sort: {aa: 1}},
       }, driver);
+
       test.equal(result.code, 'OPLOG_SUPPORTED');
       done();
     });
   }
 );
-
-Tinytest.addAsync(
-  'CheckForOplog - Kadira.checkWhyNoOplog - with invalid MiniMongo.Matcher',
-  function (test, done) {
-    let originalRelease = Meteor.release;
-    Meteor.release = '0.7.1';
-
-    WithMongoOplogUrl(function () {
-      let result = Kadira.checkWhyNoOplog({
-        selector: {aa: {$in: null}},
-        options: {limit: 20}
-      });
-      test.equal(result.code, 'MINIMONGO_MATCHER_ERROR');
-      done();
-    });
-
-    Meteor.release = originalRelease;
-  }
-);
-
 
 function WithMongoOplogUrl (fn) {
   process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd';

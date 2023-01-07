@@ -118,7 +118,14 @@ SubscribeAndWait = function (client, name, args) {
 CompareNear = function (v1, v2, maxDifference) {
   maxDifference = maxDifference || 30;
   let diff = Math.abs(v1 - v2);
-  return diff < maxDifference;
+
+  const isNear = diff < maxDifference;
+
+  if (!isNear) {
+    console.log(`Expected ${v1} to be near ${v2}, with a max difference of ${maxDifference}`);
+  }
+
+  return isNear;
 };
 
 CloseClient = function (client) {
@@ -157,3 +164,21 @@ WithDocCacheGetSize = function (fn, patchedSize) {
 };
 
 export const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => parseInt(num, 10));
+
+export const withRoundedTime = (fn) => (test) => {
+  const date = new Date();
+  date.setSeconds(0,0);
+  const timestamp = date.getTime();
+
+  const old = Date.now;
+
+  Date.now = () => timestamp;
+
+  fn(test);
+
+  Date.now = old;
+};
+
+export function addTestWithRoundedTime (name, fn) {
+  Tinytest.add(name, withRoundedTime(fn));
+}

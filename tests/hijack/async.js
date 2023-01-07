@@ -53,3 +53,44 @@ Tinytest.add(
     CleanTestData();
   }
 );
+
+
+Tinytest.add(
+  'Async - end event on throwInto',
+  function (test) {
+    const methodId = RegisterMethod(function () {
+      try {
+        Promise.await(
+          new Promise((resolve, reject) => {
+            setTimeout(() => {
+              reject(new Error('Fake Error'));
+            }, 100);
+          }),
+        );
+      } catch (err) {
+        TestData.find({});
+
+        return Kadira._getInfo();
+      }
+    });
+
+
+    let client = GetMeteorClient();
+    let result = client.call(methodId);
+    const events = result.trace.events.filter(event => event[0] !== 'compute');
+
+    // remove complete event
+    events.pop();
+
+    const dbEvent = events.pop();
+    const asyncEvent = events.pop();
+
+    // If the async event was not ended in throwInto,
+    // the db event will be nested in the async event
+    test.equal(asyncEvent[0], 'async');
+    // If there are nested events or forcedEnd is true, then [3] will be an object
+    test.equal(asyncEvent[3], undefined);
+
+    test.equal(dbEvent[0], 'db');
+  }
+);

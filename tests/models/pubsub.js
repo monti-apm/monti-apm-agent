@@ -1,6 +1,7 @@
 import { PubsubModel } from '../../lib/models/pubsub';
+import { addTestWithRoundedTime } from '../_helpers/helpers';
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Metrics - same date',
   function (test) {
     let pub = 'postsList';
@@ -13,7 +14,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Metrics - multi date',
   function (test) {
     let pub = 'postsList';
@@ -32,7 +33,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Metrics - same minute',
   function (test) {
     let pub = 'postsList';
@@ -52,7 +53,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - subs',
   function (test) {
     let pub = 'postsList';
@@ -70,7 +71,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - routes',
   function (test) {
     let pub = 'postsList';
@@ -91,7 +92,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - response time',
   function (test) {
     let pub = 'postsList';
@@ -109,7 +110,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - lifetime',
   function (test) {
     let pub = 'postsList';
@@ -127,7 +128,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - multiple publications',
   function (test) {
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
@@ -144,7 +145,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - multiple dates',
   function (test) {
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
@@ -162,7 +163,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - multiple subscriptions and dates',
   function (test) {
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
@@ -180,7 +181,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observer Cache - no cache',
   function (test) {
     let original = Kadira.syncedDate.getTime;
@@ -204,7 +205,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observer Cache - single cache',
   function (test) {
     let original = Kadira.syncedDate.getTime;
@@ -228,7 +229,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observer Cache - multiple dates',
   function (test) {
     let original = Date.now;
@@ -254,7 +255,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Single Sub - simple',
   function (test) {
     CleanTestData();
@@ -270,7 +271,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Single Sub - docs added',
   function (test) {
     CleanTestData();
@@ -287,7 +288,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Single Sub - docs removed',
   function (test) {
     CleanTestData();
@@ -304,7 +305,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Single Sub - unsub before payload',
   function (test) {
     CleanTestData();
@@ -320,7 +321,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Single Sub - close before payload',
   function (test) {
     CleanTestData();
@@ -336,7 +337,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Multiple Subs - simple',
   function (test) {
     CleanTestData();
@@ -356,7 +357,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Multiple Subs - sub and unsub',
   function (test) {
     CleanTestData();
@@ -376,7 +377,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - simple',
   function (test) {
     CleanTestData();
@@ -394,7 +395,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - polledDocuments with oplog',
   function (test) {
     CleanTestData();
@@ -409,7 +410,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - oplogInsertedDocuments with oplog',
   function (test) {
     CleanTestData();
@@ -425,7 +426,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - oplogDeletedDocuments with oplog',
   function (test) {
     CleanTestData();
@@ -443,7 +444,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - oplogUpdatedDocuments with oplog',
   function (test) {
     CleanTestData();
@@ -460,7 +461,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - polledDocuments with no oplog',
   function (test) {
     CleanTestData();
@@ -476,7 +477,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - initiallyAddedDocuments',
   function (test) {
     CleanTestData();
@@ -494,7 +495,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - liveAddedDocuments',
   function (test) {
     CleanTestData();
@@ -512,27 +513,41 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - liveChangedDocuments',
   function (test) {
     CleanTestData();
+
     let client = GetMeteorClient();
+
     // This will create two observers
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
+
     Wait(50);
+
     let h1 = SubscribeAndWait(client, 'tinytest-data-random');
     let h2 = SubscribeAndWait(client, 'tinytest-data-random');
+
     Wait(100);
+
     TestData.update({}, {$set: {kk: 20}}, {multi: true});
+
     Wait(50);
+
     let payload = GetPubSubPayload();
+
+    if (!payload[0].pubs['tinytest-data-random']) {
+      console.log(JSON.stringify(payload, null, 2));
+    }
+
     test.equal(payload[0].pubs['tinytest-data-random'].liveChangedDocuments, 4);
+
     CloseClient(client);
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - liveRemovedDocuments',
   function (test) {
     CleanTestData();
@@ -551,7 +566,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - initiallySentMsgSize',
   function (test) {
     CleanTestData();
@@ -571,7 +586,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - liveSentMsgSize',
   function (test) {
     CleanTestData();
@@ -591,7 +606,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - initiallyFetchedDocSize',
   function (test) {
     CleanTestData();
@@ -611,7 +626,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - liveFetchedDocSize',
   function (test) {
     CleanTestData();
@@ -631,7 +646,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - fetchedDocSize',
   function (test) {
     CleanTestData();
@@ -652,7 +667,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - PubSub - Observers - polledDocSize',
   function (test) {
     CleanTestData();
