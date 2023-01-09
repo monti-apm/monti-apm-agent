@@ -604,7 +604,7 @@ addTestWithRoundedTime(
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
     Wait(50);
-    let h1 = SubscribeAndWait(client, 'tinytest-data-random');
+    SubscribeAndWait(client, 'tinytest-data-random');
     Wait(100);
     let payload = GetPubSubPayload();
 

@@ -20,9 +20,9 @@ Tinytest.add(
 
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'insert'}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'insert'}],
       ['complete']
     ];
     test.equal(events, expected);

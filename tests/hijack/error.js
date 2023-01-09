@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { ErrorModel } from '../../lib/models/errors';
 import { GetMeteorClient, RegisterMethod, RegisterPublication } from '../_helpers/helpers';
+const HTTP = Package['http'].HTTP;
 
 Tinytest.add(
   'Errors - Meteor._debug - track with Meteor._debug',
@@ -83,9 +84,7 @@ Tinytest.add(
     _resetErrorTracking(originalErrorTrackingStatus);
 
     function causeError () {
-      const HTTP = Package['http'].HTTP;
-      // eslint-disable-next-line no-new-func
-      HTTP.call('POST', 'localhost', Function());
+      HTTP.call('POST', 'localhost', () => {});
     }
   }
 );
@@ -111,7 +110,7 @@ Tinytest.addAsync(
     });
 
     function causeError () {
-      HTTP.call('POST', 'localhost', Function());
+      HTTP.call('POST', 'localhost', () => {});
     }
   }
 );
