@@ -115,7 +115,7 @@ SubscribeAndWait = function (client, name, args) {
   }
 };
 
-CompareNear = function (v1, v2, maxDifference) {
+function compareNear (v1, v2, maxDifference) {
   maxDifference = maxDifference || 30;
   let diff = Math.abs(v1 - v2);
 
@@ -126,7 +126,7 @@ CompareNear = function (v1, v2, maxDifference) {
   }
 
   return isNear;
-};
+}
 
 CloseClient = function (client) {
   let sessionId = client._lastSessionId;
@@ -182,3 +182,24 @@ export const withRoundedTime = (fn) => (test) => {
 export function addTestWithRoundedTime (name, fn) {
   Tinytest.add(name, withRoundedTime(fn));
 }
+
+export const TestHelpers = {
+  methodStore: MethodStore,
+  getLatestEventsFromMethodStore: () => MethodStore[MethodStore.length - 1].events,
+  getMeteorClient: GetMeteorClient,
+  registerMethod: RegisterMethod,
+  registerPublication: RegisterPublication,
+  enableTrackingMethods: EnableTrackingMethods,
+  getLastMethodEvents: GetLastMethodEvents,
+  getPubSubMetrics: GetPubSubMetrics,
+  findMetricsForPub: FindMetricsForPub,
+  getPubSubPayload: GetPubSubPayload,
+  wait: Wait,
+  cleanTestData: CleanTestData,
+  subscribeAndWait: SubscribeAndWait,
+  compareNear,
+  closeClient: CloseClient,
+  withDocCacheGetSize: WithDocCacheGetSize,
+  withRoundedTime,
+  addTestWithRoundedTime,
+};
