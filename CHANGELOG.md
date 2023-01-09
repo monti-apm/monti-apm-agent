@@ -1,7 +1,9 @@
 # Changelog
 
-## Next
+## 2.47.0
+January 9, 2023
 
+* Add type definitions for apps that use [zodern:types](https://github.com/zodern/meteor-types)
 * Add stalled method or publication detection. If a method is still running or a publication is not ready after 30 minutes, the agent will record an error to inform you.
 * Add `stalledTimeout` option to configure how long it waits before deciding a method or publication is stalled.
 * If called while there is an active trace, `Monti.trackError` will send the trace events with the error
@@ -9,6 +11,8 @@
 * Add `disableClientErrorTracking` option to only disable error tracking on the client
 * Fix possible error when running app tests, and global.window is set using jsdom
 * Fix ending async events in traces when an async function throws an error
+* Improve stack trace generated in safari for errors that are missing one
+* Sends the Meteor release in every request to the engine, instead of only when the app starts
 
 ## 2.46.1
 November 8, 2022
