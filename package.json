@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "test": "meteor test-packages ./",
-    "lint": "eslint . --cache . --ext .js,.ts",
+    "lint": "eslint . --cache . --ext .js",
     "publish": "npm prune --production && meteor publish"
   },
   "devDependencies": {
