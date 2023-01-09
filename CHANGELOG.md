@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.47.0
+## 2.47.2
 January 9, 2023
 
 * Add type definitions for apps that use [zodern:types](https://github.com/zodern/meteor-types)
