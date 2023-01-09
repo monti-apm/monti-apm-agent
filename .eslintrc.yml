@@ -15,6 +15,7 @@ globals:
   MeteorX: readonly
   Npm: readonly
   window: readonly
+  Minimongo: readonly
   __meteor_runtime_config__: readonly
 parserOptions:
   requireConfigFile: false

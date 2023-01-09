@@ -210,7 +210,7 @@ Tinytest.add(
 Tinytest.add(
   'Client Side - Error Manager - Utils - getBrowserInfo() for users',
   function (test) {
-    hijackMeteorUserId(mock_MeteorUserId);
+    hijackMeteorUserId(mockMeteorUserId);
     test.equal(typeof getBrowserInfo, 'function');
     let info = getBrowserInfo();
     test.equal('string', typeof info.browser);
@@ -257,16 +257,16 @@ Tinytest.add(
 
 // --------------------------------------------------------------------------\\
 
-let original_MeteorUserId = Meteor.userId;
+let originalMeteorUserId = Meteor.userId;
 
 function hijackMeteorUserId (mock) {
   Meteor.userId = mock;
 }
 
 function restoreMeteorUserId () {
-  Meteor.userId = original_MeteorUserId;
+  Meteor.userId = originalMeteorUserId;
 }
 
-function mock_MeteorUserId () {
+function mockMeteorUserId () {
   return Random.id();
 }

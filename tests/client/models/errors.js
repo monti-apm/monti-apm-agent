@@ -10,7 +10,7 @@ Tinytest.add(
   function (test) {
     let em = new ErrorModel();
     let payloadReceived;
-    var resetSend = onKadiraSend(function (payload) {
+    const resetSend = onKadiraSend(function (payload) {
       payloadReceived = payload;
       resetSend();
     });
@@ -36,7 +36,7 @@ Tinytest.add(
   function (test) {
     let em = new ErrorModel();
     let payloadReceived;
-    var resetSend = onKadiraSend(function (payload) {
+    const resetSend = onKadiraSend(function (payload) {
       payloadReceived = payload;
       resetSend();
     });
@@ -63,7 +63,7 @@ Tinytest.add(
   function (test) {
     let em = new ErrorModel();
 
-    var resetSend = onKadiraSend(function () {
+    const resetSend = onKadiraSend(function () {
       resetSend();
     });
 
@@ -80,7 +80,7 @@ Tinytest.add(
   function (test) {
     let em = new ErrorModel();
 
-    var resetSend = onKadiraSend(function () {
+    const resetSend = onKadiraSend(function () {
       resetSend();
     });
 
@@ -101,7 +101,7 @@ Tinytest.add(
   function (test) {
     let em = new ErrorModel({maxErrorsPerInterval: 2});
 
-    var resetSend = onKadiraSend(function () {
+    const resetSend = onKadiraSend(function () {
       resetSend();
     });
 
@@ -143,7 +143,7 @@ Tinytest.addAsync(
 
     Kadira.syncedDate.synced = false;
     let payloadReceived;
-    var resetSend = onKadiraSend(function (payload) {
+    const resetSend = onKadiraSend(function (payload) {
       payloadReceived = payload;
       resetSend();
     });
@@ -175,7 +175,7 @@ Tinytest.add(
 
     Kadira.syncedDate.synced = true;
     let payloadReceived;
-    var resetSend = onKadiraSend(function (payload) {
+    const resetSend = onKadiraSend(function (payload) {
       payloadReceived = payload;
       resetSend();
     });
@@ -210,7 +210,7 @@ Tinytest.add(
     Kadira.syncedDate.synced = true;
 
     let payloadReceived;
-    var resetSend = onKadiraSend(function (payload) {
+    const resetSend = onKadiraSend(function (payload) {
       payloadReceived = payload;
       resetSend();
     });
