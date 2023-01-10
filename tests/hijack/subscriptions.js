@@ -140,15 +140,22 @@ Tinytest.add(
 
     let client = TestHelpers.getMeteorClient();
 
+    let st = Date.now();
     let h1 = TestHelpers.subscribeAndWait(client, 'tinytest-data');
+    let elapsedTime = Date.now() - st;
 
     TestHelpers.wait(100);
+
+    st = Date.now();
     h1.stop();
+    elapsedTime += Date.now() - st;
+
     TestHelpers.wait(100);
 
     let metrics = TestHelpers.findMetricsForPub('tinytest-data');
 
-    test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 100, 60));
+    console.log({elapsedTime});
+    test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 100 + elapsedTime, 60));
     TestHelpers.closeClient(client);
   }
 );
