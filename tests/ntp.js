@@ -1,3 +1,5 @@
+import { Ntp } from '../lib/ntp';
+
 Tinytest.add(
   'Ntp - ._now - with correct Date.now',
   function (test) {
