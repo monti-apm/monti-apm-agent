@@ -18,6 +18,7 @@ globals:
   window: readonly
   Minimongo: readonly
   __meteor_runtime_config__: readonly
+  __meteor_bootstrap__: readonly
 parserOptions:
   requireConfigFile: false
   sourceType: 'module'
@@ -39,6 +40,7 @@ rules:
   camelcase:
     - 2
     - properties: always
+      ignoreGlobals: true
   comma-spacing: 0
   comma-style:
     - 2
