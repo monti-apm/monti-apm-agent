@@ -62,7 +62,7 @@ rules:
     - 2
     - before: true
       after: false
-  guard-for-in: 1
+  guard-for-in: 0
   handle-callback-err:
     - 2
     - error
@@ -269,7 +269,7 @@ rules:
   class-methods-use-this: 0
   no-empty-function: 0
   sort-imports: 0
-  line-comment-position: 1
+  line-comment-position: 0
   prefer-rest-params: 0
   symbol-description: 1
   callback-return: 0
