@@ -65,7 +65,7 @@ Meteor.publish('tinytest-data-random', function () {
 });
 
 Meteor.publish('tinytest-data-cursor-fetch', function () {
-  let data = TestData.find({}).fetch();
+  TestData.find({}).fetch();
   this.ready();
 });
 
@@ -84,7 +84,7 @@ Meteor.publish('tinytest-data-delayed', function () {
   let doneOnce = false;
   Meteor.publish('tinytest-data-multi', function () {
     let pub = this;
-    Meteor._wrapAsync(function (done) {
+    Meteor._wrapAsync(function () {
       setTimeout(function () {
         if (!doneOnce) {
           pub.ready();

@@ -32,7 +32,9 @@ export const EnableTrackingMethods = function () {
 };
 
 export const GetLastMethodEvents = function (_indices) {
-  if (MethodStore.length < 1) { return []; }
+  if (MethodStore.length < 1) {
+    return [];
+  }
   let indices = _indices || [0];
   let events = MethodStore[MethodStore.length - 1].events;
   events = Array.prototype.slice.call(events, 0);
@@ -47,7 +49,9 @@ export const GetLastMethodEvents = function (_indices) {
   function filterFields (event) {
     let filteredEvent = [];
     indices.forEach(function (index) {
-      if (event[index]) { filteredEvent[index] = event[index]; }
+      if (event[index]) {
+        filteredEvent[index] = event[index];
+      }
     });
     return filteredEvent;
   }
@@ -55,6 +59,7 @@ export const GetLastMethodEvents = function (_indices) {
 
 export const GetPubSubMetrics = function () {
   let metricsArr = [];
+  // eslint-disable-next-line guard-for-in
   for (let dateId in Kadira.models.pubsub.metricsByMinute) {
     metricsArr.push(Kadira.models.pubsub.metricsByMinute[dateId]);
   }
@@ -95,7 +100,7 @@ export const CleanTestData = function () {
 
 export const SubscribeAndWait = function (client, name, args) {
   let f = new Future();
-  var args = Array.prototype.splice.call(arguments, 1);
+  args = Array.prototype.splice.call(arguments, 1);
   args.push({
     onError (err) {
       f.return(err);
@@ -105,6 +110,7 @@ export const SubscribeAndWait = function (client, name, args) {
     }
   });
 
+  // eslint-disable-next-line prefer-spread
   let handler = client.subscribe.apply(client, args);
   let error = f.wait();
 
@@ -132,18 +138,18 @@ export const CloseClient = function (client) {
   let sessionId = client._lastSessionId;
   client.disconnect();
   let f = new Future();
-  function checkClientExtence (sessionId) {
+  function checkClientExtence (_sessionId) {
     let sessionExists;
     if (Meteor.server.sessions instanceof Map) {
       // Meteor 1.8.1 and newer
-      sessionExists = Meteor.server.sessions.has(sessionId);
+      sessionExists = Meteor.server.sessions.has(_sessionId);
     } else {
-      sessionExists = Meteor.server.sessions[sessionId];
+      sessionExists = Meteor.server.sessions[_sessionId];
     }
 
     if (sessionExists) {
       setTimeout(function () {
-        checkClientExtence(sessionId);
+        checkClientExtence(_sessionId);
       }, 20);
     } else {
       f.return();
