@@ -146,6 +146,8 @@ Tinytest.add(
 
     TestHelpers.wait(100);
 
+    Kadira.EventBus.once('pubsub', 'observerDeleted', (ownerInfo) => console.log('on sub stop:', JSON.stringify(ownerInfo)));
+
     st = Date.now();
     h1.stop();
     elapsedTime += Date.now() - st;
