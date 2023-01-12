@@ -36,6 +36,7 @@ rules:
   camelcase:
     - 2
     - properties: always
+      ignoreGlobals: true
   comma-spacing: 0
   comma-style:
     - 2
