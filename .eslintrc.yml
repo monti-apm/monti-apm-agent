@@ -65,7 +65,7 @@ rules:
     - 2
     - before: true
       after: false
-  guard-for-in: 0
+  guard-for-in: 1
   handle-callback-err:
     - 2
     - error
