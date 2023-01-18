@@ -1,4 +1,6 @@
 import { _ } from 'meteor/underscore';
+import { cloneDeep } from '../../lib/utils';
+import {diff} from 'deep-diff';
 
 let eventDefaults = {
   endAt: 0,
@@ -442,6 +444,43 @@ Tinytest.add(
 
     let expected = {coll: 'posts'};
     test.equal(traceInfo.events[0].data, expected);
+  }
+);
+
+Tinytest.add(
+  'Tracer - should keep nested events',
+  function (test) {
+    let now = new Date().getTime();
+
+    const oldOptions = cloneDeep(Kadira.options);
+
+    Kadira.options.eventStackTrace = true;
+
+    let traceInfo = {
+      events: [
+        {...eventDefaults, type: 'start', at: now, endAt: now},
+        {...eventDefaults, type: 'wait', at: now, endAt: now + 1000, nested: [{ type: 'db', endAt: null }]},
+        {...eventDefaults, type: 'compute', at: now + 1000, endAt: now + 2500, nested: [{ type: 'async', endAt: null }]},
+        {...eventDefaults, type: 'db', at: now + 2500, endAt: now + 3500, nested: [{ type: 'async', endAt: null }]},
+        {type: 'complete', at: now + 3500}
+      ]
+    };
+
+    Kadira.tracer.buildTrace(traceInfo);
+
+    test.equal(traceInfo.events[2][3].nested.length, 1);
+    test.equal(traceInfo.events[3][3], undefined);
+
+    test.equal(traceInfo.metrics, {
+      total: 3500,
+      wait: 1000,
+      db: 1000,
+      compute: 0,
+    });
+
+    test.equal(traceInfo.errored, false);
+
+    Kadira.options = oldOptions;
   }
 );
 
