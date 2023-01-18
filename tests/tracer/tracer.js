@@ -1,6 +1,5 @@
 import { _ } from 'meteor/underscore';
 import { cloneDeep } from '../../lib/utils';
-import {diff} from 'deep-diff';
 
 let eventDefaults = {
   endAt: 0,
