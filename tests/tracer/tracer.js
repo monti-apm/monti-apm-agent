@@ -1,5 +1,6 @@
 import { _ } from 'meteor/underscore';
 import { cloneDeep } from '../../lib/utils';
+import { EventType } from '../../lib/constants';
 
 let eventDefaults = {
   endAt: 0,
@@ -294,7 +295,8 @@ Tinytest.add(
       ]
     };
     Kadira.tracer.buildTrace(traceInfo);
-    test.equal(traceInfo.metrics, undefined);
+    // Wait event is not ended, so it will be ignored but will not affect the metrics
+    test.equal(traceInfo.metrics, { total: 2500, db: 500, compute: 2000 });
   }
 );
 
@@ -475,6 +477,44 @@ Tinytest.add(
       wait: 1000,
       db: 1000,
       compute: 0,
+    });
+
+    test.equal(traceInfo.errored, false);
+
+    Kadira.options = oldOptions;
+  }
+);
+
+
+Tinytest.add(
+  'Tracer - should account nested custom events as if they were in the root level',
+  function (test) {
+    let now = new Date().getTime();
+
+    const oldOptions = cloneDeep(Kadira.options);
+
+    Kadira.options.eventStackTrace = true;
+
+    let traceInfo = {
+      events: [
+        {...eventDefaults, type: EventType.START, at: now, endAt: now},
+        {...eventDefaults, type: EventType.CUSTOM, at: now + 1000, endAt: now + 2500, nested: [{ type: 'async', at: now + 200, endAt: now + 300 }, { type: 'db', at: now + 200, endAt: now + 300 }]},
+        {type: EventType.COMPLETE, at: now + 2500}
+      ]
+    };
+
+    Kadira.tracer.buildTrace(traceInfo);
+
+    test.equal(traceInfo.events.length, 4);
+    test.equal(traceInfo.events[2][3].nested.length, 2);
+    test.equal(traceInfo.events[3][3], undefined);
+
+    test.equal(traceInfo.metrics, {
+      total: 2500,
+      custom: 1500,
+      compute: 1000,
+      async: 100,
+      db: 100,
     });
 
     test.equal(traceInfo.errored, false);
