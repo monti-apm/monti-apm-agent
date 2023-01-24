@@ -448,7 +448,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.only(
+Tinytest.add(
   'Tracer - should keep nested events',
   function (test) {
     let now = new Date().getTime();
