@@ -23,7 +23,7 @@ export type TraceInfo = {
     name: string
 }
 
-export type EventType = 'start' | 'end' | 'email' | 'db' | 'http' | 'fs' | 'compute' | 'custom' | 'async' | 'error'
+export type EventType = 'start' | 'end' | 'email' | 'db' | 'http' | 'fs' | 'compute' | 'custom' | 'async' | 'error' | 'wait'
 
 export namespace Tracer {
     function addFilter(filterFunction: (eventType: EventType, data: Record<string, any>, info: TraceInfo) => any): void

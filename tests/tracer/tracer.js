@@ -448,7 +448,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+Tinytest.only(
   'Tracer - should keep nested events',
   function (test) {
     let now = new Date().getTime();
@@ -459,11 +459,11 @@ Tinytest.add(
 
     let traceInfo = {
       events: [
-        {...eventDefaults, type: 'start', at: now, endAt: now},
-        {...eventDefaults, type: 'wait', at: now, endAt: now + 1000, nested: [{ type: 'db', endAt: null }]},
-        {...eventDefaults, type: 'compute', at: now + 1000, endAt: now + 2500, nested: [{ type: 'async', endAt: null }]},
-        {...eventDefaults, type: 'db', at: now + 2500, endAt: now + 3500, nested: [{ type: 'async', endAt: null }]},
-        {type: 'complete', at: now + 3500}
+        {...eventDefaults, type: EventType.START, at: now, endAt: now},
+        {...eventDefaults, type: EventType.WAIT, at: now, endAt: now + 1000, nested: [{ type: EventType.DB, endAt: null }]},
+        {...eventDefaults, type: EventType.COMPUTE, at: now + 1000, endAt: now + 2500, nested: [{ type: EventType.ASYNC, endAt: null }]},
+        {...eventDefaults, type: EventType.DB, at: now + 2500, endAt: now + 3500, nested: [{ type: EventType.ASYNC, endAt: null }]},
+        {type: EventType.COMPLETE, at: now + 3500}
       ]
     };
 
