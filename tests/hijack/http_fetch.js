@@ -1,4 +1,5 @@
 import { fetch } from 'meteor/fetch';
+import { CleanTestData, GetLastMethodEvents, GetMeteorClient, RegisterMethod } from '../_helpers/helpers';
 const Future = Npm.require('fibers/future');
 
 Tinytest.add('HTTP - meteor/fetch - async call', function (test) {
@@ -16,9 +17,9 @@ Tinytest.add('HTTP - meteor/fetch - async call', function (test) {
   const result = client.call(methodId);
   const events = GetLastMethodEvents([0, 2]);
   const expected = [
-    ['start', , { userId: null, params: '[]' }],
-    ['wait', , { waitOn: [] }],
-    ['http', , { method: 'GET', url: 'http://localhost:3301/', library: 'meteor/fetch' }],
+    ['start', undefined, { userId: null, params: '[]' }],
+    ['wait', undefined, { waitOn: [] }],
+    ['http', undefined, { method: 'GET', url: 'http://localhost:3301/', library: 'meteor/fetch' }],
     ['complete']
   ];
   test.equal(events, expected);
@@ -42,10 +43,10 @@ Tinytest.add('HTTP - meteor/fetch - trace error', function (test) {
   const result = client.call(methodId);
   const events = GetLastMethodEvents([0, 2]);
   const expected = [
-    ['start', , { userId: null, params: '[]' }],
-    ['wait', , { waitOn: [] }],
+    ['start', undefined, { userId: null, params: '[]' }],
+    ['wait', undefined, { waitOn: [] }],
     [
-      'http',,
+      'http',undefined,
       {
         method: 'GET',
         url: 'http://localhost:9999/',

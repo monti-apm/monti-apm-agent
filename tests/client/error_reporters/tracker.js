@@ -5,7 +5,7 @@ Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - tracker - afterFlush',
   TestWithErrorTrackingAsync(function (test, next) {
     Kadira._setupOnErrorReporter();
-    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    hijackKadiraSendErrors(mockKadiraSendErrors);
 
     let message = Random.id();
     let error = new Error(message);
@@ -15,15 +15,15 @@ Tinytest.addAsync(
       throw error;
     });
 
-    function mock_KadiraSendErrors (error) {
-      test.equal('string', typeof error.appId);
-      test.equal('object', typeof error.info);
-      test.equal(message, error.name);
-      test.equal('client', error.type);
-      test.equal(true, Array.isArray(JSON.parse(error.stacks)));
-      test.equal('number', typeof error.startTime);
-      test.equal('tracker.afterFlush', error.subType);
-      test.equal(JSON.parse(error.stacks)[0].stack, stack);
+    function mockKadiraSendErrors (_error) {
+      test.equal('string', typeof _error.appId);
+      test.equal('object', typeof _error.info);
+      test.equal(message, _error.name);
+      test.equal('client', _error.type);
+      test.equal(true, Array.isArray(JSON.parse(_error.stacks)));
+      test.equal('number', typeof _error.startTime);
+      test.equal('tracker.afterFlush', _error.subType);
+      test.equal(JSON.parse(_error.stacks)[0].stack, stack);
       restoreKadiraSendErrors();
       next();
     }
@@ -58,7 +58,7 @@ Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - tracker - autorun',
   TestWithErrorTrackingAsync(function (test, next) {
     Kadira._setupOnErrorReporter();
-    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    hijackKadiraSendErrors(mockKadiraSendErrors);
 
     let message = Random.id();
     let error = new Error(message);
@@ -74,15 +74,15 @@ Tinytest.addAsync(
 
     computation.invalidate();
 
-    function mock_KadiraSendErrors (error) {
-      test.equal('string', typeof error.appId);
-      test.equal('object', typeof error.info);
-      test.equal(message, error.name);
-      test.equal('client', error.type);
-      test.equal(true, Array.isArray(JSON.parse(error.stacks)));
-      test.equal('number', typeof error.startTime);
-      test.equal('tracker.compute', error.subType);
-      test.equal(JSON.parse(error.stacks)[0].stack, stack);
+    function mockKadiraSendErrors (_error) {
+      test.equal('string', typeof _error.appId);
+      test.equal('object', typeof _error.info);
+      test.equal(message, _error.name);
+      test.equal('client', _error.type);
+      test.equal(true, Array.isArray(JSON.parse(_error.stacks)));
+      test.equal('number', typeof _error.startTime);
+      test.equal('tracker.compute', _error.subType);
+      test.equal(JSON.parse(_error.stacks)[0].stack, stack);
       restoreKadiraSendErrors();
       next();
     }
@@ -112,15 +112,15 @@ Tinytest.addAsync(
   })
 );
 
-let original_KadiraSendErrors;
+let originalKadiraSendError;
 
 function hijackKadiraSendErrors (mock) {
-  original_KadiraSendErrors = Kadira.errors.sendError;
+  originalKadiraSendError = Kadira.errors.sendError;
   Kadira.errors.sendError = mock;
 }
 
 function restoreKadiraSendErrors () {
-  Kadira.errors.sendError = original_KadiraSendErrors;
+  Kadira.errors.sendError = originalKadiraSendError;
 }
 
 function TestWithErrorTrackingAsync (testFunction) {
@@ -131,7 +131,11 @@ function TestWithErrorTrackingAsync (testFunction) {
     Kadira.enableErrorTracking();
     testFunction(test, function () {
       Kadira.options.appId = appId;
-      status ? Kadira.enableErrorTracking() : Kadira.disableErrorTracking();
+      if (status) {
+        Kadira.enableErrorTracking();
+      } else {
+        Kadira.disableErrorTracking();
+      }
       next();
     });
   };

@@ -1,4 +1,7 @@
-/* global Minimongo, Meteor */
+import { TestData } from './_helpers/globals';
+import { CleanTestData, CloseClient, GetMeteorClient, RegisterPublication, SubscribeAndWait } from './_helpers/helpers';
+import { OplogCheck } from '../lib/check_for_oplog';
+import { _ } from 'meteor/underscore';
 
 Tinytest.addAsync('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', function (test, done) {
   const old = process.env.MONGO_OPLOG_URL;

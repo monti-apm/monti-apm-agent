@@ -3,7 +3,7 @@
 // Tinytest.addAsync(
 //   'Client Side - Error Manager - Reporters - zone - setTimeout',
 //   TestWithErrorTrackingAsync(function (test, next) {
-//     hijackKadiraSendErrors(mock_KadiraSendErrors);
+//     hijackKadiraSendErrors(mockKadiraSendErrors);
 //     test.equal(typeof window.onerror, 'function');
 //     var message = Meteor.uuid();
 
@@ -16,7 +16,7 @@
 //       next();
 //     }, 1000);
 
-//     function mock_KadiraSendErrors(error) {
+//     function mockKadiraSendErrors(error) {
 //       test.equal('string', typeof error.appId);
 //       test.equal('object', typeof error.info);
 //       test.equal(message, error.name);
@@ -32,14 +32,14 @@
 
 // //--------------------------------------------------------------------------\\
 
-// var original_KadiraSendErrors = Kadira.errors.sendError;
+// var originalKadiraSendError = Kadira.errors.sendError;
 
 // function hijackKadiraSendErrors(mock) {
 //   Kadira.errors.sendError = mock;
 // }
 
 // function restoreKadiraSendErrors() {
-//   Kadira.errors.sendError = original_KadiraSendErrors;
+//   Kadira.errors.sendError = originalKadiraSendError;
 // }
 
 // function TestWithErrorTrackingAsync (testFunction) {

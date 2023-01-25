@@ -1,3 +1,5 @@
+import { GetMeteorClient, RegisterMethod } from './_helpers/helpers';
+
 Tinytest.add(
   'Helpers - ddp server connection',
   function (test) {

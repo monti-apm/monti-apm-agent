@@ -1,5 +1,4 @@
 import { Meteor } from 'meteor/meteor';
 
-MethodStore = [];
-TestData = new Meteor.Collection('tinytest-data');
-TestData2 = new Meteor.Collection('tinytest-data-2');
+export const MethodStore = [];
+export const TestData = new Meteor.Collection('tinytest-data');
