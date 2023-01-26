@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import { CleanTestData, EnableTrackingMethods, GetMeteorClient, RegisterMethod } from '../_helpers/helpers';
 
 Tinytest.add(
   'Info - Meteor.EnvironmentVariable',
@@ -6,9 +7,10 @@ Tinytest.add(
     EnableTrackingMethods();
     let methodId = RegisterMethod(testMethod);
     let client = GetMeteorClient();
-    let result = client.call(methodId, 10, 'abc');
-    CleanTestData();
 
+    client.call(methodId, 10, 'abc');
+
+    CleanTestData();
 
     function testMethod () {
       Meteor.setTimeout(function () {

@@ -1,4 +1,12 @@
 import { Meteor } from 'meteor/meteor';
+import { TestData } from '../_helpers/globals';
+import {
+  CleanTestData,
+  EnableTrackingMethods,
+  GetLastMethodEvents,
+  GetMeteorClient,
+  RegisterMethod
+} from '../_helpers/helpers';
 
 Tinytest.add(
   'Async - track with Meteor._wrapAsync',
@@ -11,7 +19,7 @@ Tinytest.add(
       wait(100);
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0]);
     let expected = [
       ['start'],
@@ -36,12 +44,10 @@ Tinytest.add(
       });
       try {
         wait(100);
-      } catch (ex) {
-
-      }
+      } catch (ex) { /* empty */ }
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0]);
     let expected = [
       ['start'],

@@ -1,6 +1,12 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
-import { TestHelpers } from '../_helpers/helpers';
+import {
+  CleanTestData, CloseClient,
+  EnableTrackingMethods, FindMetricsForPub,
+  GetMeteorClient, GetPubSubMetrics, GetPubSubPayload, RegisterPublication,
+  SubscribeAndWait,
+  TestHelpers, Wait
+} from '../_helpers/helpers';
 
 Tinytest.add(
   'Subscriptions - Sub/Unsub - subscribe only',
@@ -169,15 +175,14 @@ Tinytest.add(
     CleanTestData();
     EnableTrackingMethods();
     let client = GetMeteorClient();
-    const Future = Npm.require('fibers/future');
-    let f = new Future();
+
     let h1 = SubscribeAndWait(client, 'tinytest-data');
     let h2 = SubscribeAndWait(client, 'tinytest-data');
     let h3 = SubscribeAndWait(client, 'tinytest-data-2');
 
     let payload = GetPubSubPayload();
-    test.equal(payload[0].pubs['tinytest-data'].activeSubs == 2, true);
-    test.equal(payload[0].pubs['tinytest-data-2'].activeSubs == 1, true);
+    test.equal(payload[0].pubs['tinytest-data'].activeSubs === 2, true);
+    test.equal(payload[0].pubs['tinytest-data-2'].activeSubs === 1, true);
     h1.stop();
     h2.stop();
     h3.stop();
@@ -190,19 +195,19 @@ Tinytest.add(
   function (test) {
     CleanTestData();
     EnableTrackingMethods();
-    ReadyCounts = 0;
+    let ReadyCounts = 0;
     let pubId = RegisterPublication(function () {
       this.ready();
       this.ready();
     });
     let original = Kadira.models.pubsub._trackReady;
     Kadira.models.pubsub._trackReady = function (session, sub) {
-      if (sub._name == pubId) {
+      if (sub._name === pubId) {
         ReadyCounts++;
       }
     };
     let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, pubId);
+    SubscribeAndWait(client, pubId);
 
     test.equal(ReadyCounts, 1);
     Kadira.models.pubsub._trackReady = original;

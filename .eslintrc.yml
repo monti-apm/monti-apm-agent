@@ -7,14 +7,19 @@ plugins:
 env:
   es6: true
   node: true
+  browser: true
 globals:
+  Monti: writable
+  Meteor: readonly
   Tinytest: readonly
   Package: readonly
-  Kadira: readonly
+  Kadira: writable
   MeteorX: readonly
   Npm: readonly
   window: readonly
+  Minimongo: readonly
   __meteor_runtime_config__: readonly
+  __meteor_bootstrap__: readonly
 parserOptions:
   requireConfigFile: false
   sourceType: 'module'
@@ -255,7 +260,7 @@ rules:
     - always
   strict: 0
   use-isnan: 2
-  valid-jsdoc: 1
+  valid-jsdoc: 0
   valid-typeof: 2
   vars-on-top: 0
   wrap-iife: 2
@@ -268,7 +273,7 @@ rules:
   class-methods-use-this: 0
   no-empty-function: 0
   sort-imports: 0
-  line-comment-position: 1
+  line-comment-position: 0
   prefer-rest-params: 0
   symbol-description: 1
   callback-return: 0

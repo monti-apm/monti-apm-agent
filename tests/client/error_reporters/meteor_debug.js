@@ -4,7 +4,7 @@ import { Random } from 'meteor/random';
 Tinytest.add(
   'Client Side - Error Manager - Reporters - meteor._debug - with zone',
   TestWithErrorTracking(function (test) {
-    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    hijackKadiraSendErrors(mockKadiraSendErrors);
     test.equal(typeof Meteor._debug, 'function');
     let errorSent = false;
     let message = Random.id();
@@ -19,7 +19,7 @@ Tinytest.add(
 
     // cleajr
     window.zone = originalZone;
-    function mock_KadiraSendErrors (data) {
+    function mockKadiraSendErrors () {
       errorSent = true;
     }
   })
@@ -28,7 +28,7 @@ Tinytest.add(
 Tinytest.add(
   'Client Side - Error Manager - Reporters - meteor._debug - without zone',
   TestWithErrorTracking(function (test) {
-    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    hijackKadiraSendErrors(mockKadiraSendErrors);
     test.equal(typeof Meteor._debug, 'function');
     let errorSent = false;
     let originalZone = window.zone;
@@ -37,13 +37,13 @@ Tinytest.add(
 
     try {
       Meteor._debug(message, '_stack');
-    } catch (e) { }
+    } catch (e) { /* empty */ }
 
     window.zone = originalZone;
     test.equal(errorSent, true);
     restoreKadiraSendErrors();
 
-    function mock_KadiraSendErrors (error) {
+    function mockKadiraSendErrors (error) {
       errorSent = true;
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
@@ -59,7 +59,7 @@ Tinytest.add(
 Tinytest.add(
   'Client Side - Error Manager - Reporters - meteor._debug - using Error only',
   TestWithErrorTracking(function (test) {
-    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    hijackKadiraSendErrors(mockKadiraSendErrors);
     test.equal(typeof Meteor._debug, 'function');
     let errorSent = false;
     let originalZone = window.zone;
@@ -70,13 +70,13 @@ Tinytest.add(
       let err = new Error(message);
       err.stack = '_stack';
       Meteor._debug(err);
-    } catch (e) { }
+    } catch (e) { /* empty */ }
 
     window.zone = originalZone;
     test.equal(errorSent, true);
     restoreKadiraSendErrors();
 
-    function mock_KadiraSendErrors (error) {
+    function mockKadiraSendErrors (error) {
       errorSent = true;
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
@@ -92,7 +92,7 @@ Tinytest.add(
 Tinytest.add(
   'Client Side - Error Manager - Reporters - meteor._debug - string and Error',
   TestWithErrorTracking(function (test) {
-    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    hijackKadiraSendErrors(mockKadiraSendErrors);
     test.equal(typeof Meteor._debug, 'function');
     let errorSent = false;
     let originalZone = window.zone;
@@ -104,13 +104,13 @@ Tinytest.add(
       let err = new Error(errorMessage);
       err.stack = '_stack';
       Meteor._debug(message, err);
-    } catch (e) { }
+    } catch (e) { /* empty */ }
 
     window.zone = originalZone;
     test.equal(errorSent, true);
     restoreKadiraSendErrors();
 
-    function mock_KadiraSendErrors (error) {
+    function mockKadiraSendErrors (error) {
       errorSent = true;
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
@@ -126,7 +126,7 @@ Tinytest.add(
 Tinytest.add(
   'Client Side - Error Manager - Reporters - meteor._debug - string with colon and Error',
   TestWithErrorTracking(function (test) {
-    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    hijackKadiraSendErrors(mockKadiraSendErrors);
     test.equal(typeof Meteor._debug, 'function');
     let errorSent = false;
     let originalZone = window.zone;
@@ -138,13 +138,13 @@ Tinytest.add(
       let err = new Error(errorMessage);
       err.stack = '_stack';
       Meteor._debug(message, err);
-    } catch (e) { }
+    } catch (e) { /* empty */ }
 
     window.zone = originalZone;
     test.equal(errorSent, true);
     restoreKadiraSendErrors();
 
-    function mock_KadiraSendErrors (error) {
+    function mockKadiraSendErrors (error) {
       errorSent = true;
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
@@ -160,7 +160,7 @@ Tinytest.add(
 Tinytest.add(
   'Client Side - Error Manager - Reporters - meteor._debug - Meteor.timeout Error',
   TestWithErrorTracking(function (test) {
-    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    hijackKadiraSendErrors(mockKadiraSendErrors);
     test.equal(typeof Meteor._debug, 'function');
     let errorSent = false;
     let originalZone = window.zone;
@@ -172,13 +172,13 @@ Tinytest.add(
       let err = new Error(errorMessage);
       err.stack = '_stack';
       Meteor._debug(message, err);
-    } catch (e) { }
+    } catch (e) { /* empty */ }
 
     window.zone = originalZone;
     test.equal(errorSent, true);
     restoreKadiraSendErrors();
 
-    function mock_KadiraSendErrors (error) {
+    function mockKadiraSendErrors (error) {
       errorSent = true;
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
@@ -194,7 +194,7 @@ Tinytest.add(
 Tinytest.add(
   'Client Side - Error Manager - Reporters - meteor._debug - extract firefox stack',
   TestWithErrorTracking(function (test) {
-    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    hijackKadiraSendErrors(mockKadiraSendErrors);
     let errorSent = false;
     let originalZone = window.zone;
     let message = Random.id();
@@ -213,14 +213,15 @@ Tinytest.add(
       let err = new Error(errorMessage);
       err.stack = stack;
       Meteor._debug(message, err);
-    } catch (e) { }
+    } catch (e) { /* empty */ }
 
     window.zone = originalZone;
     test.equal(errorSent, true);
     restoreKadiraSendErrors();
 
-    function mock_KadiraSendErrors (error) {
+    function mockKadiraSendErrors (error) {
       errorSent = true;
+      // eslint-disable-next-line no-undef
       test.equal(expectedStack, stackResult);
       test.equal('number', typeof error.startTime);
       test.equal('meteor._debug', error.subType);
@@ -230,15 +231,15 @@ Tinytest.add(
 
 // --------------------------------------------------------------------------\\
 
-let original_KadiraSendErrors;
+let originalKadiraSendError;
 
 function hijackKadiraSendErrors (mock) {
-  original_KadiraSendErrors = Kadira.errors.sendError;
+  originalKadiraSendError = Kadira.errors.sendError;
   Kadira.errors.sendError = mock;
 }
 
 function restoreKadiraSendErrors () {
-  Kadira.errors.sendError = original_KadiraSendErrors;
+  Kadira.errors.sendError = originalKadiraSendError;
 }
 
 function TestWithErrorTracking (testFunction) {
@@ -249,6 +250,10 @@ function TestWithErrorTracking (testFunction) {
     Kadira.enableErrorTracking();
     testFunction(test);
     Kadira.options.appId = appId;
-    status ? Kadira.enableErrorTracking() : Kadira.disableErrorTracking();
+    if (status) {
+      Kadira.enableErrorTracking();
+    } else {
+      Kadira.disableErrorTracking();
+    }
   };
 }

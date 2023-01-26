@@ -1,5 +1,13 @@
 import { PubsubModel } from '../../lib/models/pubsub';
-import { addTestWithRoundedTime } from '../_helpers/helpers';
+import {
+  addTestWithRoundedTime,
+  CleanTestData,
+  CloseClient,
+  GetMeteorClient, GetPubSubPayload,
+  SubscribeAndWait,
+  Wait, WithDocCacheGetSize
+} from '../_helpers/helpers';
+import {TestData} from '../_helpers/globals';
 
 addTestWithRoundedTime(
   'Models - PubSub - Metrics - same date',
@@ -98,10 +106,10 @@ addTestWithRoundedTime(
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let model = new PubsubModel();
-    var metrics = model._getMetrics(d1, pub);
+    let metrics = model._getMetrics(d1, pub);
     metrics.resTime = 3000;
     metrics.subs = 3;
-    var metrics = [
+    metrics = [
       model.buildPayload(),
       model.metricsByMinute
     ];
@@ -116,10 +124,10 @@ addTestWithRoundedTime(
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let model = new PubsubModel();
-    var metrics = model._getMetrics(d1, pub);
+    let metrics = model._getMetrics(d1, pub);
     metrics.lifeTime = 4000;
     metrics.unsubs = 2;
-    var metrics = [
+    metrics = [
       model.buildPayload(),
       model.metricsByMinute
     ];
@@ -260,7 +268,11 @@ addTestWithRoundedTime(
   function (test) {
     CleanTestData();
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
-    docs.forEach(function (doc) { TestData.insert(doc); });
+
+    docs.forEach(function (doc) {
+      TestData.insert(doc);
+    });
+
     let client = GetMeteorClient();
     let h1 = SubscribeAndWait(client, 'tinytest-data');
     Wait(200);
@@ -276,7 +288,11 @@ addTestWithRoundedTime(
   function (test) {
     CleanTestData();
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
-    docs.forEach(function (doc) { TestData.insert(doc); });
+
+    docs.forEach(function (doc) {
+      TestData.insert(doc);
+    });
+
     let client = GetMeteorClient();
     let h1 = SubscribeAndWait(client, 'tinytest-data');
     TestData.insert({data: 'data4'});
@@ -293,7 +309,9 @@ addTestWithRoundedTime(
   function (test) {
     CleanTestData();
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
-    docs.forEach(function (doc) { TestData.insert(doc); });
+    docs.forEach(function (doc) {
+      TestData.insert(doc);
+    });
     let client = GetMeteorClient();
     let h1 = SubscribeAndWait(client, 'tinytest-data');
     TestData.remove({data: 'data3'});
@@ -310,7 +328,9 @@ addTestWithRoundedTime(
   function (test) {
     CleanTestData();
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
-    docs.forEach(function (doc) { TestData.insert(doc); });
+    docs.forEach(function (doc) {
+      TestData.insert(doc);
+    });
     let client = GetMeteorClient();
     let h1 = SubscribeAndWait(client, 'tinytest-data');
     h1.stop();
@@ -326,7 +346,9 @@ addTestWithRoundedTime(
   function (test) {
     CleanTestData();
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
-    docs.forEach(function (doc) { TestData.insert(doc); });
+    docs.forEach(function (doc) {
+      TestData.insert(doc);
+    });
     let client = GetMeteorClient();
     let h1 = SubscribeAndWait(client, 'tinytest-data');
     CloseClient(client);
@@ -342,7 +364,9 @@ addTestWithRoundedTime(
   function (test) {
     CleanTestData();
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
-    docs.forEach(function (doc) { TestData.insert(doc); });
+    docs.forEach(function (doc) {
+      TestData.insert(doc);
+    });
     let client = GetMeteorClient();
     let h1 = SubscribeAndWait(client, 'tinytest-data');
     let h2 = SubscribeAndWait(client, 'tinytest-data');
@@ -362,7 +386,9 @@ addTestWithRoundedTime(
   function (test) {
     CleanTestData();
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
-    docs.forEach(function (doc) { TestData.insert(doc); });
+    docs.forEach(function (doc) {
+      TestData.insert(doc);
+    });
     let client = GetMeteorClient();
     let h1 = SubscribeAndWait(client, 'tinytest-data');
     let h2 = SubscribeAndWait(client, 'tinytest-data');
@@ -384,12 +410,12 @@ addTestWithRoundedTime(
     let client = GetMeteorClient();
     let h1 = SubscribeAndWait(client, 'tinytest-data');
     Wait(200);
-    var payload = GetPubSubPayload();
+    let payload = GetPubSubPayload();
     test.equal(payload[0].pubs['tinytest-data'].createdObservers, 1);
     test.equal(payload[0].pubs['tinytest-data'].deletedObservers, 0);
     h1.stop();
     Wait(200);
-    var payload = GetPubSubPayload();
+    payload = GetPubSubPayload();
     test.equal(payload[0].pubs['tinytest-data'].deletedObservers, 1);
     CloseClient(client);
   }
@@ -402,7 +428,7 @@ addTestWithRoundedTime(
     let client = GetMeteorClient();
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
+    SubscribeAndWait(client, 'tinytest-data');
     Wait(200);
     let payload = GetPubSubPayload();
     test.equal(payload[0].pubs['tinytest-data'].polledDocuments, 2);
@@ -415,7 +441,9 @@ addTestWithRoundedTime(
   function (test) {
     CleanTestData();
     let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
+
+    SubscribeAndWait(client, 'tinytest-data');
+
     Wait(50);
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
@@ -434,7 +462,9 @@ addTestWithRoundedTime(
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
     Wait(50);
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
+
+    SubscribeAndWait(client, 'tinytest-data');
+
     Wait(200);
     TestData.remove({});
     Wait(100);
@@ -451,7 +481,7 @@ addTestWithRoundedTime(
     let client = GetMeteorClient();
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
+    SubscribeAndWait(client, 'tinytest-data');
     Wait(200);
     TestData.update({}, {$set: {kk: 20}}, {multi: true});
     Wait(100);
@@ -486,8 +516,8 @@ addTestWithRoundedTime(
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
     Wait(50);
-    let h1 = SubscribeAndWait(client, 'tinytest-data-random');
-    let h2 = SubscribeAndWait(client, 'tinytest-data-random');
+    SubscribeAndWait(client, 'tinytest-data-random');
+    SubscribeAndWait(client, 'tinytest-data-random');
     Wait(100);
     let payload = GetPubSubPayload();
     test.equal(payload[0].pubs['tinytest-data-random'].initiallyAddedDocuments, 4);
@@ -501,8 +531,8 @@ addTestWithRoundedTime(
     CleanTestData();
     let client = GetMeteorClient();
     // This will create two observers
-    let h1 = SubscribeAndWait(client, 'tinytest-data-random');
-    let h2 = SubscribeAndWait(client, 'tinytest-data-random');
+    SubscribeAndWait(client, 'tinytest-data-random');
+    SubscribeAndWait(client, 'tinytest-data-random');
     Wait(50);
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
@@ -526,8 +556,8 @@ addTestWithRoundedTime(
 
     Wait(50);
 
-    let h1 = SubscribeAndWait(client, 'tinytest-data-random');
-    let h2 = SubscribeAndWait(client, 'tinytest-data-random');
+    SubscribeAndWait(client, 'tinytest-data-random');
+    SubscribeAndWait(client, 'tinytest-data-random');
 
     Wait(100);
 
@@ -555,8 +585,8 @@ addTestWithRoundedTime(
     // This will create two observers
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
-    let h1 = SubscribeAndWait(client, 'tinytest-data-random');
-    let h2 = SubscribeAndWait(client, 'tinytest-data-random');
+    SubscribeAndWait(client, 'tinytest-data-random');
+    SubscribeAndWait(client, 'tinytest-data-random');
     Wait(100);
     TestData.remove({});
     Wait(50);
@@ -574,7 +604,7 @@ addTestWithRoundedTime(
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
     Wait(50);
-    let h1 = SubscribeAndWait(client, 'tinytest-data-random');
+    SubscribeAndWait(client, 'tinytest-data-random');
     Wait(100);
     let payload = GetPubSubPayload();
 
@@ -591,7 +621,7 @@ addTestWithRoundedTime(
   function (test) {
     CleanTestData();
     let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data-random');
+    SubscribeAndWait(client, 'tinytest-data-random');
     Wait(50);
     TestData.insert({aa: 10});
     TestData.insert({aa: 20});
@@ -616,7 +646,7 @@ addTestWithRoundedTime(
     Wait(100);
 
     WithDocCacheGetSize(function () {
-      let h1 = SubscribeAndWait(client, 'tinytest-data-random');
+      SubscribeAndWait(client, 'tinytest-data-random');
       Wait(200);
     }, 30);
 
@@ -633,7 +663,7 @@ addTestWithRoundedTime(
     let client = GetMeteorClient();
 
     WithDocCacheGetSize(function () {
-      let h1 = SubscribeAndWait(client, 'tinytest-data-random');
+      SubscribeAndWait(client, 'tinytest-data-random');
       Wait(100);
       TestData.insert({aa: 10});
       TestData.insert({aa: 20});
