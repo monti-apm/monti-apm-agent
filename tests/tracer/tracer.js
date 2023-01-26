@@ -463,7 +463,7 @@ Tinytest.add(
       events: [
         {...eventDefaults, type: EventType.START, at: now, endAt: now},
         {...eventDefaults, type: EventType.WAIT, at: now, endAt: now + 1000, nested: [{ type: EventType.DB, endAt: null }]},
-        {...eventDefaults, type: EventType.COMPUTE, at: now + 1000, endAt: now + 2500, nested: [{ type: EventType.ASYNC, endAt: null }]},
+        {...eventDefaults, type: EventType.ASYNC, at: now + 1000, endAt: now + 2500, nested: [{ type: EventType.ASYNC, endAt: null }]},
         {...eventDefaults, type: EventType.DB, at: now + 2500, endAt: now + 3500, nested: [{ type: EventType.ASYNC, endAt: null }]},
         {type: EventType.COMPLETE, at: now + 3500}
       ]
@@ -477,6 +477,7 @@ Tinytest.add(
     test.equal(traceInfo.metrics, {
       total: 3500,
       wait: 1000,
+      async: 1500,
       db: 1000,
       compute: 0,
     });
