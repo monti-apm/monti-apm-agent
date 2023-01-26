@@ -511,7 +511,6 @@ Tinytest.add(
 
     test.equal(traceInfo.metrics, {
       total: 2500,
-      custom: 1500,
       compute: 1000,
       async: 100,
       db: 100,
