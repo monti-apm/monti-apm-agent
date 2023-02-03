@@ -174,7 +174,9 @@ export const WithDocCacheGetSize = function (fn, patchedSize) {
   }
 };
 
-export const releaseParts = Meteor.release.split('METEOR@')[1]?.split('.').map(num => parseInt(num, 10)) || [0, 0, 0];
+const releaseVer = Meteor.release.split('METEOR@')[1];
+
+export const releaseParts = releaseVer && releaseVer.split('.').map(num => parseInt(num, 10)) || [0, 0, 0];
 
 export const withRoundedTime = (fn) => (test) => {
   const date = new Date();
