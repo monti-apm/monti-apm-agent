@@ -1,8 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { DDP } from 'meteor/ddp';
-const Future = Npm.require('fibers/future');
 import { MethodStore, TestData } from './globals';
+
+const Future = require('fibers/future');
 
 export const GetMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
@@ -173,7 +174,7 @@ export const WithDocCacheGetSize = function (fn, patchedSize) {
   }
 };
 
-export const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => parseInt(num, 10));
+export const releaseParts = Meteor.release.split('METEOR@')[1]?.split('.').map(num => parseInt(num, 10)) || [0, 0, 0];
 
 export const withRoundedTime = (fn) => (test) => {
   const date = new Date();

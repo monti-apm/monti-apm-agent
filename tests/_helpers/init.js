@@ -3,8 +3,8 @@ import { Random } from 'meteor/random';
 import { MethodStore, TestData } from './globals';
 
 Kadira.connect('foo', 'bar', {enableErrorTracking: true});
-let http = Npm.require('http');
-let Future = Npm.require('fibers/future');
+let http = require('http');
+let Future = require('fibers/future');
 
 let server3301 = new Future();
 let server8808 = new Future();

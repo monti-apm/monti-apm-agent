@@ -1,11 +1,17 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import {
-  CleanTestData, CloseClient,
-  EnableTrackingMethods, FindMetricsForPub,
-  GetMeteorClient, GetPubSubMetrics, GetPubSubPayload, RegisterPublication,
+  CleanTestData,
+  CloseClient,
+  EnableTrackingMethods,
+  FindMetricsForPub,
+  GetMeteorClient,
+  GetPubSubMetrics,
+  GetPubSubPayload,
+  RegisterPublication,
   SubscribeAndWait,
-  TestHelpers, Wait
+  TestHelpers,
+  Wait
 } from '../_helpers/helpers';
 
 Tinytest.add(
@@ -72,7 +78,7 @@ Tinytest.add(
 //   function (test) {
 //     EnableTrackingMethods();
 //     var client = GetMeteorClient();
-//     var Future = Npm.require('fibers/future');
+//     var Future = require('fibers/future');
 //     var f = new Future();
 //     var h1, h2;
 //     h1 = client.subscribe('tinytest-data-multi', function() {
@@ -117,7 +123,7 @@ Tinytest.add(
 // //     // test.fail('no pubs for null(autopublish)');
 // //     // EnableTrackingMethods();
 // //     // var client = GetMeteorClient();
-// //     // var Future = Npm.require('fibers/future');
+// //     // var Future = require('fibers/future');
 // //     // var f = new Future();
 // //     // var interval = setInterval(function () {
 // //     //   if (client.status().connected) {

@@ -1,6 +1,7 @@
 import { fetch } from 'meteor/fetch';
 import { CleanTestData, GetLastMethodEvents, GetMeteorClient, RegisterMethod } from '../_helpers/helpers';
-const Future = Npm.require('fibers/future');
+
+const Future = require('fibers/future');
 
 Tinytest.add('HTTP - meteor/fetch - async call', function (test) {
   const methodId = RegisterMethod(function () {
