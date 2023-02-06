@@ -3,8 +3,6 @@ import { Random } from 'meteor/random';
 import { DDP } from 'meteor/ddp';
 import { MethodStore, TestData } from './globals';
 
-const Future = require('fibers/future');
-
 export const GetMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
   return DDP.connect(url, {retry: false});
@@ -85,11 +83,9 @@ export const GetPubSubPayload = function (detailInfoNeeded) {
 };
 
 export const Wait = function (time) {
-  let f = new Future();
-  Meteor.setTimeout(function () {
-    f.return();
-  }, time);
-  f.wait();
+  return new Promise((resolve) => {
+    setTimeout(resolve, time);
+  });
 };
 
 export const CleanTestData = function () {
@@ -100,26 +96,20 @@ export const CleanTestData = function () {
 };
 
 export const SubscribeAndWait = function (client, name, args) {
-  let f = new Future();
-  args = Array.prototype.splice.call(arguments, 1);
-  args.push({
-    onError (err) {
-      f.return(err);
-    },
-    onReady () {
-      f.return();
-    }
+  return new Promise((resolve, reject) => {
+    args = Array.prototype.splice.call(arguments, 1);
+
+    args.push({
+      onError (err) {
+        reject(err);
+      },
+      onReady () {
+        resolve();
+      }
+    });
+
+    client.subscribe(...args);
   });
-
-  // eslint-disable-next-line prefer-spread
-  let handler = client.subscribe.apply(client, args);
-  let error = f.wait();
-
-  if (error) {
-    throw error;
-  } else {
-    return handler;
-  }
 };
 
 export function compareNear (v1, v2, maxDifference) {
@@ -136,28 +126,30 @@ export function compareNear (v1, v2, maxDifference) {
 }
 
 export const CloseClient = function (client) {
-  let sessionId = client._lastSessionId;
-  client.disconnect();
-  let f = new Future();
-  function checkClientExtence (_sessionId) {
-    let sessionExists;
-    if (Meteor.server.sessions instanceof Map) {
-      // Meteor 1.8.1 and newer
-      sessionExists = Meteor.server.sessions.has(_sessionId);
-    } else {
-      sessionExists = Meteor.server.sessions[_sessionId];
+  return new Promise((resolve) => {
+    let sessionId = client._lastSessionId;
+    client.disconnect();
+
+    function checkClientExtence (_sessionId) {
+      let sessionExists;
+      if (Meteor.server.sessions instanceof Map) {
+        // Meteor 1.8.1 and newer
+        sessionExists = Meteor.server.sessions.has(_sessionId);
+      } else {
+        sessionExists = Meteor.server.sessions[_sessionId];
+      }
+
+      if (sessionExists) {
+        setTimeout(function () {
+          checkClientExtence(_sessionId);
+        }, 20);
+      } else {
+        resolve();
+      }
     }
 
-    if (sessionExists) {
-      setTimeout(function () {
-        checkClientExtence(_sessionId);
-      }, 20);
-    } else {
-      f.return();
-    }
-  }
-  checkClientExtence(sessionId);
-  return f.wait();
+    checkClientExtence(sessionId);
+  });
 };
 
 export const WithDocCacheGetSize = function (fn, patchedSize) {

@@ -1,8 +1,6 @@
 import { HTTP } from 'meteor/http';
 import { CleanTestData, GetLastMethodEvents, GetMeteorClient, RegisterMethod } from '../_helpers/helpers';
 
-const Future = require('fibers/future');
-
 Tinytest.add('HTTP - meteor/http - call a server', function (test) {
   const methodId = RegisterMethod(function () {
     const result = HTTP.get('http://localhost:3301');

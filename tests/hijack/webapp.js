@@ -1,5 +1,5 @@
 import { WebApp } from 'meteor/webapp';
-import { checkHandlersInFiber, wrapWebApp } from '../../lib/hijack/wrap_webapp';
+import { wrapWebApp } from '../../lib/hijack/wrap_webapp';
 import { releaseParts } from '../_helpers/helpers';
 
 // Check if Meteor 1.7 or newer, which are the
@@ -7,14 +7,6 @@ import { releaseParts } from '../_helpers/helpers';
 // to wrap the static middleware
 const httpMonitoringEnabled = releaseParts[0] > 1 ||
   (releaseParts[0] > 0 && releaseParts[1] > 6);
-
-Tinytest.add(
-  'Webapp - checkHandlersInFiber',
-  function (test) {
-    const expected = httpMonitoringEnabled;
-    test.equal(checkHandlersInFiber(), expected);
-  }
-);
 
 if (httpMonitoringEnabled) {
   wrapWebApp();

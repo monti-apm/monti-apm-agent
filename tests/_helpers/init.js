@@ -4,7 +4,6 @@ import { MethodStore, TestData } from './globals';
 
 Kadira.connect('foo', 'bar', {enableErrorTracking: true});
 let http = require('http');
-let Future = require('fibers/future');
 
 let server3301 = new Future();
 let server8808 = new Future();
