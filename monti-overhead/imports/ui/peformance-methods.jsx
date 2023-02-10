@@ -20,8 +20,8 @@ export const PerformanceMethods = () => {
   }, [total, isRunning])
 
   return (
-    <div>
-      <h2>Performance Tests</h2>
+    <article>
+      <header>Performance Tests</header>
 
       <label>
         Total Calls
@@ -32,6 +32,6 @@ export const PerformanceMethods = () => {
       <button onClick={callEcho} disabled={isRunning}>Echo</button>
 
       <progress value={curProgress} max={total}></progress>
-    </div>
+    </article>
   );
 };
