@@ -4,5 +4,5 @@ import { WebApp } from 'meteor/webapp';
 import '../imports/methods/performance';
 
 Meteor.startup(async () => {
-  WebApp.addHtmlAttributeHook(() => ({ 'data-theme': 'light' }));
+  WebApp.addHtmlAttributeHook(() => ({ 'data-theme': 'dark', class: 'dark' }));
 });

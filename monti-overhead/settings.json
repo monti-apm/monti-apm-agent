@@ -1,1 +1,9 @@
-{}
+{
+  "monti": {
+    "appId": "s4eSWPyZy4AgiHGmF",
+    "appSecret": "c497f00a-3eb1-4d39-b101-e8c8fd63118f",
+    "options": {
+      "endpoint": "http://localhost:11011"
+    }
+  }
+}

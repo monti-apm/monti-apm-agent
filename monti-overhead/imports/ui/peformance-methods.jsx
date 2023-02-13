@@ -1,9 +1,8 @@
-import React, { useCallback } from 'react';
-import { range } from 'lodash';
-import { call } from '../utils/methods';
+import React from 'react';
 import { useReactive } from 'ahooks';
+import { Tests } from './tests';
 
-export const PerformanceMethods = () => {
+export const PerformanceMethods = ({ appState }) => {
   const state = useReactive({
     isRunning: false,
     total: 1000,
@@ -15,29 +14,6 @@ export const PerformanceMethods = () => {
     averageCallDuration: null,
   })
 
-  const callEcho = useCallback(async () => {
-    state.memBefore = await call('getMemoryUsage')
-    state.isRunning = true
-    state.startTime = performance.now()
-
-    for (const i of range(state.total)) {
-      await call('echo', 'Hello World!')
-      state.curProgress = i + 1
-      state.averageCallDuration = (performance.now() - state.startTime) / (i + 1)
-    }
-
-    state.endTime = performance.now()
-
-    state.isRunning = false
-    state.curProgress = null
-
-    state.memAfter = await call('getMemoryUsage')
-
-    console.log('Memory Usage Before:', state.memBefore)
-    console.log('Memory Usage After:', state.memAfter)
-    console.log('Average Call Duration:', state.averageCallDuration, 'ms')
-  }, [state.total, state.isRunning, state.memBefore, state.memAfter, state.curProgress])
-
   return (
     <article>
       <header>Performance Tests</header>
@@ -48,7 +24,8 @@ export const PerformanceMethods = () => {
       </label>
 
       <h3>Tests</h3>
-      <button onClick={callEcho} disabled={state.isRunning}>Echo</button>
+
+      <button onClick={() => Tests.echo(state, appState)} disabled={state.isRunning}>Echo</button>
 
       {state.memBefore ? <p>Heap Usage Before: {state.memBefore.heapUsed.toFixed(2)}kb</p> : null}
       {state.memAfter ? <p>Heap Usage After: {state.memAfter.heapUsed.toFixed(2)}kb</p> : null}
