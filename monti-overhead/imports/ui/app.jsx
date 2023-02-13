@@ -8,7 +8,7 @@ const isMontiApmInstalled = !!Package['montiapm:agent'];
 export const App = () => {
   const appState = useReactive({
     history: [],
-  })
+  });
 
   const montiInstalled = isMontiApmInstalled ?
     <span className='font-medium text-green-600'>Monti APM Installed</span> :
@@ -25,8 +25,8 @@ export const App = () => {
         </ul>
       </nav>
       <div className='grid grid-cols-2'>
-        <PerformanceMethods appState={appState} />
-        <Histogram appState={appState} />
+        <PerformanceMethods appState={ appState } />
+        <Histogram appState={ appState } />
       </div>
     </div>
   );

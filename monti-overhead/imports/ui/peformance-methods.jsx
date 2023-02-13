@@ -12,7 +12,7 @@ export const PerformanceMethods = ({ appState }) => {
     startTime: null,
     endTime: null,
     averageCallDuration: null,
-  })
+  });
 
   return (
     <article>
@@ -20,18 +20,27 @@ export const PerformanceMethods = ({ appState }) => {
 
       <label>
         Total Calls
-        <input type='number' min={100} max={100000} onChange={(e) => state.total = Number(e.target.value)} value={state.total} />
+        <input
+          type='number' min={ 100 } max={ 100000 } onChange={ (e) => {
+            state.total = Number(e.target.value);
+          } } value={ state.total }
+        />
+      </label>
+
+      <label htmlFor='terms'>
+        <input type='checkbox' id='terms' name='terms' />
+        Enable Profiler
       </label>
 
       <h3>Tests</h3>
 
-      <button onClick={() => Tests.echo(state, appState)} disabled={state.isRunning}>Echo</button>
+      <button onClick={ () => Tests.echo(state, appState) } disabled={ state.isRunning }>Echo</button>
 
       {state.memBefore ? <p>Heap Usage Before: {state.memBefore.heapUsed.toFixed(2)}kb</p> : null}
       {state.memAfter ? <p>Heap Usage After: {state.memAfter.heapUsed.toFixed(2)}kb</p> : null}
       {state.averageCallDuration ? <p>Average Call Duration: {state.averageCallDuration.toFixed(2)}ms</p> : null}
 
-      <progress value={state.curProgress} max={state.total}></progress>
+      <progress value={ state.curProgress } max={ state.total } />
     </article>
   );
 };

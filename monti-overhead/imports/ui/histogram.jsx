@@ -1,5 +1,9 @@
 import React from 'react';
 
 export function Histogram () {
-  return <div></div>
+  return (
+    <div>
+      <h2>Histogram</h2>
+    </div>
+  );
 }
