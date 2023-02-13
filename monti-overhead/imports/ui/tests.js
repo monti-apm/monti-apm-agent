@@ -3,7 +3,9 @@ import { range } from 'lodash';
 
 export const Tests = {
   echo: async (state, appState) => {
-    const payload = {};
+    const payload = {
+      id: crypto.randomUUID(),
+    };
 
     state.isRunning = true;
 

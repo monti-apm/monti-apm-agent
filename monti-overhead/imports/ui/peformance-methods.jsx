@@ -7,11 +7,9 @@ export const PerformanceMethods = ({ appState }) => {
     isRunning: false,
     total: 1000,
     curProgress: null,
-    memBefore: null,
-    memAfter: null,
-    startTime: null,
-    endTime: null,
     averageCallDuration: null,
+    profilerEnabled: false,
+    profilerDurationSeconds: 5,
   });
 
   return (
@@ -27,8 +25,21 @@ export const PerformanceMethods = ({ appState }) => {
         />
       </label>
 
-      <label htmlFor='terms'>
-        <input type='checkbox' id='terms' name='terms' />
+      <label>
+        Profiler Duration
+        <input
+          type='number' min={ 5 } max={ 60 } onChange={ (e) => {
+            state.profilerDurationSeconds = Number(e.target.value);
+          } } value={ state.profilerDurationSeconds }
+        />
+      </label>
+
+      <label>
+        <input
+          type='checkbox' checked={ state.profilerEnabled } onChange={ e => {
+            state.profilerEnabled = e.target.checked;
+          } }
+        />
         Enable Profiler
       </label>
 
