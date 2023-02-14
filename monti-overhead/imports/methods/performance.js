@@ -5,6 +5,8 @@ Meteor.methods({
   },
 
   getMemoryUsage () {
+    global.gc();
+
     const memory = process.memoryUsage();
 
     return {
