@@ -16,7 +16,8 @@
   },
   "volta": {
     "node": "14.18.2",
-    "yarn": "1.22.18"
+    "yarn": "1.22.18",
+    "npm": "6.14.17"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.7",
@@ -26,7 +27,8 @@
     "meteor-node-stubs": "^1.2.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "simpl-schema": "^3.4.1"
+    "simpl-schema": "^3.4.1",
+    "v8-profiler-next": "^1.9.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.13",
