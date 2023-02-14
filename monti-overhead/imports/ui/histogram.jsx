@@ -1,4 +1,5 @@
 import React from 'react';
+import { TrashIcon } from '@heroicons/react/20/solid';
 
 export function Histogram ({ historyState }) {
   const [history, setHistory] = historyState;
@@ -6,7 +7,9 @@ export function Histogram ({ historyState }) {
   return (
     <div className='space-y-4 overflow-y-scroll max-h-[80vh]'>
       <div>
-        <button onClick={ () => setHistory([]) } className='inline w-auto outline secondary text-xs px-3 py-2' disabled={ !history.length }>Clear</button>
+        <button onClick={ () => setHistory([]) } className='inline-flex w-auto outline secondary text-xs px-3 py-2' disabled={ !history.length }>
+          <TrashIcon className='w-3 h-3 self-center mr-1' /> Clear
+        </button>
       </div>
 
       {history.map((data, index) => {

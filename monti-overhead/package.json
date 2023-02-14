@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.20.7",
+    "@heroicons/react": "^2.0.15",
     "@picocss/pico": "^1.5.7",
     "ahooks": "^3.7.4",
     "lodash": "^4.17.21",
