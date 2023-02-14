@@ -1,6 +1,11 @@
 import fs from 'fs';
 import v8Profiler from 'v8-profiler-next';
 import path from 'path';
+import memwatch from '@airbnb/node-memwatch';
+
+
+let hd;
+
 
 v8Profiler.setGenerateType(1);
 
@@ -20,10 +25,14 @@ export const stopCpuProfile = Meteor.wrapAsync(function (name, callback) {
 
 export const Profiler = {
   start (name) {
+    global.gc();
+    hd = new memwatch.HeapDiff();
     v8Profiler.startProfiling(name);
   },
   stop (name) {
     const profile = stopCpuProfile(name);
+    global.gc();
+    const diff = hd.end();
 
     const filename = path.resolve(Meteor.absolutePath, `./${name}-${Date.now()}.cpuprofile`);
     console.log(`Writing profile to ${filename}`);
@@ -31,6 +40,7 @@ export const Profiler = {
 
     return {
       filename,
+      diff
     };
   },
   registerMethods () {

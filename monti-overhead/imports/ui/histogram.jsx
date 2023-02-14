@@ -13,7 +13,7 @@ export function Histogram ({ historyState }) {
       </div>
 
       {history.map((data, index) => {
-        const { id, memBefore, memAfter, startTime, endTime, totalCalls, testName, profilerFilename, profilerEnabled, createdAt, montiApmInstalled } = data;
+        const { id, memBefore, memAfter, startTime, endTime, totalCalls, testName, profilerFilename, profilerEnabled, createdAt, montiApmInstalled, diff } = data;
 
         return (<table key={ id } className='p-2 font-medium rounded text-xs' role='grid'>
           <thead>
@@ -62,8 +62,11 @@ export function Histogram ({ historyState }) {
               <td>Profiler Filename:</td>
               <td>{profilerFilename || 'N/A'}</td>
             </tr>
+            <tr>
+              <td>Profiler Diff:</td>
+              <td>{diff ? <pre>{JSON.stringify(diff, null, 2)}</pre> : 'N/A'}</td>
+            </tr>
           </tbody>
-
         </table>);
       }
       )}

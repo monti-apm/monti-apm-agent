@@ -11,7 +11,7 @@ export const PerformanceMethods = ({ historyState }) => {
     total: 1000,
     curProgress: null,
     averageCallDuration: null,
-    profilerEnabled: false,
+    profilerEnabled: true,
   });
 
   const runTest = async (test) => {
@@ -24,11 +24,12 @@ export const PerformanceMethods = ({ historyState }) => {
     };
 
     if (state.profilerEnabled) {
-      const { filename } = await runWithProfiler('monti-overhead', async () => {
+      const { filename, diff } = await runWithProfiler('monti-overhead', async () => {
         await Tests[test](state, payload);
       });
 
       payload.profilerFilename = filename;
+      payload.diff = diff;
     } else {
       await Tests[test](state, payload);
     }
