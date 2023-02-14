@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { PerformanceMethods } from './peformance-methods';
 import { useLocalStorageState } from 'ahooks';
 import { Histogram } from './histogram';
@@ -6,6 +6,7 @@ import { Histogram } from './histogram';
 const isMontiApmInstalled = !!Package['montiapm:agent'];
 
 export const App = () => {
+  const historyListRef = useRef(null);
   const historyState = useLocalStorageState('monti-overhead-history', { defaultValue: [] });
 
   const montiInstalled = isMontiApmInstalled ?
@@ -23,8 +24,8 @@ export const App = () => {
         </ul>
       </nav>
       <div className='grid grid-cols-2'>
-        <PerformanceMethods historyState={ historyState } />
-        <Histogram historyState={ historyState } />
+        <PerformanceMethods historyState={ historyState } historyListRef={ historyListRef } />
+        <Histogram historyState={ historyState } historyListRef={ historyListRef } />
       </div>
     </div>
   );

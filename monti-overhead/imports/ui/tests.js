@@ -3,8 +3,6 @@ import { range } from 'lodash';
 
 export const Tests = {
   echo: async (state, payload) => {
-    state.isRunning = true;
-
     payload.totalCalls = state.total;
     payload.memBefore = await call('getMemoryUsage');
     payload.startTime = performance.now();
@@ -17,7 +15,6 @@ export const Tests = {
 
     payload.endTime = performance.now();
 
-    state.isRunning = false;
     state.curProgress = null;
 
     payload.memAfter = await call('getMemoryUsage');

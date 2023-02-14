@@ -1,24 +1,17 @@
 import React from 'react';
-import { TrashIcon } from '@heroicons/react/20/solid';
 
-export function Histogram ({ historyState }) {
-  const [history, setHistory] = historyState;
+export function Histogram ({ historyState, historyListRef }) {
+  const [history] = historyState;
 
   return (
-    <div className='space-y-4 overflow-y-scroll max-h-[80vh]'>
-      <div>
-        <button onClick={ () => setHistory([]) } className='inline-flex w-auto outline secondary text-xs px-3 py-2' disabled={ !history.length }>
-          <TrashIcon className='w-3 h-3 self-center mr-1' /> Clear
-        </button>
-      </div>
-
-      {history.map((data, index) => {
-        const { id, memBefore, memAfter, startTime, endTime, totalCalls, testName, profilerFilename, profilerEnabled, createdAt, montiApmInstalled, diff } = data;
+    <div className='flex flex-col-reverse space-y-4 overflow-y-scroll max-h-[80vh]' ref={ historyListRef }>
+      {Array.from(history).reverse().map((data) => {
+        const { id, num, memBefore, memAfter, startTime, endTime, totalCalls, testName, profilerFilename, profilerEnabled, createdAt, montiApmInstalled, diff } = data;
 
         return (<table key={ id } className='p-2 font-medium rounded text-xs' role='grid'>
           <thead>
             <tr>
-              <th colSpan='2'>Test #{index + 1} {createdAt}</th>
+              <th colSpan='2'>Test #{num} {createdAt}</th>
             </tr>
           </thead>
           <tbody>
