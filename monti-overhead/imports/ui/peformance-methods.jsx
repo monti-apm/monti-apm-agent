@@ -3,7 +3,9 @@ import { useReactive } from 'ahooks';
 import { Tests } from './tests';
 import { runWithProfiler } from './utils';
 
-export const PerformanceMethods = ({ appState }) => {
+export const PerformanceMethods = ({ historyState }) => {
+  const [history, setHistory] = historyState;
+
   const state = useReactive({
     isRunning: false,
     total: 1000,
@@ -13,17 +15,29 @@ export const PerformanceMethods = ({ appState }) => {
   });
 
   const runTest = async (test) => {
+    const payload = {
+      id: crypto.randomUUID(),
+      testName: test,
+      profilerEnabled: state.profilerEnabled,
+      createdAt: new Date().toISOString(),
+      montiApmInstalled: !!Package['montiapm:agent'],
+    };
+
     if (state.profilerEnabled) {
-      await runWithProfiler('monti-overhead', async () => {
-        await Tests[test](state, appState);
+      const { filename } = await runWithProfiler('monti-overhead', async () => {
+        await Tests[test](state, payload);
       });
+
+      payload.profilerFilename = filename;
     } else {
-      await Tests[test](state, appState);
+      await Tests[test](state, payload);
     }
+
+    setHistory([...history, payload]);
   };
 
   return (
-    <article>
+    <article className='mt-0 mb-0 overflow-y-auto max-h-[80vh]'>
       <header>Performance Tests</header>
 
       <label>

@@ -2,13 +2,10 @@ import { call } from '../utils/methods';
 import { range } from 'lodash';
 
 export const Tests = {
-  echo: async (state, appState) => {
-    const payload = {
-      id: crypto.randomUUID(),
-    };
-
+  echo: async (state, payload) => {
     state.isRunning = true;
 
+    payload.totalCalls = state.total;
     payload.memBefore = await call('getMemoryUsage');
     payload.startTime = performance.now();
 
@@ -24,7 +21,5 @@ export const Tests = {
     state.curProgress = null;
 
     payload.memAfter = await call('getMemoryUsage');
-
-    appState.history.push(payload);
   }
 };
