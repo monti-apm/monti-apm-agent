@@ -48,7 +48,7 @@ export const PerformanceMethods = ({ historyState, historyListRef }) => {
   };
 
   return (
-    <article className='mt-0 mb-0 overflow-y-auto max-h-[80vh]'>
+    <article className='mt-0 mb-0 overflow-y-auto max-h-full'>
       <header>Performance Tests</header>
 
       <label>

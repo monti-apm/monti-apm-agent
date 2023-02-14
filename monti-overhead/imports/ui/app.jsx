@@ -14,8 +14,8 @@ export const App = () => {
     <span className='font-medium text-red-500'>Monti APM Not Installed</span>;
 
   return (
-    <div className='p-4'>
-      <nav>
+    <div className='p-4 h-screen w-screen box-border flex flex-col'>
+      <nav className='grow-0'>
         <ul>
           <li><strong>Monti Overhead</strong></li>
         </ul>
@@ -23,7 +23,7 @@ export const App = () => {
           <li>{montiInstalled}</li>
         </ul>
       </nav>
-      <div className='grid grid-cols-2'>
+      <div className='grid grid-cols-2 grow min-h-0 '>
         <PerformanceMethods historyState={ historyState } historyListRef={ historyListRef } />
         <Histogram historyState={ historyState } historyListRef={ historyListRef } />
       </div>

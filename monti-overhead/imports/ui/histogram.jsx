@@ -4,7 +4,7 @@ export function Histogram ({ historyState, historyListRef }) {
   const [history] = historyState;
 
   return (
-    <div className='flex flex-col-reverse space-y-4 overflow-y-scroll max-h-[80vh]' ref={ historyListRef }>
+    <div className='flex flex-col-reverse gap-4 overflow-y-scroll max-h-full' ref={ historyListRef }>
       {Array.from(history).reverse().map((data) => {
         const { id, num, memBefore, memAfter, startTime, endTime, totalCalls, testName, profilerFilename, profilerEnabled, createdAt, montiApmInstalled, diff } = data;
 

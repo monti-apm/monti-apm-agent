@@ -3,6 +3,6 @@
 @tailwind utilities;
 
 body {
-  padding: 10px;
+  padding: 0 !important;
   font-family: sans-serif;
 }
