@@ -1,6 +1,7 @@
 import React from 'react';
 import { useReactive } from 'ahooks';
 import { Tests } from './tests';
+import { runWithProfiler } from './utils';
 
 export const PerformanceMethods = ({ appState }) => {
   const state = useReactive({
@@ -9,8 +10,17 @@ export const PerformanceMethods = ({ appState }) => {
     curProgress: null,
     averageCallDuration: null,
     profilerEnabled: false,
-    profilerDurationSeconds: 5,
   });
+
+  const runTest = async (test) => {
+    if (state.profilerEnabled) {
+      await runWithProfiler('monti-overhead', async () => {
+        await Tests[test](state, appState);
+      });
+    } else {
+      await Tests[test](state, appState);
+    }
+  };
 
   return (
     <article>
@@ -26,15 +36,6 @@ export const PerformanceMethods = ({ appState }) => {
       </label>
 
       <label>
-        Profiler Duration
-        <input
-          type='number' min={ 5 } max={ 60 } onChange={ (e) => {
-            state.profilerDurationSeconds = Number(e.target.value);
-          } } value={ state.profilerDurationSeconds }
-        />
-      </label>
-
-      <label>
         <input
           type='checkbox' checked={ state.profilerEnabled } onChange={ e => {
             state.profilerEnabled = e.target.checked;
@@ -43,9 +44,9 @@ export const PerformanceMethods = ({ appState }) => {
         Enable Profiler
       </label>
 
-      <h3>Tests</h3>
+      <hr />
 
-      <button onClick={ () => Tests.echo(state, appState) } disabled={ state.isRunning }>Echo</button>
+      <button onClick={ async () => runTest('echo') } disabled={ state.isRunning }>Echo</button>
 
       {state.memBefore ? <p>Heap Usage Before: {state.memBefore.heapUsed.toFixed(2)}kb</p> : null}
       {state.memAfter ? <p>Heap Usage After: {state.memAfter.heapUsed.toFixed(2)}kb</p> : null}

@@ -1,9 +1,12 @@
 import fs from 'fs';
 import v8Profiler from 'v8-profiler-next';
+import path from 'path';
 
-export const writeToDisk = Kadira._wrapAsync(fs.writeFile);
+v8Profiler.setGenerateType(1);
 
-export const stopCpuProfile = Kadira._wrapAsync(function (name, timeToProfileSecs, callback) {
+export const writeToDisk = Meteor.wrapAsync(fs.writeFile);
+
+export const stopCpuProfile = Meteor.wrapAsync(function (name, callback) {
   const profile = v8Profiler.stopProfiling(name);
   profile.export((err, result) => {
     if (err) {
@@ -22,7 +25,13 @@ export const Profiler = {
   stop (name) {
     const profile = stopCpuProfile(name);
 
-    writeToDisk(`./${name}-${Date.now()}.cpuprofile`, profile);
+    const filename = path.resolve(Meteor.absolutePath, `./${name}-${Date.now()}.cpuprofile`);
+    console.log(`Writing profile to ${filename}`);
+    writeToDisk(filename, profile);
+
+    return {
+      filename,
+    };
   },
   registerMethods () {
     Meteor.methods({
@@ -30,7 +39,7 @@ export const Profiler = {
         Profiler.start(name);
       },
       'profiler.stop' (name) {
-        Profiler.stop(name);
+        return Profiler.stop(name);
       }
     });
   }
