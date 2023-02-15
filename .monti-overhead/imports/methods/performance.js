@@ -1,7 +1,12 @@
+import { LinksCollection } from '../api/links';
 
 Meteor.methods({
   echo (msg) {
     return msg;
+  },
+
+  find () {
+    return LinksCollection.find({}).fetch()
   },
 
   getMemoryUsage () {

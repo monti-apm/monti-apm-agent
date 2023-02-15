@@ -3,6 +3,7 @@ import { useReactive } from 'ahooks';
 import { Tests } from './tests';
 import { runWithProfiler } from './utils';
 import { TrashIcon } from '@heroicons/react/20/solid';
+import { TestButton } from './test-button';
 
 export const PerformanceMethods = ({ historyState, historyListRef }) => {
   const [history, setHistory] = historyState;
@@ -15,7 +16,7 @@ export const PerformanceMethods = ({ historyState, historyListRef }) => {
     profilerEnabled: true,
   });
 
-  const runTest = async (test) => {
+  const onTestRun = async (test) => {
     state.isRunning = true;
 
     const payload = {
@@ -71,7 +72,8 @@ export const PerformanceMethods = ({ historyState, historyListRef }) => {
 
       <hr />
 
-      <button onClick={ async () => runTest('echo') } disabled={ state.isRunning }>Echo</button>
+      <TestButton test='echo' onTestRun={onTestRun} state={state} />
+      <TestButton test='find' onTestRun={onTestRun} state={state} />
 
       {state.memBefore ? <p>Heap Usage Before: {state.memBefore.heapUsed.toFixed(2)}kb</p> : null}
       {state.memAfter ? <p>Heap Usage After: {state.memAfter.heapUsed.toFixed(2)}kb</p> : null}
