@@ -194,3 +194,21 @@ Make sure you install the dev dependencies first with `npm install`.
 ```
 npm run lint
 ```
+
+#### Overhead Analysis App
+
+The overhead analysis app is a Meteor app that can be used to measure the overhead of the Monti APM agent and compare with a base Meteor app. It is located in the `.monti-overhead` directory.
+
+You can use one of the following commands:
+
+```
+cd monti-overhead
+meteor npm run start:with:agent
+```
+
+or
+
+```
+cd monti-overhead
+meteor npm run start:without:agent
+```
