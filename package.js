@@ -4,7 +4,7 @@ Package.describe({
   summary: 'Performance Monitoring for Meteor',
   version: '2.47.2',
   git: 'https://github.com/monti-apm/monti-apm-agent.git',
-  name: 'montiapm:agent'
+  name: 'leonardoventurini:agent'
 });
 
 let npmModules = {
