@@ -57,7 +57,13 @@ export function Histogram ({ historyState, historyListRef }) {
             </tr>
             <tr>
               <td>Profiler Diff:</td>
-              <td>{diff ? <pre>{JSON.stringify(diff, null, 2)}</pre> : 'N/A'}</td>
+              <td>
+                {diff ?
+                  <details>
+                    <summary>See JSON</summary>
+                    <pre>{JSON.stringify(diff, null, 2)}</pre>
+                  </details> : 'N/A'}
+              </td>
             </tr>
           </tbody>
         </table>);

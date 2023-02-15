@@ -2,6 +2,7 @@ import fs from 'fs';
 import v8Profiler from 'v8-profiler-next';
 import path from 'path';
 import memwatch from '@airbnb/node-memwatch';
+import { orderBy } from 'lodash';
 
 
 let hd;
@@ -34,9 +35,11 @@ export const Profiler = {
     global.gc();
     const diff = hd.end();
 
-    const filename = path.resolve(Meteor.absolutePath, `./${name}-${Date.now()}.cpuprofile`);
+    const filename = path.resolve(Meteor.absolutePath, `../${name}-${Date.now()}.cpuprofile`);
     console.log(`Writing profile to ${filename}`);
     writeToDisk(filename, profile);
+
+    diff.change.details = orderBy(diff.change.details, 'size_bytes', 'desc')
 
     return {
       filename,
