@@ -1,13 +1,14 @@
 import { call } from '../utils/methods';
 import { range } from 'lodash';
+import { subscribe } from '../utils/subs';
 
-export const getTester = (methodName, methodParams) => async (state, payload) => {
+export const callbackTester = (callback) => async (state, payload) => {
   payload.totalCalls = state.total;
   payload.memBefore = await call('getMemoryUsage');
   payload.startTime = performance.now();
 
   for (const i of range(state.total)) {
-    await call(methodName, methodParams);
+    await callback();
     state.curProgress = i + 1;
     state.averageCallDuration = (performance.now() - payload.startTime) / (i + 1);
   }
@@ -19,7 +20,15 @@ export const getTester = (methodName, methodParams) => async (state, payload) =>
   payload.memAfter = await call('getMemoryUsage');
 }
 
+export const getTester = (methodName, methodParams) => callbackTester(async () => {
+  await call(methodName, methodParams);
+})
+
 export const Tests = {
   echo: getTester('echo', 'Hello World!'),
   find: getTester('find'),
+  subscribe: callbackTester(async () => {
+    const sub = await subscribe('links');
+    sub.stop();
+  })
 };

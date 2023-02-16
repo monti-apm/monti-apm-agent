@@ -1,5 +1,9 @@
 import { LinksCollection } from '../api/links';
 
+Meteor.publish('links', function () {
+  return LinksCollection.find({});
+})
+
 Meteor.methods({
   echo (msg) {
     return msg;

@@ -26,6 +26,7 @@
     "@heroicons/react": "^2.0.15",
     "@picocss/pico": "^1.5.7",
     "ahooks": "^3.7.4",
+    "classnames": "^2.3.2",
     "lodash": "^4.17.21",
     "meteor-node-stubs": "^1.2.5",
     "react": "^18.2.0",

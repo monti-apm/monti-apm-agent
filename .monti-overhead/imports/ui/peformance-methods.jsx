@@ -74,6 +74,7 @@ export const PerformanceMethods = ({ historyState, historyListRef }) => {
 
       <TestButton test='echo' onTestRun={onTestRun} state={state} />
       <TestButton test='find' onTestRun={onTestRun} state={state} />
+      <TestButton test='subscribe' onTestRun={onTestRun} state={state} />
 
       {state.memBefore ? <p>Heap Usage Before: {state.memBefore.heapUsed.toFixed(2)}kb</p> : null}
       {state.memAfter ? <p>Heap Usage After: {state.memAfter.heapUsed.toFixed(2)}kb</p> : null}

@@ -1,4 +1,5 @@
 import React from 'react';
+import classnames from 'classnames';
 
 export function Histogram ({ historyState, historyListRef }) {
   const [history] = historyState;
@@ -8,7 +9,10 @@ export function Histogram ({ historyState, historyListRef }) {
       {Array.from(history).reverse().map((data) => {
         const { id, num, memBefore, memAfter, startTime, endTime, totalCalls, testName, profilerFilename, profilerEnabled, createdAt, montiApmInstalled, diff } = data;
 
-        return (<table key={ id } className='p-2 font-medium rounded text-xs' role='grid'>
+        return (<table key={ id } className={classnames('p-2 font-medium rounded text-xs', {
+          'bg-green-500/20': montiApmInstalled,
+          'bg-red-500/20': !montiApmInstalled,
+        })} role='grid'>
           <thead>
             <tr>
               <th colSpan='2'>Test #{num} {createdAt}</th>
@@ -25,7 +29,7 @@ export function Histogram ({ historyState, historyListRef }) {
             </tr>
             <tr>
               <td>Total Calls:</td>
-              <td>{totalCalls} ms</td>
+              <td>{totalCalls}x</td>
             </tr>
             <tr>
               <td>Monti APM Installed:</td>
