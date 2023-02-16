@@ -7,7 +7,23 @@ export function Histogram ({ historyState, historyListRef }) {
   return (
     <div className='flex flex-col-reverse gap-4 overflow-y-scroll max-h-full' ref={ historyListRef }>
       {Array.from(history).reverse().map((data) => {
-        const { id, num, memBefore, memAfter, startTime, endTime, totalCalls, testName, profilerFilename, profilerEnabled, createdAt, montiApmInstalled, diff } = data;
+        const {
+          id,
+          num,
+          memBefore,
+          memAfter,
+          startTime,
+          endTime,
+          totalCalls,
+          testName,
+          profilerFilename,
+          profilerEnabled,
+          createdAt,
+          montiApmInstalled,
+          diff,
+          heapBeforePath,
+          heapAfterPath,
+        } = data;
 
         return (<table key={ id } className={classnames('p-2 font-medium rounded text-xs', {
           'bg-green-500/20': montiApmInstalled,
@@ -56,8 +72,12 @@ export function Histogram ({ historyState, historyListRef }) {
               <td>{JSON.stringify(profilerEnabled)}</td>
             </tr>
             <tr>
-              <td>Profiler Filename:</td>
-              <td>{profilerFilename || 'N/A'}</td>
+              <td>CPU & Heap Snapshot Filenames:</td>
+              <td>
+                <div>{profilerFilename || 'N/A'}</div>
+                <div>{heapBeforePath || 'N/A'}</div>
+                <div>{heapAfterPath || 'N/A'}</div>
+              </td>
             </tr>
             <tr>
               <td>Profiler Diff:</td>

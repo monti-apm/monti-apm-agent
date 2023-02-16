@@ -29,12 +29,14 @@ export const PerformanceMethods = ({ historyState, historyListRef }) => {
     };
 
     if (state.profilerEnabled) {
-      const { filename, diff } = await runWithProfiler('monti-overhead', async () => {
+      const { filename, diff, heapAfterPath, heapBeforePath } = await runWithProfiler('monti-overhead', async () => {
         await Tests[test](state, payload);
       });
 
       payload.profilerFilename = filename;
       payload.diff = diff;
+      payload.heapAfterPath = heapAfterPath;
+      payload.heapBeforePath = heapBeforePath;
     } else {
       await Tests[test](state, payload);
     }
