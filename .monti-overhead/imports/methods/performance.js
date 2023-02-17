@@ -13,6 +13,22 @@ Meteor.methods({
     return LinksCollection.find({}).fetch()
   },
 
+  manualEvent () {
+    if (!Package['montiapm:agent']) throw new Error('Monti APM is not installed');
+
+    const event = Monti.startEvent('manualEvent', { details: true });
+
+    LinksCollection.find({}).fetch();
+
+    LinksCollection.update({}, { $set: { updatedAt: new Date() } });
+
+    Monti.trackError(new Error('Something went wrong'));
+
+    Monti.endEvent(event);
+
+    return true;
+  },
+
   getMemoryUsage () {
     global.gc();
 

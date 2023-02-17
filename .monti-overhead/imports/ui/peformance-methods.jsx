@@ -28,9 +28,11 @@ export const PerformanceMethods = ({ historyState, historyListRef }) => {
       montiApmInstalled: !!Package['montiapm:agent'],
     };
 
+    const testCallback = typeof Tests[test] === 'object' ? Tests[test].test : Tests[test];
+
     if (state.profilerEnabled) {
       const { filename, diff, heapAfterPath, heapBeforePath } = await runWithProfiler('monti-overhead', async () => {
-        await Tests[test](state, payload);
+        await testCallback(state, payload);
       });
 
       payload.profilerFilename = filename;
@@ -38,7 +40,7 @@ export const PerformanceMethods = ({ historyState, historyListRef }) => {
       payload.heapAfterPath = heapAfterPath;
       payload.heapBeforePath = heapBeforePath;
     } else {
-      await Tests[test](state, payload);
+      await testCallback(state, payload);
     }
 
     setHistory([...history, payload]);
@@ -74,9 +76,9 @@ export const PerformanceMethods = ({ historyState, historyListRef }) => {
 
       <hr />
 
-      <TestButton test='echo' onTestRun={onTestRun} state={state} />
-      <TestButton test='find' onTestRun={onTestRun} state={state} />
-      <TestButton test='subscribe' onTestRun={onTestRun} state={state} />
+      {Object.keys(Tests).map(test => {
+          return <TestButton key={test} test={test} onTestRun={onTestRun} state={state} />
+      })}
 
       {state.memBefore ? <p>Heap Usage Before: {state.memBefore.heapUsed.toFixed(2)}kb</p> : null}
       {state.memAfter ? <p>Heap Usage After: {state.memAfter.heapUsed.toFixed(2)}kb</p> : null}

@@ -20,15 +20,19 @@ export const callbackTester = (callback) => async (state, payload) => {
   payload.memAfter = await call('getMemoryUsage');
 }
 
-export const getTester = (methodName, methodParams) => callbackTester(async () => {
+export const getMethodTester = (methodName, methodParams) => callbackTester(async () => {
   await call(methodName, methodParams);
 })
 
 export const Tests = {
-  echo: getTester('echo', 'Hello World!'),
-  find: getTester('find'),
+  echo: getMethodTester('echo', 'Hello World!'),
+  find: getMethodTester('find'),
   subscribe: callbackTester(async () => {
     const sub = await subscribe('links');
     sub.stop();
-  })
+  }),
+  manualEvent: {
+    test: getMethodTester('manualEvent'),
+    requiresMontiApm: true
+  }
 };
