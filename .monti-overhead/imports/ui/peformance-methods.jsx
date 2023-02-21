@@ -1,23 +1,26 @@
 import React from 'react';
-import { useReactive } from 'ahooks';
 import { Tests } from './tests';
 import { runWithProfiler } from './utils';
 import { TrashIcon } from '@heroicons/react/20/solid';
 import { TestButton } from './test-button';
+import { useReactive, useReactiveLocalStorage } from './use-reactive-ls';
 
 export const PerformanceMethods = ({ historyState, historyListRef }) => {
   const [history, setHistory] = historyState;
 
-  const state = useReactive({
-    isRunning: false,
+  const state = useReactiveLocalStorage('monti-overhead-state', {
     total: 1000,
-    curProgress: null,
     averageCallDuration: null,
     profilerEnabled: true,
   });
 
+  const ephemeralState = useReactive({
+    isRunning: false,
+    curProgress: null,
+  })
+
   const onTestRun = async (test) => {
-    state.isRunning = true;
+    ephemeralState.isRunning = true;
 
     const payload = {
       id: crypto.randomUUID(),
@@ -32,7 +35,7 @@ export const PerformanceMethods = ({ historyState, historyListRef }) => {
 
     if (state.profilerEnabled) {
       const { filename, diff, heapAfterPath, heapBeforePath } = await runWithProfiler('monti-overhead', async () => {
-        await testCallback(state, payload);
+        await testCallback(state, ephemeralState, payload);
       });
 
       payload.profilerFilename = filename;
@@ -40,12 +43,12 @@ export const PerformanceMethods = ({ historyState, historyListRef }) => {
       payload.heapAfterPath = heapAfterPath;
       payload.heapBeforePath = heapBeforePath;
     } else {
-      await testCallback(state, payload);
+      await testCallback(state, ephemeralState, payload);
     }
 
     setHistory([...history, payload]);
 
-    state.isRunning = false;
+    ephemeralState.isRunning = false;
 
     historyListRef?.current?.scrollTo({
       top: 0,
@@ -77,14 +80,14 @@ export const PerformanceMethods = ({ historyState, historyListRef }) => {
       <hr />
 
       {Object.keys(Tests).map(test => {
-          return <TestButton key={test} test={test} onTestRun={onTestRun} state={state} />
+          return <TestButton key={test} test={test} onTestRun={onTestRun} ephemeralState={ephemeralState} />
       })}
 
       {state.memBefore ? <p>Heap Usage Before: {state.memBefore.heapUsed.toFixed(2)}kb</p> : null}
       {state.memAfter ? <p>Heap Usage After: {state.memAfter.heapUsed.toFixed(2)}kb</p> : null}
       {state.averageCallDuration ? <p>Average Call Duration: {state.averageCallDuration.toFixed(2)}ms</p> : null}
 
-      <progress value={ state.curProgress } max={ state.total } />
+      <progress value={ ephemeralState.curProgress } max={ state.total } />
 
       <div>
         <button onClick={ () => setHistory([]) } className='inline-flex w-auto outline secondary text-xs px-3 py-2' disabled={ !history.length }>
