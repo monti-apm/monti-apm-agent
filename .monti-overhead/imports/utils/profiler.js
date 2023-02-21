@@ -16,6 +16,11 @@ export const writeToDisk = Meteor.wrapAsync(fs.writeFile);
 
 export const stopCpuProfile = Meteor.wrapAsync(function (name, callback) {
   const profile = v8Profiler.stopProfiling(name);
+
+  if (!profile) {
+    return
+  }
+
   profile.export((err, result) => {
     if (err) {
       callback(err);
