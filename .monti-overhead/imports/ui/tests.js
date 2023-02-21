@@ -1,5 +1,4 @@
 import { call } from '../utils/methods';
-import { range } from 'lodash';
 import { subscribe } from '../utils/subs';
 
 export const callbackTester = (callback) => async (state, payload) => {
@@ -7,8 +6,8 @@ export const callbackTester = (callback) => async (state, payload) => {
   payload.memBefore = await call('getMemoryUsage');
   payload.startTime = performance.now();
 
-  for (const i of range(state.total)) {
-    await callback();
+  for (const i of Array.from({ length: state.total }).map((_,i) => i+ 1)) {
+    await callback(i);
     state.curProgress = i + 1;
     state.averageCallDuration = (performance.now() - payload.startTime) / (i + 1);
   }
@@ -20,14 +19,18 @@ export const callbackTester = (callback) => async (state, payload) => {
   payload.memAfter = await call('getMemoryUsage');
 }
 
-export const getMethodTester = (methodName, methodParams) => callbackTester(async () => {
-  await call(methodName, methodParams);
+export const getMethodTester = (methodName, methodParams = undefined, methodShuffle = 1) => callbackTester(async (i) => {
+  if (methodShuffle > 1) {
+    await call(methodName.concat(i % methodShuffle + 1), methodParams);
+  } else {
+    await call(methodName, methodParams);
+  }
 })
 
 export const Tests = {
   echo: getMethodTester('echo', 'Hello World!'),
   find: getMethodTester('find'),
-  largeTrace: getMethodTester('trace:spam:100'),
+  largeTrace: getMethodTester('trace:spam:', null, 100),
   subscribe: callbackTester(async () => {
     const sub = await subscribe('links');
     sub.stop();
