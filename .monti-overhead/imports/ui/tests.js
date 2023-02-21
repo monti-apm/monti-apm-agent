@@ -27,6 +27,7 @@ export const getMethodTester = (methodName, methodParams) => callbackTester(asyn
 export const Tests = {
   echo: getMethodTester('echo', 'Hello World!'),
   find: getMethodTester('find'),
+  largeTrace: getMethodTester('trace:spam:100'),
   subscribe: callbackTester(async () => {
     const sub = await subscribe('links');
     sub.stop();

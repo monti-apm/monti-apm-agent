@@ -1,4 +1,6 @@
 import { LinksCollection } from '../api/links';
+import { LargeTraceRange } from '../utils/constants';
+import { largeTrace } from '../utils/large-trace';
 
 Meteor.publish('links', function () {
   return LinksCollection.find({});
@@ -42,3 +44,11 @@ Meteor.methods({
     };
   }
 });
+
+for (const i of LargeTraceRange) {
+  Meteor.methods({
+    [`trace:spam:${i}`] () {
+      largeTrace();
+    }
+  })
+}
