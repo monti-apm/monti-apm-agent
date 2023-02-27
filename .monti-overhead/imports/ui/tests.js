@@ -27,12 +27,15 @@ export const getMethodTester = (methodName, methodParams = undefined, methodShuf
   }
 })
 
-const bigstring = 'a'.repeat(1024 * 1024)
+
+export const generateRandomString = (size) => `random::${Array.from({length: size}, () => Math.floor(Math.random() * 36).toString(36)).join('')}`;
+
+const bigstring = generateRandomString(1024 * 1024 * 10)
 
 export const Tests = {
   echo: getMethodTester('echo', 'Hello World!'),
-  find: getMethodTester('find', { bigstring }),
-  largeTrace: getMethodTester('trace:spam:', null, 100),
+  find: getMethodTester('find'),
+  largeTrace: getMethodTester('trace:spam:', { bigstring }, 100),
   subscribe: callbackTester(async () => {
     const sub = await subscribe('links');
     sub.stop();
