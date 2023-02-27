@@ -1,8 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { DDP } from 'meteor/ddp';
-const Future = Npm.require('fibers/future');
 import { MethodStore, TestData } from './globals';
+
+const Future = Npm.require('fibers/future');
 
 export const GetMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
@@ -192,6 +193,8 @@ export const withRoundedTime = (fn) => (test) => {
 export function addTestWithRoundedTime (name, fn) {
   Tinytest.add(name, withRoundedTime(fn));
 }
+
+export const runTestAsync = (fn) => test => Promise.await(fn(test));
 
 export const TestHelpers = {
   methodStore: MethodStore,
