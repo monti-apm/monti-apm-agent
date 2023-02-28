@@ -1,7 +1,6 @@
 import { generateRandomString } from '../lib/string';
 import { gzipDeflateObject, gzipObject } from '../lib/resource_management/compression';
 import { runTestAsync } from './_helpers/helpers';
-import sinon from 'sinon';
 import { MemoryMonitor } from '../lib/resource_management/memory_monitor';
 
 const getMockMemoryUsage = ({ heapTotal, heapUsed }) => ({
@@ -687,7 +686,9 @@ Tinytest.add(
 
     const muref = getMockMemoryUsage({ heapTotal, heapUsed: heapTotal - MemoryMonitor.CRITICAL_MEMORY_THRESHOLD + 1 });
 
-    const stub = sinon.stub(process, 'memoryUsage').returns(muref);
+    const original = process.memoryUsage;
+
+    process.memoryUsage = () => muref;
 
     const monitor = new MemoryMonitor(100);
 
@@ -707,7 +708,7 @@ Tinytest.add(
 
     test.equal(tick.heapUsed, 30000000);
 
-    stub.restore();
+    process.memoryUsage = original;
     monitor.destroy();
   })
 );
