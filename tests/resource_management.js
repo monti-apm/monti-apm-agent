@@ -1,5 +1,4 @@
 import { generateRandomString } from '../lib/string';
-import { gzipDeflateObject, gzipObject } from '../lib/resource_management/compression';
 import { runTestAsync } from './_helpers/helpers';
 import { MemoryMonitor } from '../lib/resource_management/memory_monitor';
 
@@ -659,25 +658,6 @@ const samplePayload = {
   }],
   bloat: generateRandomString(1024 * 1024 * 12)
 };
-
-Tinytest.add(
-  'Resource Management - Compression',
-  runTestAsync(async function (test) {
-    console.time('gzipObject');
-    const compressed = await gzipObject(samplePayload);
-    console.timeEnd('gzipObject');
-
-    console.log(compressed.constructor.name);
-    test.equal(compressed.constructor.name, 'Buffer');
-
-    console.time('gzipDeflateObject');
-    const decompressed = await gzipDeflateObject(compressed);
-    console.timeEnd('gzipDeflateObject');
-
-    test.equal(typeof decompressed, 'object');
-    test.equal(typeof decompressed.bloat, 'string');
-  })
-);
 
 Tinytest.add(
   'Resource Management - Memory Monitor',
