@@ -1,13 +1,16 @@
-import { GetMeteorClient, RegisterMethod } from './_helpers/helpers';
+import { callAsync, registerMethod } from './_helpers/helpers';
 
-Tinytest.add(
+Tinytest.addAsync(
   'Helpers - ddp server connection',
-  function (test) {
-    let methodId = RegisterMethod(function () {
+  async function (test, done) {
+    const methodId = registerMethod(function () {
       return 'pong';
     });
-    let client = GetMeteorClient();
-    let result = client.call(methodId);
+
+    const result = await callAsync(methodId);
+
     test.equal(result, 'pong');
+
+    done();
   }
 );
