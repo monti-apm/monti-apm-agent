@@ -9,7 +9,7 @@ Package.describe({
 
 let npmModules = {
   debug: '0.8.1',
-  'monti-apm-core': '1.7.5',
+  'monti-apm-core': 'file:///Users/leonardo/Repositories/monti-apm/monti-apm-core',
   'lru-cache': '5.1.1',
   'json-stringify-safe': '5.0.1',
   'monti-apm-sketches-js': '0.0.3',
@@ -32,7 +32,6 @@ Package.onUse(function (api) {
 Package.onTest(function (api) {
   configurePackage(api, true);
   api.use([
-    'peerlibrary:reactive-publish',
     'tinytest',
     'test-helpers',
   ], ['client', 'server']);

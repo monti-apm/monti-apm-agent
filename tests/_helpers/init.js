@@ -3,15 +3,13 @@ import { Random } from 'meteor/random';
 import { MethodStore, TestData } from './globals';
 
 Kadira.connect('foo', 'bar', {enableErrorTracking: true});
-let http = require('http');
 
-let server3301 = new Future();
-let server8808 = new Future();
+let http = require('http');
 
 http.createServer(function (req, res) {
   res.writeHead(200);
   res.end('hello');
-}).listen(3301, server3301.return.bind(server3301));
+}).listen(3301);
 
 http.createServer(function (req, res) {
   let data = '';
@@ -44,10 +42,7 @@ http.createServer(function (req, res) {
       res.end('internal-error-here');
     }
   });
-}).listen(8808, server8808.return.bind(server8808));
-
-server3301.wait();
-server8808.wait();
+}).listen(8808);
 
 // TODO use RegisterPublication instead of these
 

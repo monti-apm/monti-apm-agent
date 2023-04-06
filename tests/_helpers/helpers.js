@@ -3,6 +3,10 @@ import { Random } from 'meteor/random';
 import { DDP } from 'meteor/ddp';
 import { MethodStore, TestData } from './globals';
 
+const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
+
+export const callAsync = async (method, ...args) => _client.call(method, ...args).stubValuePromise;
+
 export const GetMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
   return DDP.connect(url, {retry: false});
@@ -88,9 +92,9 @@ export const Wait = function (time) {
   });
 };
 
-export const CleanTestData = function () {
+export const CleanTestData = async function () {
   MethodStore.length = 0;
-  TestData.remove({});
+  await TestData.removeAsync({});
   Kadira.models.pubsub.metricsByMinute = {};
   Kadira.models.pubsub.subscriptions = {};
 };
