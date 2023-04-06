@@ -20,6 +20,8 @@ export const RegisterMethod = function (F) {
   return id;
 };
 
+export const registerMethod = RegisterMethod;
+
 export const RegisterPublication = function (F) {
   let id = `test_${Random.id()}`;
   Meteor.publish(id, F);
@@ -60,6 +62,8 @@ export const GetLastMethodEvents = function (_indices) {
   }
 };
 
+export const getLastMethodEvents = GetLastMethodEvents;
+
 export const GetPubSubMetrics = function () {
   let metricsArr = [];
   // eslint-disable-next-line guard-for-in
@@ -98,6 +102,8 @@ export const CleanTestData = async function () {
   Kadira.models.pubsub.metricsByMinute = {};
   Kadira.models.pubsub.subscriptions = {};
 };
+
+export const cleanTestData = CleanTestData;
 
 export const SubscribeAndWait = function (client, name, args) {
   return new Promise((resolve, reject) => {
