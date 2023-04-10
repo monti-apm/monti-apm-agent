@@ -2,6 +2,9 @@ import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { DDP } from 'meteor/ddp';
 import { MethodStore, TestData } from './globals';
+import { stringify } from 'yaml';
+import highlight from 'cli-highlight';
+import chalk from 'chalk';
 
 const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
@@ -218,3 +221,18 @@ export const TestHelpers = {
   withRoundedTime,
   addTestWithRoundedTime,
 };
+
+export function prettyLog (...args) {
+  const label = args.length > 1 ? args[0] : '';
+  const obj = args.length > 1 ? args[1] : args[0];
+
+  const yaml = stringify(obj);
+
+  if (label) {
+    process.stdout.write(`${chalk.yellowBright(`${label}`)}\n`);
+  }
+
+  process.stdout.write(
+    highlight(`${yaml?.trim()}\n`, { language: 'yaml', ignoreIllegals: true }),
+  );
+}
