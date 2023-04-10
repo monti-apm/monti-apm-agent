@@ -1,18 +1,18 @@
 import { TestData } from '../_helpers/globals';
 import {
   callAsync,
+  cleanTestData,
   CleanTestData,
-  EnableTrackingMethods,
+  getLastMethodEvents,
   GetLastMethodEvents,
   GetMeteorClient,
+  registerMethod,
   RegisterMethod
 } from '../_helpers/helpers';
 
 Tinytest.addAsync(
   'Database - insert',
   async function (test, done) {
-    EnableTrackingMethods();
-
     const methodId = RegisterMethod(async function () {
       await TestData.insertAsync({aa: 10});
       return 'insert';
@@ -20,7 +20,7 @@ Tinytest.addAsync(
 
     await callAsync(methodId);
 
-    let events = GetLastMethodEvents([0, 2]);
+    let events = getLastMethodEvents([0, 2]);
 
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
@@ -39,116 +39,143 @@ Tinytest.addAsync(
   }
 );
 
-Tinytest.add(
-  'Database - insert with async callback',
-  function (test) {
-    EnableTrackingMethods();
-    let methodId = RegisterMethod(function () {
-      TestData.insert({aa: 10}, function () {
-        // body...
-      });
-      return 'insert';
-    });
-    let client = GetMeteorClient();
-    client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
-    let expected = [
-      ['start',undefined,{userId: null, params: '[]'}],
-      ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'insert', async: true}],
-      ['complete']
-    ];
-    test.equal(events, expected);
-    CleanTestData();
-  }
-);
+// Callback methods do not exist anymore, so this test is not needed.
+//
+// Tinytest.addAsync(
+//   'Database - insert with async callback',
+//   async function (test, done) {
+//     let methodId = registerMethod(async function () {
+//       await TestData.insertAsync({aa: 10}, function () {
+//         // body...
+//       });
+//       return 'insert';
+//     });
+//
+//     await callAsync(methodId);
+//
+//     let events = getLastMethodEvents([0, 2]);
+//
+//     let expected = [
+//       ['start',undefined,{userId: null, params: '[]'}],
+//       ['wait',undefined,{waitOn: []}],
+//       ['db',undefined,{coll: 'tinytest-data', func: 'insertAsync', async: true}],
+//       ['complete']
+//     ];
+//
+//     test.equal(events, expected);
+//
+//     await CleanTestData();
+//
+//     done();
+//   }
+// );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - throw error and catch',
-  function (test) {
-    EnableTrackingMethods();
-    let methodId = RegisterMethod(function () {
+  async function (test, done) {
+    let methodId = registerMethod(async function () {
       try {
-        TestData.insert({_id: 'aa'});
-        TestData.insert({_id: 'aa', aa: 10});
+        await TestData.insertAsync({_id: 'aa'});
+        await TestData.insertAsync({_id: 'aa', aa: 10});
       } catch (ex) { /* empty */ }
       return 'insert';
     });
-    let client = GetMeteorClient();
-    client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     if (events && events[3] && events[3][2] && events[3][2].err) {
       events[3][2].err = events[3][2].err.indexOf('E11000') >= 0 ? 'E11000' : null;
     }
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'insert'}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'insert', err: 'E11000'}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'insertAsync'}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'insertAsync', err: 'E11000'}],
       ['complete']
     ];
+
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - update',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({_id: 'aa', dd: 10});
-    let methodId = RegisterMethod(function () {
-      TestData.update({_id: 'aa'}, {$set: {dd: 30}});
+  async function (test, done) {
+    await TestData.insertAsync({_id: 'aa', dd: 10});
+
+    let methodId = registerMethod(async function () {
+      await TestData.updateAsync({_id: 'aa'}, {$set: {dd: 30}});
       return 'update';
     });
-    let client = GetMeteorClient();
-    client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined, {coll: 'tinytest-data', func: 'update', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}],
+      ['db',undefined, {coll: 'tinytest-data', func: 'updateAsync', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}],
       ['complete']
     ];
+
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - remove',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({_id: 'aa', dd: 10});
-    let methodId = RegisterMethod(function () {
-      TestData.remove({_id: 'aa'});
+  async function (test, done) {
+    await TestData.insertAsync({_id: 'aa', dd: 10});
+
+    let methodId = registerMethod(async function () {
+      await TestData.removeAsync({_id: 'aa'});
       return 'remove';
     });
-    let client = GetMeteorClient();
-    client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined, {coll: 'tinytest-data', func: 'remove', selector: JSON.stringify({_id: 'aa'}), removedDocs: 1}],
+      ['db',undefined, {coll: 'tinytest-data', func: 'removeAsync', selector: JSON.stringify({_id: 'aa'}), removedDocs: 1}],
       ['complete']
     ];
+
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - findOne',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({_id: 'aa', dd: 10});
-    let methodId = RegisterMethod(function () {
-      return TestData.findOne({_id: 'aa'});
+  async function (test, done) {
+    await TestData.insertAsync({_id: 'aa', dd: 10});
+
+    let methodId = RegisterMethod(async function () {
+      return TestData.findOneAsync({_id: 'aa'});
     });
-    let client = GetMeteorClient();
-    let result = client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    let result = await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -167,24 +194,29 @@ Tinytest.add(
 
     test.equal(result, {_id: 'aa', dd: 10});
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - findOne with sort and fields',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({_id: 'aa', dd: 10});
-    let methodId = RegisterMethod(function () {
-      return TestData.findOne({_id: 'aa'}, {
+  async function (test, done) {
+    await TestData.insertAsync({_id: 'aa', dd: 10});
+
+    let methodId = registerMethod(async function () {
+      return TestData.findOneAsync({_id: 'aa'}, {
         sort: {dd: -1},
         fields: {dd: 1}
       });
     });
-    let client = GetMeteorClient();
-    let result = client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    let result = await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -201,30 +233,37 @@ Tinytest.add(
       }],
       ['complete']
     ];
+
     const projection = JSON.stringify({dd: 1});
+
     if (events[3][2].projection) {
       expected[3][2].projection = projection;
     } else {
       expected[3][2].fields = projection;
     }
+
     test.equal(result, {_id: 'aa', dd: 10});
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - upsert',
-  function (test) {
-    EnableTrackingMethods();
-    let methodId = RegisterMethod(function () {
-      TestData.upsert({_id: 'aa'}, {$set: {bb: 20}});
-      TestData.upsert({_id: 'aa'}, {$set: {bb: 30}});
+  async function (test, done) {
+    let methodId = registerMethod(async function () {
+      await TestData.upsertAsync({_id: 'aa'}, {$set: {bb: 20}});
+      await TestData.upsertAsync({_id: 'aa'}, {$set: {bb: 30}});
       return 'upsert';
     });
-    let client = GetMeteorClient();
-    client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -232,23 +271,28 @@ Tinytest.add(
       ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: undefined}],
       ['complete']
     ];
+
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - upsert with update',
-  function (test) {
-    EnableTrackingMethods();
-    let methodId = RegisterMethod(function () {
-      TestData.update({_id: 'aa'}, {$set: {bb: 20}}, {upsert: true});
-      TestData.update({_id: 'aa'}, {$set: {bb: 30}}, {upsert: true});
+  async function (test, done) {
+    let methodId = registerMethod(async function () {
+      await TestData.updateAsync({_id: 'aa'}, {$set: {bb: 20}}, {upsert: true});
+      await TestData.updateAsync({_id: 'aa'}, {$set: {bb: 30}}, {upsert: true});
       return 'upsert';
     });
-    let client = GetMeteorClient();
-    client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -256,24 +300,28 @@ Tinytest.add(
       ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}],
       ['complete']
     ];
+
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - indexes',
-  function (test) {
-    EnableTrackingMethods();
-    let name = typeof TestData.createIndex === 'function' ? 'createIndex' : '_ensureIndex';
-    let methodId = RegisterMethod(function () {
-      TestData[name]({aa: 1, bb: 1});
-      TestData._dropIndex({aa: 1, bb: 1});
+  async function (test, done) {
+    let methodId = registerMethod(async function () {
+      await TestData.createIndexAsync({aa: 1, bb: 1});
+      await TestData.dropIndexAsync({aa: 1, bb: 1});
       return 'indexes';
     });
-    let client = GetMeteorClient();
-    client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -281,23 +329,29 @@ Tinytest.add(
       ['db',undefined,{coll: 'tinytest-data', func: '_dropIndex', index: JSON.stringify({aa: 1, bb: 1})}],
       ['complete']
     ];
+
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - Cursor - count',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({aa: 100});
-    TestData.insert({aa: 300});
-    let methodId = RegisterMethod(function () {
-      return TestData.find().count();
+  async function (test, done) {
+    await TestData.insertAsync({aa: 100});
+    await TestData.insertAsync({aa: 300});
+
+    let methodId = RegisterMethod(async function () {
+      return TestData.find().countAsync();
     });
-    let client = GetMeteorClient();
-    let result = client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    let result = await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -305,24 +359,30 @@ Tinytest.add(
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'count', selector: JSON.stringify({})}],
       ['complete']
     ];
+
     test.equal(result, 2);
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - Cursor - fetch',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({_id: 'aa'});
-    TestData.insert({_id: 'bb'});
-    let methodId = RegisterMethod(function () {
-      return TestData.find({_id: {$exists: true}}).fetch();
+  async function (test, done) {
+    await TestData.insertAsync({_id: 'aa'});
+    await TestData.insertAsync({_id: 'bb'});
+
+    let methodId = RegisterMethod(async function () {
+      return TestData.find({_id: {$exists: true}}).fetchAsync();
     });
-    let client = GetMeteorClient();
-    let result = client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    let result = await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -330,26 +390,32 @@ Tinytest.add(
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'fetch', selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2, docSize: JSON.stringify({_id: 'aa'}).length * 2}],
       ['complete']
     ];
+
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - Cursor - map',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({_id: 'aa'});
-    TestData.insert({_id: 'bb'});
-    let methodId = RegisterMethod(function () {
-      return TestData.find({_id: {$exists: true}}).map(function (doc) {
+  async function (test, done) {
+    await TestData.insertAsync({_id: 'aa'});
+    await TestData.insertAsync({_id: 'bb'});
+
+    let methodId = RegisterMethod(async function () {
+      return TestData.find({_id: {$exists: true}}).mapAsync(function (doc) {
         return doc._id;
       });
     });
-    let client = GetMeteorClient();
-    let result = client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    let result = await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -357,28 +423,34 @@ Tinytest.add(
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'map', selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2}],
       ['complete']
     ];
+
     test.equal(result, ['aa', 'bb']);
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - Cursor - forEach',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({_id: 'aa'});
-    TestData.insert({_id: 'bb'});
-    let methodId = RegisterMethod(function () {
+  async function (test, done) {
+    await TestData.insertAsync({_id: 'aa'});
+    await TestData.insertAsync({_id: 'bb'});
+
+    let methodId = RegisterMethod(async function () {
       let res = [];
-      TestData.find({_id: {$exists: true}}).forEach(function (doc) {
+      TestData.find({_id: {$exists: true}}).forEachAsync(function (doc) {
         res.push(doc._id);
       });
       return res;
     });
-    let client = GetMeteorClient();
-    let result = client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    let result = await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -386,29 +458,40 @@ Tinytest.add(
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'forEach', selector: JSON.stringify({_id: {$exists: true}})}],
       ['complete']
     ];
+
     test.equal(result, ['aa', 'bb']);
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - Cursor - forEach:findOne inside',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({_id: 'aa'});
-    TestData.insert({_id: 'bb'});
-    let methodId = RegisterMethod(function () {
+  async function (test, done) {
+    await TestData.insertAsync({_id: 'aa'});
+    await TestData.insertAsync({_id: 'bb'});
+
+    let methodId = RegisterMethod(async function () {
       let res = [];
-      TestData.find({_id: {$exists: true}}).forEach(function (doc) {
+
+      TestData.find({_id: {$exists: true}}).forEachAsync(function (doc) {
         res.push(doc._id);
-        TestData.findOne();
       });
+
+      // eslint-disable-next-line no-unused-vars
+      for (const _ of res) {
+        await TestData.findOneAsync();
+      }
+
       return res;
     });
-    let client = GetMeteorClient();
-    let result = client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    let result = await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -416,19 +499,23 @@ Tinytest.add(
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'forEach', selector: JSON.stringify({_id: {$exists: true}})}],
       ['complete']
     ];
+
     test.equal(result, ['aa', 'bb']);
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - Cursor - observeChanges',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({_id: 'aa'});
-    TestData.insert({_id: 'bb'});
-    let methodId = RegisterMethod(function () {
+  async function (test, done) {
+    await TestData.insertAsync({_id: 'aa'});
+    await TestData.insertAsync({_id: 'bb'});
+
+    let methodId = RegisterMethod(async function () {
       let data = [];
       let handle = TestData.find({}).observeChanges({
         added (id, fields) {
@@ -439,10 +526,14 @@ Tinytest.add(
       handle.stop();
       return data;
     });
-    let client = GetMeteorClient();
-    let result = client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+
+    let result = await callAsync(methodId);
+
+    let events = getLastMethodEvents([0, 2]);
+
     events[3][2].oplog = false;
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -450,20 +541,26 @@ Tinytest.add(
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: false}],
       ['complete']
     ];
+
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
+
     clearAdditionalObserverInfo(events[3][2]);
+
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - Cursor - observeChanges:re-using-multiflexer',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({_id: 'aa'});
-    TestData.insert({_id: 'bb'});
-    let methodId = RegisterMethod(function () {
+  async function (test, done) {
+    await TestData.insertAsync({_id: 'aa'});
+    await TestData.insertAsync({_id: 'bb'});
+
+    let methodId = RegisterMethod(async function () {
       let data = [];
       let handle = TestData.find({}).observeChanges({
         added (id, fields) {
@@ -483,8 +580,10 @@ Tinytest.add(
     let client = GetMeteorClient();
     let result = client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
+
     events[3][2].oplog = false;
     events[5][2].oplog = false;
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -494,20 +593,26 @@ Tinytest.add(
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: true}],
       ['complete']
     ];
+
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
+
     clearAdditionalObserverInfo(events[3][2]);
     clearAdditionalObserverInfo(events[5][2]);
+
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Database - Cursor - observe',
-  function (test) {
-    EnableTrackingMethods();
-    TestData.insert({_id: 'aa'});
-    TestData.insert({_id: 'bb'});
+  async function (test, done) {
+    await TestData.insertAsync({_id: 'aa'});
+    await TestData.insertAsync({_id: 'bb'});
+
     let methodId = RegisterMethod(function () {
       let data = [];
       let handle = TestData.find({}).observe({
@@ -518,10 +623,12 @@ Tinytest.add(
       handle.stop();
       return data;
     });
-    let client = GetMeteorClient();
-    let result = client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+
+    let result = await callAsync(methodId);
+    let events = getLastMethodEvents([0, 2]);
+
     events[3][2].oplog = false;
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -533,7 +640,10 @@ Tinytest.add(
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
     clearAdditionalObserverInfo(events[3][2]);
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
 
