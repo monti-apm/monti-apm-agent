@@ -1,31 +1,30 @@
 import { TestData } from '../_helpers/globals';
-import {
-  CleanTestData,
-  EnableTrackingMethods,
-  GetLastMethodEvents,
-  GetMeteorClient,
-  RegisterMethod
-} from '../_helpers/helpers';
+import { callAsync, cleanTestData, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
 
-Tinytest.add(
+Tinytest.onlyAsync(
   'User - not logged in',
-  function (test) {
-    EnableTrackingMethods();
-    let methodId = RegisterMethod(function () {
-      TestData.insert({aa: 10});
+  async function (test, done) {
+    let methodId = registerMethod(async function () {
+      console.log(await TestData.insertAsync({aa: 10}));
+
+      return 'foo';
     });
-    let client = GetMeteorClient();
 
-    client.call(methodId);
+    console.log(await callAsync(methodId));
 
-    let events = GetLastMethodEvents([0, 2]);
+    let events = getLastMethodEvents([0, 2]);
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'insert'}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'insertAsync'}],
       ['complete']
     ];
+
     test.equal(events, expected);
-    CleanTestData();
+
+    await cleanTestData();
+
+    done();
   }
 );
