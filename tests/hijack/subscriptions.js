@@ -1,9 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import {
-  CleanTestData,
-  closeClient,
-  EnableTrackingMethods,
+  addAsyncTest,
   FindMetricsForPub,
   getMeteorClient,
   GetPubSubMetrics,
@@ -13,63 +11,61 @@ import {
   TestHelpers,
   Wait
 } from '../_helpers/helpers';
+import { sleep } from '../../lib/utils';
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - Sub/Unsub - subscribe only',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = getMeteorClient();
-
-    let h1 = subscribeAndWait(client, 'tinytest-data');
-    let h2 = subscribeAndWait(client, 'tinytest-data');
+  async function (test, client) {
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+    let h2 = await subscribeAndWait(client, 'tinytest-data');
 
     let metrics = GetPubSubMetrics();
+
     test.equal(metrics.length, 1);
     test.equal(metrics[0].pubs['tinytest-data'].subs, 2);
+
     h1.stop();
     h2.stop();
-    closeClient(client);
   }
 );
 
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - Sub/Unsub - subscribe and unsubscribe',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = getMeteorClient();
-
+  async function (test, client) {
     let h1 = subscribeAndWait(client, 'tinytest-data');
     let h2 = subscribeAndWait(client, 'tinytest-data');
+
     h1.stop();
     h2.stop();
-    Wait(100);
+
+    await sleep(100);
 
     let metrics = GetPubSubMetrics();
+
     test.equal(metrics.length, 1);
     test.equal(metrics[0].pubs['tinytest-data'].subs, 2);
     test.equal(metrics[0].pubs['tinytest-data'].unsubs, 2);
-    closeClient(client);
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - Response Time - single',
-  function (test) {
-    CleanTestData();
-    let client = getMeteorClient();
+  async function (test, client) {
     let pubName = `pub-${Random.id()}`;
+
     Meteor.publish(pubName, function () {
       Wait(200);
       this.ready();
     });
-    let h1 = subscribeAndWait(client, pubName);
+
+    let h1 = await subscribeAndWait(client, pubName);
+
     let metrics = FindMetricsForPub(pubName);
+
     test.isTrue(TestHelpers.compareNear(metrics.resTime, 200, 100));
+
     h1.stop();
-    closeClient(client);
   }
 );
 
@@ -102,17 +98,17 @@ Tinytest.add(
 //   }
 // );
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - Lifetime - sub',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = getMeteorClient();
+  async function (test, client) {
     let h1 = subscribeAndWait(client, 'tinytest-data');
-    Wait(50);
+
+    await sleep(50);
+
     h1.stop();
-    closeClient(client);
+
     let metrics = FindMetricsForPub('tinytest-data');
+
     test.isTrue(TestHelpers.compareNear(metrics.lifeTime, 50, 75));
   }
 );
@@ -143,20 +139,14 @@ Tinytest.add(
 /**
  * @flaky
  */
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - ObserverLifetime - sub',
-  function (test) {
-    TestHelpers.cleanTestData();
-
-    TestHelpers.enableTrackingMethods();
-
-    let client = TestHelpers.getMeteorClient();
-
+  async function (test, client) {
     let st = Date.now();
-    let h1 = TestHelpers.subscribeAndWait(client, 'tinytest-data');
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
     let elapsedTime = Date.now() - st;
 
-    TestHelpers.wait(100);
+    await sleep(100);
 
     Kadira.EventBus.once('pubsub', 'observerDeleted', (ownerInfo) => console.log('on sub stop:', JSON.stringify(ownerInfo)));
 
@@ -164,114 +154,104 @@ Tinytest.add(
     h1.stop();
     elapsedTime += Date.now() - st;
 
-    TestHelpers.wait(100);
+    await sleep(100);
 
     let metrics = TestHelpers.findMetricsForPub('tinytest-data');
 
     console.log({elapsedTime});
     test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 100 + elapsedTime, 60));
-    TestHelpers.closeClient(client);
   }
 );
 
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - active subs',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = getMeteorClient();
-
-    let h1 = subscribeAndWait(client, 'tinytest-data');
-    let h2 = subscribeAndWait(client, 'tinytest-data');
-    let h3 = subscribeAndWait(client, 'tinytest-data-2');
+  async function (test, client) {
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+    let h2 = await subscribeAndWait(client, 'tinytest-data');
+    let h3 = await subscribeAndWait(client, 'tinytest-data-2');
 
     let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].activeSubs === 2, true);
     test.equal(payload[0].pubs['tinytest-data-2'].activeSubs === 1, true);
+
     h1.stop();
     h2.stop();
     h3.stop();
-    closeClient(client);
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - avoiding multiple ready',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
+  async function (test, client) {
     let ReadyCounts = 0;
+
     let pubId = RegisterPublication(function () {
       this.ready();
       this.ready();
     });
+
     let original = Kadira.models.pubsub._trackReady;
+
     Kadira.models.pubsub._trackReady = function (session, sub) {
       if (sub._name === pubId) {
         ReadyCounts++;
       }
     };
-    let client = getMeteorClient();
-    subscribeAndWait(client, pubId);
+
+    await subscribeAndWait(client, pubId);
 
     test.equal(ReadyCounts, 1);
     Kadira.models.pubsub._trackReady = original;
-    closeClient(client);
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - Observer Cache - single publication and single subscription',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = getMeteorClient();
-    let h1 = subscribeAndWait(client, 'tinytest-data');
+  async function (test, client) {
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
 
-    Wait(100);
+    await sleep(100);
+
     let metrics = getPubSubPayload();
+
     test.equal(metrics[0].pubs['tinytest-data'].totalObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data'].cachedObservers, 0);
     test.equal(metrics[0].pubs['tinytest-data'].avgObserverReuse, 0);
 
     h1.stop();
-    closeClient(client);
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - Observer Cache - single publication and multiple subscriptions',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = getMeteorClient();
+  async function (test, client) {
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+    let h2 = await subscribeAndWait(client, 'tinytest-data');
 
-    let h1 = subscribeAndWait(client, 'tinytest-data');
-    let h2 = subscribeAndWait(client, 'tinytest-data');
+    await sleep(100);
 
-    Wait(100);
     let metrics = getPubSubPayload();
     test.equal(metrics[0].pubs['tinytest-data'].totalObservers, 2);
     test.equal(metrics[0].pubs['tinytest-data'].cachedObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data'].avgObserverReuse, 0.5);
     h1.stop();
     h2.stop();
-    closeClient(client);
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - Observer Cache - multiple publication and multiple subscriptions',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
+  async function (test) {
     let client = getMeteorClient();
-    let h1 = subscribeAndWait(client, 'tinytest-data');
-    let h2 = subscribeAndWait(client, 'tinytest-data-2');
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+    let h2 = await subscribeAndWait(client, 'tinytest-data-2');
 
-    Wait(100);
+    await sleep(100);
+
     let metrics = getPubSubPayload();
+
     test.equal(metrics[0].pubs['tinytest-data'].totalObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data'].cachedObservers, 0);
     test.equal(metrics[0].pubs['tinytest-data'].avgObserverReuse, 0);
@@ -279,8 +259,8 @@ Tinytest.add(
     test.equal(metrics[0].pubs['tinytest-data-2'].totalObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data-2'].cachedObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data-2'].avgObserverReuse, 1);
+
     h1.stop();
     h2.stop();
-    closeClient(client);
   }
 );

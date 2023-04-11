@@ -107,6 +107,8 @@ export const cleanTestData = CleanTestData;
 
 export const subscribeAndWait = function (client, name, args) {
   return new Promise((resolve, reject) => {
+    let sub = null;
+
     args = Array.prototype.splice.call(arguments, 1);
 
     args.push({
@@ -114,11 +116,11 @@ export const subscribeAndWait = function (client, name, args) {
         reject(err);
       },
       onReady () {
-        resolve();
+        resolve(sub);
       }
     });
 
-    client.subscribe(...args);
+    sub = client.subscribe(...args);
   });
 };
 
@@ -207,7 +209,11 @@ export function addTestWithRoundedTime (name, fn) {
 }
 
 const asyncTest = fn => async (test, done) => {
-  await fn(test);
+  const client = getMeteorClient();
+
+  await fn(test, client);
+
+  await closeClient(client);
 
   await cleanTestData();
 
