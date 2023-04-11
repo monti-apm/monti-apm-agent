@@ -1,12 +1,12 @@
 import { Meteor } from 'meteor/meteor';
-import { CleanTestData, EnableTrackingMethods, GetMeteorClient, RegisterMethod } from '../_helpers/helpers';
+import { CleanTestData, EnableTrackingMethods, getMeteorClient, RegisterMethod } from '../_helpers/helpers';
 
 Tinytest.add(
   'Info - Meteor.EnvironmentVariable',
   function (test) {
     EnableTrackingMethods();
     let methodId = RegisterMethod(testMethod);
-    let client = GetMeteorClient();
+    let client = getMeteorClient();
 
     client.call(methodId, 10, 'abc');
 

@@ -3,7 +3,7 @@ import {
   CleanTestData,
   EnableTrackingMethods,
   GetLastMethodEvents,
-  GetMeteorClient,
+  getMeteorClient,
   RegisterMethod
 } from '../_helpers/helpers';
 
@@ -17,7 +17,7 @@ Tinytest.add(
       TestData.insert({aa: 10});
     });
 
-    let client = GetMeteorClient();
+    let client = getMeteorClient();
 
     client.call(methodId, 10, 'abc');
 

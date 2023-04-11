@@ -1,5 +1,5 @@
 import { fetch } from 'meteor/fetch';
-import { CleanTestData, GetLastMethodEvents, GetMeteorClient, RegisterMethod } from '../_helpers/helpers';
+import { CleanTestData, GetLastMethodEvents, getMeteorClient, RegisterMethod } from '../_helpers/helpers';
 
 Tinytest.add('HTTP - meteor/fetch - async call', function (test) {
   const methodId = RegisterMethod(function () {
@@ -12,7 +12,7 @@ Tinytest.add('HTTP - meteor/fetch - async call', function (test) {
     f.wait();
     return result.status;
   });
-  const client = GetMeteorClient();
+  const client = getMeteorClient();
   const result = client.call(methodId);
   const events = GetLastMethodEvents([0, 2]);
   const expected = [
@@ -38,7 +38,7 @@ Tinytest.add('HTTP - meteor/fetch - trace error', function (test) {
     f.wait();
     return error;
   });
-  const client = GetMeteorClient();
+  const client = getMeteorClient();
   const result = client.call(methodId);
   const events = GetLastMethodEvents([0, 2]);
   const expected = [

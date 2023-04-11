@@ -5,7 +5,7 @@ import {
   CleanTestData,
   getLastMethodEvents,
   GetLastMethodEvents,
-  GetMeteorClient,
+  getMeteorClient,
   registerMethod,
   RegisterMethod
 } from '../_helpers/helpers';
@@ -577,7 +577,7 @@ Tinytest.addAsync(
       handle2.stop();
       return data;
     });
-    let client = GetMeteorClient();
+    let client = getMeteorClient();
     let result = client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
 

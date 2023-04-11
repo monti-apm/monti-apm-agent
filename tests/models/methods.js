@@ -1,7 +1,17 @@
 import { EJSON } from 'meteor/ejson';
 import { MethodsModel } from '../../lib/models/methods';
 import { TestData } from '../_helpers/globals';
-import { CleanTestData, GetMeteorClient, RegisterMethod, Wait, WithDocCacheGetSize } from '../_helpers/helpers';
+import {
+  addAsyncTest,
+  callAsync,
+  CleanTestData,
+  getMeteorClient,
+  registerMethod,
+  RegisterMethod,
+  withDocCacheGetSize
+} from '../_helpers/helpers';
+import { sleep } from '../../lib/utils';
+import { prettyLog } from '../_helpers/pretty-log';
 
 Tinytest.add(
   'Models - Method - buildPayload simple',
@@ -97,29 +107,32 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Models - Method - Metrics - fetchedDocSize',
-  function (test) {
+  async function (test) {
     let docs = [{data: 'data1'}, {data: 'data2'}];
-    docs.forEach(function (doc) {
-      TestData.insert(doc);
+
+    for (const doc of docs) {
+      await TestData.insertAsync(doc);
+    }
+
+    let methodId = registerMethod(async function () {
+      TestData.find({}).fetchAsync();
     });
 
-    let methodId = RegisterMethod(function () {
-      TestData.find({}).fetch();
-    });
-
-    let client = GetMeteorClient();
-    WithDocCacheGetSize(function () {
-      client.call(methodId);
+    await withDocCacheGetSize(async function () {
+      await callAsync(methodId);
     }, 30);
-    Wait(100);
+
+    await sleep(100);
 
     let payload = Kadira.models.methods.buildPayload();
+
     let index = payload.methodMetrics.findIndex(methodMetrics => methodId in methodMetrics.methods);
 
+    prettyLog(payload.methodMetrics[index].methods[methodId]);
+
     test.equal(payload.methodMetrics[index].methods[methodId].fetchedDocSize, 60);
-    CleanTestData();
   }
 );
 
@@ -137,7 +150,7 @@ Tinytest.add(
       return returnValue;
     });
 
-    let client = GetMeteorClient();
+    let client = getMeteorClient();
     client.call(methodId);
 
     let payload = Kadira.models.methods.buildPayload();
@@ -157,7 +170,7 @@ Tinytest.add(
     let methodId = RegisterMethod(function () {
     });
 
-    let client = GetMeteorClient();
+    let client = getMeteorClient();
     client.call(methodId, { __test1: 'value', abc: true }, { xyz: false, __test1: 'value2' });
 
     let trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
@@ -175,7 +188,7 @@ Tinytest.add(
     let methodId = RegisterMethod(function () {
     });
 
-    let client = GetMeteorClient();
+    let client = getMeteorClient();
     client.call(methodId, { __test1: 'value', abc: true }, null, { xyz: false, __test1: 'value2' });
 
     let trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];

@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { ErrorModel } from '../../lib/models/errors';
-import { GetMeteorClient, RegisterMethod, RegisterPublication } from '../_helpers/helpers';
+import { getMeteorClient, RegisterMethod, RegisterPublication } from '../_helpers/helpers';
+
 const HTTP = Package['http'].HTTP;
 
 Tinytest.add(
@@ -68,7 +69,7 @@ Tinytest.add(
     Kadira.enableErrorTracking();
     Kadira.models.error = new ErrorModel('foo');
     let method = RegisterMethod(causeError);
-    let client = GetMeteorClient();
+    let client = getMeteorClient();
 
     try {
       client.call(method);
@@ -96,7 +97,7 @@ Tinytest.addAsync(
     Kadira.enableErrorTracking();
     Kadira.models.error = new ErrorModel('foo');
     let pubsub = RegisterPublication(causeError);
-    let client = GetMeteorClient();
+    let client = getMeteorClient();
     client.subscribe(pubsub, {
       onError () {
         let payload = Kadira.models.error.buildPayload();
@@ -229,7 +230,7 @@ Tinytest.addAsync(
     let methodId = RegisterMethod(function () {
       throw new Meteor.Error('ERR_CODE', 'reason');
     });
-    let client = GetMeteorClient();
+    let client = getMeteorClient();
     try {
       client.call(methodId);
     } catch (ex) {
@@ -256,7 +257,7 @@ Tinytest.addAsync(
     let methodId = RegisterMethod(function () {
       throw new Meteor.Error('ERR_CODE', 'reason', 'details');
     });
-    let client = GetMeteorClient();
+    let client = getMeteorClient();
     try {
       client.call(methodId);
     } catch (ex) {
@@ -285,7 +286,7 @@ Tinytest.addAsync(
     let methodId = RegisterMethod(function () {
       throw new Error('the-message');
     });
-    let client = GetMeteorClient();
+    let client = getMeteorClient();
     try {
       client.call(methodId);
     } catch (ex) {

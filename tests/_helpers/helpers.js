@@ -7,7 +7,7 @@ const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
 export const callAsync = async (method, ...args) => _client.call(method, ...args).stubValuePromise;
 
-export const GetMeteorClient = function (_url) {
+export const getMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
   return DDP.connect(url, {retry: false});
 };
@@ -86,7 +86,7 @@ export const FindMetricsForPub = function (pubname) {
   return candidates[candidates.length - 1];
 };
 
-export const GetPubSubPayload = function (detailInfoNeeded) {
+export const getPubSubPayload = function (detailInfoNeeded) {
   return Kadira.models.pubsub.buildPayload(detailInfoNeeded).pubMetrics;
 };
 
@@ -189,7 +189,11 @@ export const withRoundedTime = (fn) => async (test, done) => {
 
   Date.now = () => timestamp;
 
-  await fn(test);
+  const client = getMeteorClient();
+
+  await fn(test, client);
+
+  await closeClient(client);
 
   Date.now = old;
 
@@ -202,27 +206,33 @@ export function addTestWithRoundedTime (name, fn) {
   Tinytest.addAsync(name, withRoundedTime(fn));
 }
 
+const asyncTest = fn => async (test, done) => {
+  await fn(test);
+
+  await cleanTestData();
+
+  done();
+};
+
 export function addAsyncTest (name, fn) {
-  Tinytest.addAsync(name, async (test, done) => {
-    await fn(test);
-
-    await cleanTestData();
-
-    done();
-  });
+  Tinytest.addAsync(name, asyncTest(fn));
 }
+
+addAsyncTest.only = function (name, fn) {
+  Tinytest.onlyAsync(name, asyncTest(fn));
+};
 
 export const TestHelpers = {
   methodStore: MethodStore,
   getLatestEventsFromMethodStore: () => MethodStore[MethodStore.length - 1].events,
-  getMeteorClient: GetMeteorClient,
+  getMeteorClient,
   registerMethod: RegisterMethod,
   registerPublication: RegisterPublication,
   enableTrackingMethods: EnableTrackingMethods,
   getLastMethodEvents: GetLastMethodEvents,
   getPubSubMetrics: GetPubSubMetrics,
   findMetricsForPub: FindMetricsForPub,
-  getPubSubPayload: GetPubSubPayload,
+  getPubSubPayload,
   wait: Wait,
   cleanTestData: CleanTestData,
   subscribeAndWait,
