@@ -1,15 +1,12 @@
-import { HTTP } from 'meteor/http';
-import {
-  callAsync,
-  cleanTestData,
-  getLastMethodEvents,
-  GetLastMethodEvents,
-  RegisterMethod
-} from '../_helpers/helpers';
+import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
+import { asyncHttpGet } from '../_helpers/http';
 
-Tinytest.addAsync('HTTP - meteor/http - call a server', async function (test, done) {
-  const methodId = RegisterMethod(function () {
-    const result = HTTP.get('http://localhost:3301');
+/**
+ * @warning Every HTTP call should be async since Release 3.0
+ */
+addAsyncTest('HTTP - meteor/http - call a server', async function (test) {
+  const methodId = registerMethod(async function () {
+    const result = await asyncHttpGet('http://localhost:3301');
     return result.statusCode;
   });
 
@@ -20,40 +17,10 @@ Tinytest.addAsync('HTTP - meteor/http - call a server', async function (test, do
   const expected = [
     ['start', undefined, { userId: null, params: '[]' }],
     ['wait', undefined, { waitOn: [] }],
-    ['http', undefined, { url: 'http://localhost:3301', method: 'GET', statusCode: 200, library: 'meteor/http' }],
+    ['http', undefined, { url: 'http://localhost:3301', method: 'GET', statusCode: 200, async: true, library: 'meteor/http' }],
     ['complete']
   ];
 
   test.equal(events, expected);
   test.equal(result, 200);
-
-  await cleanTestData();
-
-  done();
-}
-);
-
-Tinytest.addAsync('HTTP - meteor/http - async callback', async function (test, done) {
-  const methodId = RegisterMethod(function () {
-    const result = HTTP.get('http://localhost:3301');
-    return result.statusCode;
-  });
-
-  const result = await callAsync(methodId);
-  const events = GetLastMethodEvents([0, 2]);
-
-  const expected = [
-    ['start', undefined, { userId: null, params: '[]' }],
-    ['wait', undefined, { waitOn: [] }],
-    ['http', undefined, { url: 'http://localhost:3301', method: 'GET', async: true, library: 'meteor/http' }],
-    ['async', undefined, {}],
-    ['complete']
-  ];
-
-  test.equal(events, expected);
-  test.equal(result, 200);
-
-  await cleanTestData();
-  done();
-}
-);
+});
