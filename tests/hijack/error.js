@@ -1,6 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { ErrorModel } from '../../lib/models/errors';
-import { getMeteorClient, RegisterMethod, RegisterPublication } from '../_helpers/helpers';
+import { addAsyncTest, callAsync, getMeteorClient, RegisterMethod, RegisterPublication } from '../_helpers/helpers';
 
 const HTTP = Package['http'].HTTP;
 
@@ -62,17 +62,19 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Errors - Meteor._debug - do not track method errors',
-  function (test) {
+  async function (test) {
     let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+
     Kadira.enableErrorTracking();
+
     Kadira.models.error = new ErrorModel('foo');
+
     let method = RegisterMethod(causeError);
-    let client = getMeteorClient();
 
     try {
-      client.call(method);
+      await callAsync(method);
     } catch (e) {
       // ignore the error
     }
