@@ -1,9 +1,10 @@
 import { TestData } from '../_helpers/globals';
-import { callAsync, cleanTestData, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
+import { addAsyncTest, callAsync, cleanTestData, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
+import { prettyLog } from '../_helpers/pretty-log';
 
-Tinytest.addAsync(
+addAsyncTest(
   'User - not logged in',
-  async function (test, done) {
+  async function (test) {
     let methodId = registerMethod(async function () {
       await TestData.insertAsync({aa: 10});
 
@@ -24,7 +25,5 @@ Tinytest.addAsync(
     test.equal(events, expected);
 
     await cleanTestData();
-
-    done();
   }
 );

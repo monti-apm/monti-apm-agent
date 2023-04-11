@@ -105,7 +105,7 @@ export const CleanTestData = async function () {
 
 export const cleanTestData = CleanTestData;
 
-export const SubscribeAndWait = function (client, name, args) {
+export const subscribeAndWait = function (client, name, args) {
   return new Promise((resolve, reject) => {
     args = Array.prototype.splice.call(arguments, 1);
 
@@ -135,7 +135,7 @@ export function compareNear (v1, v2, maxDifference) {
   return isNear;
 }
 
-export const CloseClient = function (client) {
+export const closeClient = function (client) {
   return new Promise((resolve) => {
     let sessionId = client._lastSessionId;
     client.disconnect();
@@ -162,7 +162,7 @@ export const CloseClient = function (client) {
   });
 };
 
-export const WithDocCacheGetSize = function (fn, patchedSize) {
+export const withDocCacheGetSize = async function (fn, patchedSize) {
   let original = Kadira.docSzCache.getSize;
 
   Kadira.docSzCache.getSize = function () {
@@ -170,7 +170,7 @@ export const WithDocCacheGetSize = function (fn, patchedSize) {
   };
 
   try {
-    fn();
+    await fn();
   } finally {
     Kadira.docSzCache.getSize = original;
   }
@@ -180,7 +180,7 @@ const releaseVer = Meteor.release.split('METEOR@')[1];
 
 export const releaseParts = releaseVer && releaseVer.split('.').map(num => parseInt(num, 10)) || [0, 0, 0];
 
-export const withRoundedTime = (fn) => (test) => {
+export const withRoundedTime = (fn) => async (test, done) => {
   const date = new Date();
   date.setSeconds(0,0);
   const timestamp = date.getTime();
@@ -189,13 +189,27 @@ export const withRoundedTime = (fn) => (test) => {
 
   Date.now = () => timestamp;
 
-  fn(test);
+  await fn(test);
 
   Date.now = old;
+
+  await cleanTestData();
+
+  done();
 };
 
 export function addTestWithRoundedTime (name, fn) {
-  Tinytest.add(name, withRoundedTime(fn));
+  Tinytest.addAsync(name, withRoundedTime(fn));
+}
+
+export function addAsyncTest (name, fn) {
+  Tinytest.addAsync(name, async (test, done) => {
+    await fn(test);
+
+    await cleanTestData();
+
+    done();
+  });
 }
 
 export const TestHelpers = {
@@ -211,10 +225,9 @@ export const TestHelpers = {
   getPubSubPayload: GetPubSubPayload,
   wait: Wait,
   cleanTestData: CleanTestData,
-  subscribeAndWait: SubscribeAndWait,
+  subscribeAndWait,
   compareNear,
-  closeClient: CloseClient,
-  withDocCacheGetSize: WithDocCacheGetSize,
+  closeClient,
   withRoundedTime,
   addTestWithRoundedTime,
 };
