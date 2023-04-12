@@ -8,8 +8,7 @@ import {
   getPubSubPayload,
   RegisterPublication,
   subscribeAndWait,
-  TestHelpers,
-  Wait
+  TestHelpers
 } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 
@@ -54,8 +53,8 @@ addAsyncTest(
   async function (test, client) {
     let pubName = `pub-${Random.id()}`;
 
-    Meteor.publish(pubName, function () {
-      Wait(200);
+    Meteor.publish(pubName, async function () {
+      await sleep(200);
       this.ready();
     });
 
