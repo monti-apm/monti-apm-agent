@@ -4,7 +4,6 @@ import {
   callAsync,
   getLastMethodEvents,
   GetLastMethodEvents,
-  getMeteorClient,
   registerMethod,
   RegisterMethod
 } from '../_helpers/helpers';
@@ -428,7 +427,7 @@ addAsyncTest(
 
     let methodId = registerMethod(async function () {
       let data = [];
-      let handle = TestData.find({}).observeChanges({
+      let handle = await TestData.find({}).observeChanges({
         added (id, fields) {
           fields._id = id;
           data.push(fields);
@@ -461,21 +460,26 @@ addAsyncTest(
   }
 );
 
+
+/**
+ * @flaky
+ * @todo `wasMultiplexerReady` is true for both when it should be false then true all the time
+ */
 addAsyncTest(
   'Database - Cursor - observeChanges:re-using-multiflexer',
   async function (test) {
     await TestData.insertAsync({_id: 'aa'});
     await TestData.insertAsync({_id: 'bb'});
 
-    let methodId = RegisterMethod(async function () {
+    let methodId = registerMethod(async function () {
       let data = [];
-      let handle = TestData.find({}).observeChanges({
+      let handle = await TestData.find({}).observeChanges({
         added (id, fields) {
           fields._id = id;
           data.push(fields);
         }
       });
-      let handle2 = TestData.find({}).observeChanges({
+      let handle2 = await TestData.find({}).observeChanges({
         added () {
           // body
         }
@@ -484,8 +488,8 @@ addAsyncTest(
       handle2.stop();
       return data;
     });
-    let client = getMeteorClient();
-    let result = client.call(methodId);
+
+    let result = await callAsync(methodId);
     let events = GetLastMethodEvents([0, 2]);
 
     events[3][2].oplog = false;
