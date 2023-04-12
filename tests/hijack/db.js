@@ -1,8 +1,7 @@
 import { TestData } from '../_helpers/globals';
 import {
+  addAsyncTest,
   callAsync,
-  cleanTestData,
-  CleanTestData,
   getLastMethodEvents,
   GetLastMethodEvents,
   getMeteorClient,
@@ -10,9 +9,9 @@ import {
   RegisterMethod
 } from '../_helpers/helpers';
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - insert',
-  async function (test, done) {
+  async function (test) {
     const methodId = RegisterMethod(async function () {
       await TestData.insertAsync({aa: 10});
       return 'insert';
@@ -29,50 +28,13 @@ Tinytest.addAsync(
       ['complete']
     ];
 
-    console.warn({ events, expected });
-
     test.equal(events, expected);
-
-    await CleanTestData();
-
-    done();
   }
 );
 
-// Callback methods do not exist anymore, so this test is not needed.
-//
-// Tinytest.addAsync(
-//   'Database - insert with async callback',
-//   async function (test, done) {
-//     let methodId = registerMethod(async function () {
-//       await TestData.insertAsync({aa: 10}, function () {
-//         // body...
-//       });
-//       return 'insert';
-//     });
-//
-//     await callAsync(methodId);
-//
-//     let events = getLastMethodEvents([0, 2]);
-//
-//     let expected = [
-//       ['start',undefined,{userId: null, params: '[]'}],
-//       ['wait',undefined,{waitOn: []}],
-//       ['db',undefined,{coll: 'tinytest-data', func: 'insertAsync', async: true}],
-//       ['complete']
-//     ];
-//
-//     test.equal(events, expected);
-//
-//     await CleanTestData();
-//
-//     done();
-//   }
-// );
-
-Tinytest.addAsync(
+addAsyncTest(
   'Database - throw error and catch',
-  async function (test, done) {
+  async function (test) {
     let methodId = registerMethod(async function () {
       try {
         await TestData.insertAsync({_id: 'aa'});
@@ -98,16 +60,12 @@ Tinytest.addAsync(
     ];
 
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - update',
-  async function (test, done) {
+  async function (test) {
     await TestData.insertAsync({_id: 'aa', dd: 10});
 
     let methodId = registerMethod(async function () {
@@ -127,16 +85,12 @@ Tinytest.addAsync(
     ];
 
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - remove',
-  async function (test, done) {
+  async function (test) {
     await TestData.insertAsync({_id: 'aa', dd: 10});
 
     let methodId = registerMethod(async function () {
@@ -156,19 +110,15 @@ Tinytest.addAsync(
     ];
 
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - findOne',
-  async function (test, done) {
+  async function (test) {
     await TestData.insertAsync({_id: 'aa', dd: 10});
 
-    let methodId = RegisterMethod(async function () {
+    let methodId = registerMethod(async function () {
       return TestData.findOneAsync({_id: 'aa'});
     });
 
@@ -194,16 +144,12 @@ Tinytest.addAsync(
 
     test.equal(result, {_id: 'aa', dd: 10});
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - findOne with sort and fields',
-  async function (test, done) {
+  async function (test) {
     await TestData.insertAsync({_id: 'aa', dd: 10});
 
     let methodId = registerMethod(async function () {
@@ -244,16 +190,12 @@ Tinytest.addAsync(
 
     test.equal(result, {_id: 'aa', dd: 10});
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - upsert',
-  async function (test, done) {
+  async function (test) {
     let methodId = registerMethod(async function () {
       await TestData.upsertAsync({_id: 'aa'}, {$set: {bb: 20}});
       await TestData.upsertAsync({_id: 'aa'}, {$set: {bb: 30}});
@@ -273,16 +215,12 @@ Tinytest.addAsync(
     ];
 
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - upsert with update',
-  async function (test, done) {
+  async function (test) {
     let methodId = registerMethod(async function () {
       await TestData.updateAsync({_id: 'aa'}, {$set: {bb: 20}}, {upsert: true});
       await TestData.updateAsync({_id: 'aa'}, {$set: {bb: 30}}, {upsert: true});
@@ -302,16 +240,12 @@ Tinytest.addAsync(
     ];
 
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - indexes',
-  async function (test, done) {
+  async function (test) {
     let methodId = registerMethod(async function () {
       await TestData.createIndexAsync({aa: 1, bb: 1});
       await TestData.dropIndexAsync({aa: 1, bb: 1});
@@ -325,22 +259,18 @@ Tinytest.addAsync(
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: name, index: JSON.stringify({aa: 1, bb: 1})}],
-      ['db',undefined,{coll: 'tinytest-data', func: '_dropIndex', index: JSON.stringify({aa: 1, bb: 1})}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'createIndexAsync', index: JSON.stringify({aa: 1, bb: 1})}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'dropIndexAsync', index: JSON.stringify({aa: 1, bb: 1})}],
       ['complete']
     ];
 
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - Cursor - count',
-  async function (test, done) {
+  async function (test) {
     await TestData.insertAsync({aa: 100});
     await TestData.insertAsync({aa: 300});
 
@@ -362,16 +292,12 @@ Tinytest.addAsync(
 
     test.equal(result, 2);
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - Cursor - fetch',
-  async function (test, done) {
+  async function (test) {
     await TestData.insertAsync({_id: 'aa'});
     await TestData.insertAsync({_id: 'bb'});
 
@@ -393,16 +319,12 @@ Tinytest.addAsync(
 
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - Cursor - map',
-  async function (test, done) {
+  async function (test) {
     await TestData.insertAsync({_id: 'aa'});
     await TestData.insertAsync({_id: 'bb'});
 
@@ -426,16 +348,12 @@ Tinytest.addAsync(
 
     test.equal(result, ['aa', 'bb']);
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - Cursor - forEach',
-  async function (test, done) {
+  async function (test) {
     await TestData.insertAsync({_id: 'aa'});
     await TestData.insertAsync({_id: 'bb'});
 
@@ -461,15 +379,12 @@ Tinytest.addAsync(
 
     test.equal(result, ['aa', 'bb']);
     test.equal(events, expected);
-
-    await cleanTestData();
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - Cursor - forEach:findOne inside',
-  async function (test, done) {
+  async function (test) {
     await TestData.insertAsync({_id: 'aa'});
     await TestData.insertAsync({_id: 'bb'});
 
@@ -502,20 +417,16 @@ Tinytest.addAsync(
 
     test.equal(result, ['aa', 'bb']);
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - Cursor - observeChanges',
-  async function (test, done) {
+  async function (test) {
     await TestData.insertAsync({_id: 'aa'});
     await TestData.insertAsync({_id: 'bb'});
 
-    let methodId = RegisterMethod(async function () {
+    let methodId = registerMethod(async function () {
       let data = [];
       let handle = TestData.find({}).observeChanges({
         added (id, fields) {
@@ -547,16 +458,12 @@ Tinytest.addAsync(
     clearAdditionalObserverInfo(events[3][2]);
 
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - Cursor - observeChanges:re-using-multiflexer',
-  async function (test, done) {
+  async function (test) {
     await TestData.insertAsync({_id: 'aa'});
     await TestData.insertAsync({_id: 'bb'});
 
@@ -600,16 +507,12 @@ Tinytest.addAsync(
     clearAdditionalObserverInfo(events[5][2]);
 
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Database - Cursor - observe',
-  async function (test, done) {
+  async function (test) {
     await TestData.insertAsync({_id: 'aa'});
     await TestData.insertAsync({_id: 'bb'});
 
@@ -640,10 +543,6 @@ Tinytest.addAsync(
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
     clearAdditionalObserverInfo(events[3][2]);
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );
 

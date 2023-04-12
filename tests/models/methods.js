@@ -1,21 +1,13 @@
 import { EJSON } from 'meteor/ejson';
 import { MethodsModel } from '../../lib/models/methods';
 import { TestData } from '../_helpers/globals';
-import {
-  addAsyncTest,
-  callAsync,
-  CleanTestData,
-  getMeteorClient,
-  registerMethod,
-  RegisterMethod,
-  withDocCacheGetSize
-} from '../_helpers/helpers';
+import { addAsyncTest, callAsync, registerMethod, withDocCacheGetSize } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 import { prettyLog } from '../_helpers/pretty-log';
 
-Tinytest.add(
+addAsyncTest(
   'Models - Method - buildPayload simple',
-  function (test) {
+  async function (test) {
     CreateMethodCompleted('aa', 'hello', 1, 100, 5);
     CreateMethodCompleted('aa', 'hello', 2, 800 , 10);
 
@@ -59,15 +51,15 @@ Tinytest.add(
 
     let startTime = expected.methodMetrics[0].startTime;
     expected.methodMetrics[0].startTime = Kadira.syncedDate.syncTime(startTime);
+
     // TODO comparing without parsing and stringifing fails
     test.equal(EJSON.parse(EJSON.stringify(payload)), EJSON.parse(EJSON.stringify(expected)));
-    CleanTestData();
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Models - Method - buildPayload with errors',
-  function (test) {
+  async function (test) {
     CreateMethodCompleted('aa', 'hello', 1, 100, 5);
     CreateMethodErrored('aa', 'hello', 2, 'the-error', 800, 10);
     let payload = model.buildPayload();
@@ -103,7 +95,6 @@ Tinytest.add(
     // TODO comparing without stringify fails
     expected[0].startTime = Kadira.syncedDate.syncTime(expected[0].startTime);
     test.equal(EJSON.parse(EJSON.stringify(payload.methodMetrics)), EJSON.parse(EJSON.stringify(expected)));
-    CleanTestData();
   }
 );
 
@@ -136,22 +127,22 @@ addAsyncTest(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Models - Method - Metrics - sentMsgSize',
-  function (test) {
+  async function (test) {
     let docs = [{data: 'data1'}, {data: 'data2'}];
-    docs.forEach(function (doc) {
-      TestData.insert(doc);
-    });
+
+    for (const doc of docs) {
+      await TestData.insertAsync(doc);
+    }
 
     let returnValue = 'Some return value';
-    let methodId = RegisterMethod(function () {
-      TestData.find({}).fetch();
+    let methodId = registerMethod(async function () {
+      await TestData.find({}).fetchAsync();
       return returnValue;
     });
 
-    let client = getMeteorClient();
-    client.call(methodId);
+    await callAsync(methodId);
 
     let payload = Kadira.models.methods.buildPayload();
 
@@ -159,43 +150,40 @@ Tinytest.add(
         JSON.stringify({ msg: 'result', id: '1', result: returnValue })).length;
 
     test.equal(payload.methodMetrics[0].methods[methodId].sentMsgSize, expected);
-    CleanTestData();
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Models - Method - Trace - filter params',
-  function (test) {
+  async function (test) {
     Kadira.tracer.redactField('__test1');
-    let methodId = RegisterMethod(function () {
-    });
 
-    let client = getMeteorClient();
-    client.call(methodId, { __test1: 'value', abc: true }, { xyz: false, __test1: 'value2' });
+    let methodId = registerMethod(function () {});
+
+    await callAsync(methodId, { __test1: 'value', abc: true }, { xyz: false, __test1: 'value2' });
 
     let trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
 
     let expected = JSON.stringify([{ __test1: 'Monti: redacted', abc: true }, { xyz: false, __test1: 'Monti: redacted'}]);
+
     test.equal(trace.events[0][2].params, expected);
-    CleanTestData();
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Models - Method - Trace - filter params with null',
-  function (test) {
+  async function (test) {
     Kadira.tracer.redactField('__test1');
-    let methodId = RegisterMethod(function () {
-    });
 
-    let client = getMeteorClient();
-    client.call(methodId, { __test1: 'value', abc: true }, null, { xyz: false, __test1: 'value2' });
+    let methodId = registerMethod(function () {});
+
+    await callAsync(methodId, { __test1: 'value', abc: true }, null, { xyz: false, __test1: 'value2' });
 
     let trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
 
     let expected = JSON.stringify([{ __test1: 'Monti: redacted', abc: true }, null, { xyz: false, __test1: 'Monti: redacted' }]);
+
     test.equal(trace.events[0][2].params, expected);
-    CleanTestData();
   }
 );
 

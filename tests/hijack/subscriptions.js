@@ -33,8 +33,8 @@ addAsyncTest(
 addAsyncTest(
   'Subscriptions - Sub/Unsub - subscribe and unsubscribe',
   async function (test, client) {
-    let h1 = subscribeAndWait(client, 'tinytest-data');
-    let h2 = subscribeAndWait(client, 'tinytest-data');
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+    let h2 = await subscribeAndWait(client, 'tinytest-data');
 
     h1.stop();
     h2.stop();
