@@ -1,25 +1,15 @@
 import { TestData } from '../_helpers/globals';
-import {
-  CleanTestData,
-  EnableTrackingMethods,
-  GetLastMethodEvents,
-  getMeteorClient,
-  RegisterMethod
-} from '../_helpers/helpers';
+import { addAsyncTest, callAsync, GetLastMethodEvents, registerMethod } from '../_helpers/helpers';
 
 
-Tinytest.add(
+addAsyncTest(
   'Base - method params',
-  function (test) {
-    EnableTrackingMethods();
-
-    let methodId = RegisterMethod(function () {
-      TestData.insert({aa: 10});
+  async function (test) {
+    let methodId = registerMethod(async function () {
+      await TestData.insertAsync({aa: 10});
     });
 
-    let client = getMeteorClient();
-
-    client.call(methodId, 10, 'abc');
+    await callAsync(methodId, 10, 'abc');
 
     let events = GetLastMethodEvents([0, 2]);
 
@@ -31,7 +21,5 @@ Tinytest.add(
     ];
 
     test.equal(events, expected);
-
-    CleanTestData();
   }
 );

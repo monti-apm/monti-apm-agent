@@ -101,7 +101,7 @@ addAsyncTest(
 addAsyncTest(
   'Subscriptions - Lifetime - sub',
   async function (test, client) {
-    let h1 = subscribeAndWait(client, 'tinytest-data');
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
 
     await sleep(50);
 

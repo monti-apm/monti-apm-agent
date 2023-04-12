@@ -140,6 +140,12 @@ export function compareNear (v1, v2, maxDifference) {
 export const closeClient = function (client) {
   return new Promise((resolve) => {
     let sessionId = client._lastSessionId;
+
+    Object.entries(client._subscriptions).forEach(([subId, sub]) => {
+      console.log('closing sub', subId);
+      sub?.stop();
+    });
+
     client.disconnect();
 
     function checkClientExtence (_sessionId) {
@@ -182,6 +188,21 @@ const releaseVer = Meteor.release.split('METEOR@')[1];
 
 export const releaseParts = releaseVer && releaseVer.split('.').map(num => parseInt(num, 10)) || [0, 0, 0];
 
+
+const asyncTest = fn => async (test, done) => {
+  await cleanTestData();
+
+  const client = getMeteorClient();
+
+  await fn(test, client);
+
+  await closeClient(client);
+
+  await cleanTestData();
+
+  done();
+};
+
 export const withRoundedTime = (fn) => async (test, done) => {
   const date = new Date();
   date.setSeconds(0,0);
@@ -191,15 +212,9 @@ export const withRoundedTime = (fn) => async (test, done) => {
 
   Date.now = () => timestamp;
 
-  const client = getMeteorClient();
-
-  await fn(test, client);
-
-  await closeClient(client);
+  await asyncTest(fn)(test, () => {});
 
   Date.now = old;
-
-  await cleanTestData();
 
   done();
 };
@@ -208,16 +223,8 @@ export function addTestWithRoundedTime (name, fn) {
   Tinytest.addAsync(name, withRoundedTime(fn));
 }
 
-const asyncTest = fn => async (test, done) => {
-  const client = getMeteorClient();
-
-  await fn(test, client);
-
-  await closeClient(client);
-
-  await cleanTestData();
-
-  done();
+addTestWithRoundedTime.only = function (name, fn) {
+  Tinytest.onlyAsync(name, withRoundedTime(fn));
 };
 
 export function addAsyncTest (name, fn) {
@@ -227,6 +234,8 @@ export function addAsyncTest (name, fn) {
 addAsyncTest.only = function (name, fn) {
   Tinytest.onlyAsync(name, asyncTest(fn));
 };
+
+addAsyncTest.skip = function () {};
 
 export const TestHelpers = {
   methodStore: MethodStore,

@@ -290,22 +290,26 @@ addTestWithRoundedTime(
 
 addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Single Sub - docs added',
-  function (test) {
-    CleanTestData();
+  async function (test) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
 
-    docs.forEach(function (doc) {
-      TestData.insert(doc);
-    });
+    for (const doc of docs) {
+      await TestData.insertAsync(doc);
+    }
 
     let client = getMeteorClient();
-    let h1 = subscribeAndWait(client, 'tinytest-data');
-    TestData.insert({data: 'data4'});
-    Wait(200);
+
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+
+    await TestData.insertAsync({data: 'data4'});
+
+    await sleep(200);
+
     let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].activeDocs, 4);
+
     h1.stop();
-    closeClient(client);
   }
 );
 
