@@ -13,6 +13,7 @@
     "@types/meteor": "^1.4.87",
     "chalk": "^4.1.2",
     "cli-highlight": "^2.1.11",
+    "diff": "^5.1.0",
     "eslint": "^8.31.0",
     "eslint-config-es": "^0.8.12",
     "eslint-plugin-babel": "^5.3.1",
