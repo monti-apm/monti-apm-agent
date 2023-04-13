@@ -7,6 +7,7 @@ import {
   registerMethod,
   RegisterMethod
 } from '../_helpers/helpers';
+import { diffObjects } from '../_helpers/pretty-log';
 
 addAsyncTest(
   'Database - insert',
@@ -392,14 +393,10 @@ addAsyncTest(
     let methodId = RegisterMethod(async function () {
       let res = [];
 
-      TestData.find({_id: {$exists: true}}).forEachAsync(function (doc) {
+      await TestData.find({_id: {$exists: true}}).forEachAsync(async function (doc) {
         res.push(doc._id);
-      });
-
-      // eslint-disable-next-line no-unused-vars
-      for (const _ of res) {
         await TestData.findOneAsync();
-      }
+      });
 
       return res;
     });
@@ -417,6 +414,7 @@ addAsyncTest(
     ];
 
     test.equal(result, ['aa', 'bb']);
+
     test.equal(events, expected);
   }
 );
