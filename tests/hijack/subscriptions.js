@@ -135,9 +135,6 @@ addAsyncTest(
 // //   }
 // // );
 
-/**
- * @flaky
- */
 addAsyncTest(
   'Subscriptions - ObserverLifetime - sub',
   async function (test, client) {
@@ -157,7 +154,6 @@ addAsyncTest(
 
     let metrics = TestHelpers.findMetricsForPub('tinytest-data');
 
-    console.log({elapsedTime});
     test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 100 + elapsedTime, 60));
   }
 );
