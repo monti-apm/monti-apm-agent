@@ -7,7 +7,6 @@ import {
   registerMethod,
   RegisterMethod
 } from '../_helpers/helpers';
-import { diffObjects } from '../_helpers/pretty-log';
 
 addAsyncTest(
   'Database - insert',
@@ -175,6 +174,7 @@ addAsyncTest(
         sort: JSON.stringify({dd: -1}),
         docsFetched: 1,
         docSize: JSON.stringify({_id: 'aa', dd: 10}).length,
+        projection: JSON.stringify({dd: 1}),
         limit: 1
       }],
       ['complete']

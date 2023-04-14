@@ -599,7 +599,7 @@ addTestWithRoundedTime(
     await subscribeAndWait(client, 'tinytest-data-random');
 
     await sleep(100);
-    TestData.remove({});
+    await TestData.removeAsync({});
     await sleep(50);
 
     let payload = getPubSubPayload();
