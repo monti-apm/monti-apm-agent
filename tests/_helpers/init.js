@@ -58,8 +58,8 @@ Meteor.publish('tinytest-data-random', function () {
   return TestData.find({aa: {$ne: Random.id()}});
 });
 
-Meteor.publish('tinytest-data-cursor-fetch', function () {
-  TestData.find({}).fetch();
+Meteor.publish('tinytest-data-cursor-fetch', async function () {
+  await TestData.find({}).fetchAsync();
   this.ready();
 });
 
@@ -68,7 +68,7 @@ Meteor.publish('tinytest-data-2', function () {
 });
 
 Meteor.publish('tinytest-data-delayed', function () {
-  Meteor._wrapAsync(function (done) {
+  Meteor.wrapAsync(function (done) {
     setTimeout(done, 200);
   })();
   return TestData.find();
@@ -78,7 +78,7 @@ Meteor.publish('tinytest-data-delayed', function () {
   let doneOnce = false;
   Meteor.publish('tinytest-data-multi', function () {
     let pub = this;
-    Meteor._wrapAsync(function () {
+    Meteor.wrapAsync(function () {
       setTimeout(function () {
         if (!doneOnce) {
           pub.ready();

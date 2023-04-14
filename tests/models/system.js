@@ -9,7 +9,7 @@ Tinytest.add(
   'Models - System - buildPayload',
   function (test) {
     let model = new SystemModel();
-    Meteor._wrapAsync(function (callback) {
+    Meteor.wrapAsync(function (callback) {
       setTimeout(callback, 500);
     })();
     let payload = model.buildPayload().systemMetrics[0];
