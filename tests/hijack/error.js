@@ -1,6 +1,13 @@
 import { Meteor } from 'meteor/meteor';
 import { ErrorModel } from '../../lib/models/errors';
-import { addAsyncTest, callAsync, getMeteorClient, RegisterMethod, RegisterPublication } from '../_helpers/helpers';
+import {
+  addAsyncTest,
+  callAsync,
+  getMeteorClient,
+  registerMethod,
+  RegisterMethod,
+  RegisterPublication
+} from '../_helpers/helpers';
 
 const HTTP = Package['http'].HTTP;
 
@@ -118,9 +125,9 @@ Tinytest.addAsync(
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Errors - Meteor._debug - do not track when no arguments',
-  function (test, done) {
+  async function (test) {
     let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
     Kadira.enableErrorTracking();
     Kadira.models.error = new ErrorModel('foo');
@@ -128,16 +135,15 @@ Tinytest.addAsync(
     let payload = Kadira.models.error.buildPayload();
     test.equal(0, payload.errors.length);
     _resetErrorTracking(originalErrorTrackingStatus);
-    done();
   }
 );
 
 // How Meteor gives errors to Meteor._debug versions 1.4 - 1.6
 // is already tested above. It changed in 1.7 which these tests covers
 if (!['1.4', '1.5', '1.6'].find(prefix => Meteor.release.startsWith(`METEOR@${prefix}`))) {
-  Tinytest.addAsync(
+  addAsyncTest(
     'Errors - Meteor._debug - preserve error thrown in Meteor.bindEnvironment',
-    function (test, done) {
+    async function (test) {
       let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
       Kadira.enableErrorTracking();
       const error = new Error('test');
@@ -149,7 +155,6 @@ if (!['1.4', '1.5', '1.6'].find(prefix => Meteor.release.startsWith(`METEOR@${pr
         test.equal(error.message, loggedError.message);
         test.equal(error.stack, loggedError.stack);
         _resetErrorTracking(originalErrorTrackingStatus);
-        done();
       };
 
       Meteor.bindEnvironment(function () {
@@ -158,18 +163,22 @@ if (!['1.4', '1.5', '1.6'].find(prefix => Meteor.release.startsWith(`METEOR@${pr
     }
   );
 
-  Tinytest.addAsync(
+  addAsyncTest(
     'Errors - Meteor._debug - track Meteor Error thrown in Meteor.bindEnvironment',
-    function (test, done) {
+    async function (test) {
       let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
       Kadira.enableErrorTracking();
       Kadira.models.error = new ErrorModel('foo');
       const error = new Meteor.Error('test');
+
       Meteor.bindEnvironment(function () {
         throw error;
       })();
+
       let payload = Kadira.models.error.buildPayload();
+
       let errorTrace = payload.errors[0];
+
       let expected = {
         appId: 'foo',
         name: 'Exception in callback of async function: [test]',
@@ -194,20 +203,23 @@ if (!['1.4', '1.5', '1.6'].find(prefix => Meteor.release.startsWith(`METEOR@${pr
 
       delete errorTrace.startTime;
       delete errorTrace.trace.at;
+
       test.equal(expected, errorTrace);
       _resetErrorTracking(originalErrorTrackingStatus);
-      done();
     }
   );
 }
 
-Tinytest.addAsync(
+addAsyncTest(
   'Errors - unhandledRejection - track unhandledRejection',
-  function (test, done) {
+  async function (test) {
     let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+
     Kadira.enableErrorTracking();
     Kadira.models.error = new ErrorModel('foo');
+
     let error = new Error('rejected');
+
     Promise.reject(error);
 
     Meteor.defer(function () {
@@ -220,23 +232,24 @@ Tinytest.addAsync(
       test.equal(error.subType, 'unhandledRejection');
 
       _resetErrorTracking(originalErrorTrackingStatus);
-      done();
     });
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Errors - method error - track Meteor.Error',
-  function (test, done) {
+  async function (test) {
     let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
-    let methodId = RegisterMethod(function () {
+
+    let methodId = registerMethod(function () {
       throw new Meteor.Error('ERR_CODE', 'reason');
     });
-    let client = getMeteorClient();
+
     try {
-      client.call(methodId);
+      await callAsync(methodId);
     } catch (ex) {
       let errorMessage = 'reason [ERR_CODE]';
+
       test.equal(ex.message, errorMessage);
       let payload = Kadira.models.error.buildPayload();
       let error = payload.errors[0];
@@ -245,23 +258,23 @@ Tinytest.addAsync(
       let lastEvent = error.trace.events[error.trace.events.length - 1];
       test.isTrue(lastEvent[2].error.message.indexOf(errorMessage) >= 0);
       test.isTrue(lastEvent[2].error.stack.indexOf(errorMessage) >= 0);
-      done();
     }
 
     _resetErrorTracking(originalErrorTrackingStatus);
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Errors - method error - store error details property',
-  function (test, done) {
+  async function (test) {
     let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
-    let methodId = RegisterMethod(function () {
+
+    let methodId = registerMethod(function () {
       throw new Meteor.Error('ERR_CODE', 'reason', 'details');
     });
-    let client = getMeteorClient();
+
     try {
-      client.call(methodId);
+      await callAsync(methodId);
     } catch (ex) {
       let errorMessage = 'reason [ERR_CODE]';
       test.equal(ex.message, errorMessage);
@@ -274,23 +287,23 @@ Tinytest.addAsync(
       test.isTrue(lastEvent[2].error.message.indexOf(errorMessage) >= 0);
       test.isTrue(lastEvent[2].error.stack.indexOf(errorMessage) >= 0);
       test.equal(lastEvent[2].error.details, 'details');
-      done();
     }
 
     _resetErrorTracking(originalErrorTrackingStatus);
   }
 );
 
-Tinytest.addAsync(
+addAsyncTest(
   'Errors - method error - track NodeJs Error',
-  function (test, done) {
+  async function (test) {
     let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+
     let methodId = RegisterMethod(function () {
       throw new Error('the-message');
     });
-    let client = getMeteorClient();
+
     try {
-      client.call(methodId);
+      await callAsync(methodId);
     } catch (ex) {
       let errorMessage = 'the-message';
       test.isTrue(ex.message.match(/Internal server error/));
@@ -301,7 +314,6 @@ Tinytest.addAsync(
       let lastEvent = error.trace.events[error.trace.events.length - 1];
       test.isTrue(lastEvent[2].error.message.indexOf(errorMessage) >= 0);
       test.isTrue(lastEvent[2].error.stack.indexOf(errorMessage) >= 0);
-      done();
     }
 
     _resetErrorTracking(originalErrorTrackingStatus);
