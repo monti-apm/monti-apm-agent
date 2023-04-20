@@ -1,7 +1,7 @@
 import { EJSON } from 'meteor/ejson';
 import { MethodsModel } from '../../lib/models/methods';
 import { TestData } from '../_helpers/globals';
-import { addAsyncTest, callAsync, registerMethod, withDocCacheGetSize } from '../_helpers/helpers';
+import { addAsyncTest, callAsync, clientCallAsync, registerMethod, withDocCacheGetSize } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 import { prettyLog } from '../_helpers/pretty-log';
 
@@ -121,28 +121,28 @@ addAsyncTest(
 
     let index = payload.methodMetrics.findIndex(methodMetrics => methodId in methodMetrics.methods);
 
-    prettyLog(payload.methodMetrics[index].methods[methodId]);
-
     test.equal(payload.methodMetrics[index].methods[methodId].fetchedDocSize, 60);
   }
 );
 
 addAsyncTest(
   'Models - Method - Metrics - sentMsgSize',
-  async function (test) {
+  async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}];
 
     for (const doc of docs) {
       await TestData.insertAsync(doc);
     }
 
-    let returnValue = 'Some return value';
-    let methodId = registerMethod(async function () {
+    const returnValue = 'Some return value';
+
+    const methodId = registerMethod(async function () {
       await TestData.find({}).fetchAsync();
       return returnValue;
     });
 
-    await callAsync(methodId);
+    // Needs to call a client isolated from other tests for reliability
+    await clientCallAsync(client, methodId);
 
     let payload = Kadira.models.methods.buildPayload();
 

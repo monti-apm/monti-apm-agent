@@ -6,6 +6,7 @@ import { MethodStore, TestData } from './globals';
 const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
 export const callAsync = async (method, ...args) => _client.call(method, ...args).stubValuePromise;
+export const clientCallAsync = async (client, method, ...args) => client.call(method, ...args).stubValuePromise;
 
 export const getMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();

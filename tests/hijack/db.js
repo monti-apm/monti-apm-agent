@@ -143,6 +143,7 @@ addAsyncTest(
     ];
 
     test.equal(result, {_id: 'aa', dd: 10});
+
     test.equal(events, expected);
   }
 );
@@ -314,7 +315,7 @@ addAsyncTest(
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
       ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
-      ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'fetchAsync', selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2, docSize: JSON.stringify({_id: 'aa'}).length * 2}],
+      ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'fetch', selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2, docSize: JSON.stringify({_id: 'aa'}).length * 2}],
       ['complete']
     ];
 

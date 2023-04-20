@@ -333,7 +333,9 @@ addTestWithRoundedTime(
       await TestData.insertAsync(doc);
     }
 
-    await subscribeAndWait(client, 'tinytest-data');
+    const sub = await subscribeAndWait(client, 'tinytest-data');
+
+    sub.stop();
 
     await sleep(200);
 
@@ -352,7 +354,8 @@ addTestWithRoundedTime(
       await TestData.insertAsync(doc);
     }
 
-    await subscribeAndWait(client, 'tinytest-data');
+    const sub = await subscribeAndWait(client, 'tinytest-data');
+    sub.stop();
 
     await sleep(200);
 
