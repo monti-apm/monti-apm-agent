@@ -51,11 +51,11 @@ Meteor.publish('tinytest-data', function () {
 });
 
 Meteor.publish('tinytest-data-with-no-oplog', function () {
-  return TestData.find({}, {_disableOplog: true});
+  return TestData.find({}, { disableOplog: true });
 });
 
 Meteor.publish('tinytest-data-random', function () {
-  return TestData.find({aa: {$ne: Random.id()}});
+  return TestData.find({ aa: {$ne: Random.id() }});
 });
 
 Meteor.publish('tinytest-data-cursor-fetch', async function () {

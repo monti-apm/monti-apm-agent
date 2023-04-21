@@ -228,6 +228,8 @@ addTestWithRoundedTime.only = function (name, fn) {
   Tinytest.onlyAsync(name, withRoundedTime(fn));
 };
 
+addTestWithRoundedTime.skip = function () {};
+
 export function addAsyncTest (name, fn) {
   Tinytest.addAsync(name, asyncTest(fn));
 }

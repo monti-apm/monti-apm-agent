@@ -10,7 +10,7 @@ addAsyncTest(
 
     function testMethod () {
       Meteor.setTimeout(function () {
-        let kadirainfo = Kadira._getInfo(true);
+        let kadirainfo = Kadira._getInfo();
         test.equal(!!kadirainfo, true);
       }, 0);
     }
