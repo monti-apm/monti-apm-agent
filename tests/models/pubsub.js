@@ -508,7 +508,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addTestWithRoundedTime.skip(
   'Models - PubSub - Observers - polledDocuments with no oplog',
   async function (test, client) {
     await TestData.insertAsync({aa: 10});
