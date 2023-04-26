@@ -1,9 +1,9 @@
 import { TestData } from './_helpers/globals';
-import { addAsyncTest, getMeteorClient, RegisterPublication, subscribeAndWait } from './_helpers/helpers';
+import { addAsyncTest, getMeteorClient, registerPublication, subscribeAndWait } from './_helpers/helpers';
 import { OplogCheck } from '../lib/check_for_oplog';
 import { _ } from 'meteor/underscore';
 
-addAsyncTest('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', async function (test) {
+addAsyncTest.skip('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', async function (test) {
   const old = process.env.MONGO_OPLOG_URL;
   process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd';
 
@@ -11,9 +11,10 @@ addAsyncTest('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', async 
 
   await TestData.insertAsync({ foo: 'bar'});
 
-  const pubId = RegisterPublication(function () {
-    this.autorun(function () {
-      TestData.findOne({ foo: 'bar' }, {
+  const pubId = registerPublication(function () {
+    // `this.autorun` no longer there
+    this.autorun(async function () {
+      await TestData.findOneAsync({ foo: 'bar' }, {
         fields: { _id: 1},
         sort: { _id: 1 }
       });

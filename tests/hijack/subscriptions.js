@@ -6,7 +6,7 @@ import {
   getMeteorClient,
   GetPubSubMetrics,
   getPubSubPayload,
-  RegisterPublication,
+  registerPublication,
   subscribeAndWait,
   TestHelpers
 } from '../_helpers/helpers';
@@ -182,7 +182,7 @@ addAsyncTest(
   async function (test, client) {
     let ReadyCounts = 0;
 
-    let pubId = RegisterPublication(function () {
+    let pubId = registerPublication(function () {
       this.ready();
       this.ready();
     });

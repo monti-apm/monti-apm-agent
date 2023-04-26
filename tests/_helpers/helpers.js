@@ -23,9 +23,9 @@ export const RegisterMethod = function (F) {
 
 export const registerMethod = RegisterMethod;
 
-export const RegisterPublication = function (F) {
-  let id = `test_${Random.id()}`;
-  Meteor.publish(id, F);
+export const registerPublication = function (func) {
+  const id = `test_${Random.id()}`;
+  Meteor.publish(id, func);
   return id;
 };
 
@@ -245,7 +245,7 @@ export const TestHelpers = {
   getLatestEventsFromMethodStore: () => MethodStore[MethodStore.length - 1].events,
   getMeteorClient,
   registerMethod: RegisterMethod,
-  registerPublication: RegisterPublication,
+  registerPublication,
   enableTrackingMethods: EnableTrackingMethods,
   getLastMethodEvents: GetLastMethodEvents,
   getPubSubMetrics: GetPubSubMetrics,

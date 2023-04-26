@@ -6,7 +6,7 @@ import {
   getMeteorClient,
   registerMethod,
   RegisterMethod,
-  RegisterPublication
+  registerPublication
 } from '../_helpers/helpers';
 
 const HTTP = Package['http'].HTTP;
@@ -105,7 +105,7 @@ Tinytest.addAsync(
     let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
     Kadira.enableErrorTracking();
     Kadira.models.error = new ErrorModel('foo');
-    let pubsub = RegisterPublication(causeError);
+    let pubsub = registerPublication(causeError);
     let client = getMeteorClient();
     client.subscribe(pubsub, {
       onError () {

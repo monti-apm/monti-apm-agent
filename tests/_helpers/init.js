@@ -44,7 +44,7 @@ http.createServer(function (req, res) {
   });
 }).listen(8808);
 
-// TODO use RegisterPublication instead of these
+// TODO use registerPublication instead of these
 
 Meteor.publish('tinytest-data', function () {
   return TestData.find();

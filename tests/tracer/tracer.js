@@ -1,6 +1,6 @@
 import { _ } from 'meteor/underscore';
 import { Tracer } from '../../lib/tracer/tracer';
-import { addAsyncTest, Wait } from '../_helpers/helpers';
+import { addAsyncTest } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 
 let eventDefaults = {
@@ -188,20 +188,27 @@ addAsyncTest(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Tracer - trace same event twice',
-  function (test) {
+  async function (test) {
     let ddpMessage = {
       id: 'the-id',
       msg: 'method',
       method: 'method-name'
     };
+
     let traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
+
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
+
     let eventId = Kadira.tracer.event(traceInfo, 'db');
+
     Kadira.tracer.event(traceInfo, 'db');
-    Wait(20);
+
+    await sleep(20);
+
     Kadira.tracer.eventEnd(traceInfo, eventId);
+
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
 
     cleanTrace(traceInfo);
@@ -218,7 +225,9 @@ Tinytest.add(
         {type: 'end', data: {abc: 200}}
       ]
     };
+
     delete traceInfo.userId;
+
     test.equal(traceInfo, expected);
   }
 );
