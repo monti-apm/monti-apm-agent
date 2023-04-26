@@ -1,3 +1,4 @@
+import { addAsyncTest } from './_helpers/helpers';
 
 Tinytest.add(
   'Errors - enableErrorTracking',
@@ -19,17 +20,25 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Errors - Custom Errors - simple',
-  function (test) {
+  async function (test) {
     let originalTrackError = Kadira.models.error.trackError;
+
     let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+
+    // Need to clear the previous events from the test runner
+    Kadira._setInfo(null);
+
     Kadira.enableErrorTracking();
+
     Kadira.models.error.trackError = function (err, trace) {
       test.equal(err.message, 'msg');
-      test.equal(err.stack.includes('tinytest.js'), true);
+      test.equal(err.stack.includes('error_tracking.js'), true);
+
       delete trace.at;
-      test.equal(trace, {
+
+      const expected = {
         type: 'type',
         subType: 'server',
         name: 'msg',
@@ -40,10 +49,15 @@ Tinytest.add(
           ['error', 0, {error: {message: 'msg', stack: err.stack}}]
         ],
         metrics: {total: 0}
-      });
+      };
+
+      test.equal(trace, expected);
     };
+
     Kadira.trackError('type', 'msg');
+
     Kadira.models.error.trackError = originalTrackError;
+
     _resetErrorTracking(originalErrorTrackingStatus);
   }
 );
