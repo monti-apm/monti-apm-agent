@@ -1,6 +1,7 @@
 import { _ } from 'meteor/underscore';
 import { Tracer } from '../../lib/tracer/tracer';
-import { Wait } from '../_helpers/helpers';
+import { addAsyncTest, Wait } from '../_helpers/helpers';
+import { sleep } from '../../lib/utils';
 
 let eventDefaults = {
   endAt: 0,
@@ -105,21 +106,29 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Tracer - trace other events',
-  function (test) {
+  async function (test) {
     let ddpMessage = {
       id: 'the-id',
       msg: 'method',
       method: 'method-name'
     };
+
     let traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
+
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
+
     let eventId = Kadira.tracer.event(traceInfo, 'db');
-    Wait(25);
+
+    await sleep(25);
+
     Kadira.tracer.eventEnd(traceInfo, eventId);
+
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
+
     cleanTrace(traceInfo);
+
     let expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
@@ -132,26 +141,34 @@ Tinytest.add(
         {type: 'end', data: {abc: 200}}
       ],
     };
+
     delete traceInfo.userId;
+
     test.equal(traceInfo, expected);
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Tracer - end last event',
-  function (test) {
+  async function (test) {
     let ddpMessage = {
       id: 'the-id',
       msg: 'method',
       method: 'method-name'
     };
+
     let traceInfo = Kadira.tracer.start({id: 'session-id'}, ddpMessage);
+
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
     Kadira.tracer.event(traceInfo, 'db');
-    Wait(20);
+
+    await sleep(25);
+
     Kadira.tracer.endLastEvent(traceInfo);
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
+
     cleanTrace(traceInfo);
+
     let expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
@@ -164,7 +181,9 @@ Tinytest.add(
         {type: 'end', data: {abc: 200}}
       ]
     };
+
     delete traceInfo.userId;
+
     test.equal(traceInfo, expected);
   }
 );

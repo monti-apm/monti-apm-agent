@@ -1,17 +1,15 @@
 import { Meteor } from 'meteor/meteor';
 import { SystemModel } from '../../lib/models/system';
-import { Wait } from '../_helpers/helpers';
+import { addAsyncTest, Wait } from '../_helpers/helpers';
+import { sleep } from '../../lib/utils';
 
-/**
- * @flaky
- */
-Tinytest.add(
+addAsyncTest(
   'Models - System - buildPayload',
-  function (test) {
+  async function (test) {
     let model = new SystemModel();
-    Meteor.wrapAsync(function (callback) {
-      setTimeout(callback, 500);
-    })();
+
+    await sleep(500);
+
     let payload = model.buildPayload().systemMetrics[0];
 
     test.isTrue(payload.memory > 0);
@@ -97,15 +95,21 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Models - System - new Sessions - inactive ddp client',
-  function (test) {
+  async function (test) {
     let model = new SystemModel();
+
     model.sessionTimeout = 100;
+
     let session = {socket: {headers: {'x-forwarded-for': '1.1.1.1'}}};
+
     model.handleSessionActivity({msg: 'connect'}, session);
-    Wait(200);
+
+    await sleep(200);
+
     model.handleSessionActivity({msg: 'sub'}, session);
+
     test.equal(model.newSessions, 2);
   }
 );
