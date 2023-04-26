@@ -1,21 +1,20 @@
 import { TimeoutManager } from '../lib/hijack/timeout_manager';
 import assert from 'assert';
-import { getMeteorClient, RegisterMethod } from './_helpers/helpers';
+import { addAsyncTest, callAsync, registerMethod } from './_helpers/helpers';
+import { sleep } from '../lib/utils';
 
-Tinytest.add(
+addAsyncTest(
   'Stalled - Method Timeout',
-  function (test) {
+  async function (test) {
     const oldTimeout = Kadira.options.stalledTimeout;
 
     Kadira.options.stalledTimeout = 250;
 
-    let methodId = RegisterMethod(function () {
-      Meteor._sleepForMs(500);
+    const methodId = registerMethod(async function () {
+      await sleep(500);
 
       return 'pong';
     });
-
-    let client = getMeteorClient();
 
     let error = null;
 
@@ -25,7 +24,7 @@ Tinytest.add(
 
     const lastId = TimeoutManager.id;
 
-    let result = client.call(methodId);
+    let result = await callAsync(methodId);
 
     assert(lastId < TimeoutManager.id, 'The timeout id must be incremented');
     assert(error && error.constructor.name === 'Error');
