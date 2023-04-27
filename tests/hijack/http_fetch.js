@@ -1,20 +1,18 @@
 import { fetch } from 'meteor/fetch';
-import { CleanTestData, GetLastMethodEvents, getMeteorClient, RegisterMethod } from '../_helpers/helpers';
+import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod, } from '../_helpers/helpers';
 
-Tinytest.add('HTTP - meteor/fetch - async call', function (test) {
-  const methodId = RegisterMethod(function () {
-    const f = new Future();
-    let result;
-    fetch('http://localhost:3301/').then(function (res) {
-      result = res;
-      f.return();
-    });
-    f.wait();
+addAsyncTest('HTTP - meteor/fetch - async call', async function (test) {
+  const methodId = registerMethod(async function () {
+    const result = await fetch('http://localhost:3301/');
+
+
     return result.status;
   });
-  const client = getMeteorClient();
-  const result = client.call(methodId);
-  const events = GetLastMethodEvents([0, 2]);
+
+  const result = await callAsync(methodId);
+
+  const events = getLastMethodEvents([0, 2]);
+
   const expected = [
     ['start', undefined, { userId: null, params: '[]' }],
     ['wait', undefined, { waitOn: [] }],
@@ -23,24 +21,20 @@ Tinytest.add('HTTP - meteor/fetch - async call', function (test) {
   ];
   test.equal(events, expected);
   test.equal(result, 200);
-  CleanTestData();
-}
-);
+});
 
-Tinytest.add('HTTP - meteor/fetch - trace error', function (test) {
-  const methodId = RegisterMethod(function () {
-    const f = new Future();
-    let error;
-    fetch('http://localhost:9999/').catch(function (err) {
-      error = err;
-      f.return();
-    });
-    f.wait();
-    return error;
+addAsyncTest('HTTP - meteor/fetch - trace error', async function (test) {
+  const methodId = registerMethod(async function () {
+    try {
+      await fetch('http://localhost:9999/');
+    } catch (error) {
+      return error;
+    }
   });
-  const client = getMeteorClient();
-  const result = client.call(methodId);
-  const events = GetLastMethodEvents([0, 2]);
+
+  const result = await callAsync(methodId);
+  const events = getLastMethodEvents([0, 2]);
+
   const expected = [
     ['start', undefined, { userId: null, params: '[]' }],
     ['wait', undefined, { waitOn: [] }],
@@ -55,6 +49,7 @@ Tinytest.add('HTTP - meteor/fetch - trace error', function (test) {
     ],
     ['complete'],
   ];
+
   test.equal(events, expected);
   test.equal(result, {
     message:
@@ -63,6 +58,4 @@ Tinytest.add('HTTP - meteor/fetch - trace error', function (test) {
     errno: 'ECONNREFUSED',
     code: 'ECONNREFUSED',
   });
-  CleanTestData();
-}
-);
+});
