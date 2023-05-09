@@ -5,7 +5,7 @@ import { _ } from 'meteor/underscore';
 
 addAsyncTest.skip('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', async function (test) {
   const old = process.env.MONGO_OPLOG_URL;
-  process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd';
+  process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd/local';
 
   let observeChangesEvent;
 
@@ -285,7 +285,7 @@ Tinytest.addAsync(
 );
 
 function WithMongoOplogUrl (fn) {
-  process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd';
+  process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd/local';
   fn();
   delete process.env.MONGO_OPLOG_URL;
 }

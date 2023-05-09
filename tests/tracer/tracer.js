@@ -8,18 +8,22 @@ let eventDefaults = {
   nested: [],
 };
 
-Tinytest.add(
+addAsyncTest(
   'Tracer - Trace Method - method',
-  function (test) {
+  async function (test) {
     let ddpMessage = {
       id: 'the-id',
       msg: 'method',
       method: 'method-name'
     };
+
     let traceInfo = Kadira.tracer.start({id: 'session-id', userId: 'uid'}, ddpMessage);
+
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
+
     cleanTrace(traceInfo);
+
     let expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
@@ -32,6 +36,7 @@ Tinytest.add(
         {type: 'end', data: {abc: 200}}
       ]
     };
+
     test.equal(traceInfo, expected);
   }
 );
