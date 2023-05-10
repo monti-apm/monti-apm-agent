@@ -16,7 +16,7 @@ addAsyncTest.only(
 
     await callAsync(methodId, 10, 'abc');
 
-    prettyLog(info?._traces[0]);
+    prettyLog(info?._traces);
 
     let events = GetLastMethodEvents([0, 2]);
 
