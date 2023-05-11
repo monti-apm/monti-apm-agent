@@ -1,24 +1,23 @@
 import { TestData } from '../_helpers/globals';
-import { addAsyncTest, callAsync, GetLastMethodEvents, registerMethod } from '../_helpers/helpers';
+import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
 import { prettyLog } from '../_helpers/pretty-log';
 
 
-addAsyncTest.only(
+addAsyncTest(
   'Base - method params',
   async function (test) {
     let info;
 
     let methodId = registerMethod(async function () {
-      info = Kadira._getInfo();
       await TestData.insertAsync({aa: 10});
+      info = Kadira._getInfo();
     });
-
 
     await callAsync(methodId, 10, 'abc');
 
-    prettyLog(info?._traces);
+    prettyLog(info);
 
-    let events = GetLastMethodEvents([0, 2]);
+    let events = getLastMethodEvents([0, 2]);
 
     let expected = [
       ['start',undefined, {userId: null, params: '[10,"abc"]'}],

@@ -1,6 +1,5 @@
 import { TestData } from '../_helpers/globals';
 import { addAsyncTest, callAsync, cleanTestData, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
-import { prettyLog } from '../_helpers/pretty-log';
 
 addAsyncTest(
   'User - not logged in',

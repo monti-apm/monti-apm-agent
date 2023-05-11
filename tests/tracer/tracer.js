@@ -237,9 +237,9 @@ addAsyncTest(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Tracer - Build Trace - simple',
-  function (test) {
+  async function (test) {
     let now = new Date().getTime();
     let traceInfo = {
       events: [
@@ -250,17 +250,20 @@ Tinytest.add(
       ]
     };
     Kadira.tracer.buildTrace(traceInfo);
-    test.equal(traceInfo.metrics, {
+
+    const expected = {
       total: 2500,
       wait: 1000,
       db: 500,
       compute: 1000,
-    });
+    };
+
+    test.equal(traceInfo.metrics, expected);
     test.equal(traceInfo.errored, false);
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Tracer - Build Trace - errored',
   function (test) {
     let now = new Date().getTime();
@@ -273,12 +276,15 @@ Tinytest.add(
       ]
     };
     Kadira.tracer.buildTrace(traceInfo);
-    test.equal(traceInfo.metrics, {
+
+    const expected = {
       total: 2500,
       wait: 1000,
       db: 500,
       compute: 1000,
-    });
+    };
+
+    test.equal(traceInfo.metrics, expected);
     test.equal(traceInfo.errored, true);
   }
 );

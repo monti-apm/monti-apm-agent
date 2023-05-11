@@ -3,7 +3,6 @@ import { MethodsModel } from '../../lib/models/methods';
 import { TestData } from '../_helpers/globals';
 import { addAsyncTest, callAsync, clientCallAsync, registerMethod, withDocCacheGetSize } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
-import { prettyLog } from '../_helpers/pretty-log';
 
 addAsyncTest(
   'Models - Method - buildPayload simple',
