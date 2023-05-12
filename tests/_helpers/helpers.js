@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { DDP } from 'meteor/ddp';
 import { MethodStore, TestData } from './globals';
+import { EJSON } from 'meteor/ejson';
 
 const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
@@ -194,6 +195,8 @@ const asyncTest = fn => async (test, done) => {
   await cleanTestData();
 
   const client = getMeteorClient();
+
+  test.stableEqual = (a, b) => test.equal(EJSON.parse(EJSON.stringify(a)), EJSON.parse(EJSON.stringify(b)));
 
   await fn(test, client);
 

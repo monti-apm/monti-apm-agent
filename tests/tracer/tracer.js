@@ -321,10 +321,11 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Tracer - Build Trace - event not ended',
   function (test) {
     let now = new Date().getTime();
+
     let traceInfo = {
       events: [
         {type: 'start', at: now},
@@ -333,8 +334,17 @@ Tinytest.add(
         {type: 'complete', at: now + 2500}
       ]
     };
+
     Kadira.tracer.buildTrace(traceInfo);
-    test.equal(traceInfo.metrics, undefined);
+
+    const expected = [
+      ['start'],
+      ['wait', 0, { forcedEnd: true }],
+      ['db', 500],
+      ['complete']
+    ];
+
+    test.stableEqual(traceInfo.events, expected);
   }
 );
 
