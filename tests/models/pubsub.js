@@ -8,7 +8,6 @@ import {
 } from '../_helpers/helpers';
 import { TestData } from '../_helpers/globals';
 import { sleep } from '../../lib/utils';
-import { prettyLog } from '../_helpers/pretty-log';
 
 addTestWithRoundedTime(
   'Models - PubSub - Metrics - same date',
