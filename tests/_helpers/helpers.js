@@ -198,6 +198,9 @@ const asyncTest = fn => async (test, done) => {
 
   test.stableEqual = (a, b) => test.equal(EJSON.parse(EJSON.stringify(a)), EJSON.parse(EJSON.stringify(b)));
 
+  // Cleans stuff from the test engine.
+  Kadira._setInfo(null);
+
   await fn(test, client);
 
   await closeClient(client);

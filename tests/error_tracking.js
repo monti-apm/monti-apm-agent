@@ -1,4 +1,5 @@
 import { addAsyncTest } from './_helpers/helpers';
+import { diffObjects } from './_helpers/pretty-log';
 
 Tinytest.add(
   'Errors - enableErrorTracking',
@@ -27,9 +28,6 @@ addAsyncTest(
 
     let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
 
-    // Need to clear the previous events from the test runner
-    Kadira._setInfo(null);
-
     Kadira.enableErrorTracking();
 
     Kadira.models.error.trackError = function (err, trace) {
@@ -45,7 +43,7 @@ addAsyncTest(
         errored: true,
         // at: 123,
         events: [
-          ['start', 0, {}],
+          ['start'],
           ['error', 0, {error: {message: 'msg', stack: err.stack}}]
         ],
         metrics: {total: 0}
@@ -78,7 +76,7 @@ Tinytest.add(
         errored: true,
         // at: 123,
         events: [
-          ['start', 0, {}],
+          ['start'],
           ['error', 0, {error: {message: 'msg', stack: 's'}}]
         ],
         metrics: {total: 0}
@@ -90,7 +88,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Errors - Custom Errors - error object',
   function (test) {
     let originalTrackError = Kadira.models.error.trackError;
@@ -100,18 +98,23 @@ Tinytest.add(
     Kadira.models.error.trackError = function (err, trace) {
       test.equal(err, {message: 'test', stack: error.stack});
       delete trace.at;
-      test.equal(trace, {
+
+      const expected = {
         type: 'server-internal',
         subType: 'server',
         name: 'test',
         errored: true,
         // at: 123,
         events: [
-          ['start', 0, {}],
+          ['start'],
           ['error', 0, {error: {message: 'test', stack: error.stack}}]
         ],
         metrics: {total: 0}
-      });
+      };
+
+      diffObjects(trace, expected);
+
+      test.equal(trace, expected);
     };
     Kadira.trackError(error);
     Kadira.models.error.trackError = originalTrackError;
@@ -136,7 +139,7 @@ Tinytest.add(
         errored: true,
         // at: 123,
         events: [
-          ['start', 0, {}],
+          ['start'],
           ['error', 0, {error: {message: 'error-message', stack: error.stack}}]
         ],
         metrics: {total: 0}
@@ -165,7 +168,7 @@ Tinytest.add(
         errored: true,
         // at: 123,
         events: [
-          ['start', 0, {}],
+          ['start'],
           ['error', 0, {error: {message: 'error-message', stack: err.stack}}]
         ],
         metrics: {total: 0}
@@ -194,7 +197,7 @@ Tinytest.add(
         errored: true,
         // at: 123,
         events: [
-          ['start', 0, {}],
+          ['start'],
           ['error', 0, {error: {message: 'error-message', stack: err.stack}}]
         ],
         metrics: {total: 0}

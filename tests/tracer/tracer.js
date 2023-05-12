@@ -348,7 +348,7 @@ addAsyncTest(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Tracer - Build Trace - truncate events',
   function (test) {
     let now = new Date().getTime();
