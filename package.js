@@ -34,6 +34,7 @@ Package.onTest(function (api) {
   api.use([
     'tinytest',
     'test-helpers',
+    'accounts-base',
   ], ['client', 'server']);
 
   // common before

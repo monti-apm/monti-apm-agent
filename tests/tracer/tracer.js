@@ -1,7 +1,9 @@
 import { _ } from 'meteor/underscore';
 import { Tracer } from '../../lib/tracer/tracer';
-import { addAsyncTest } from '../_helpers/helpers';
+import { addAsyncTest, callAsync, registerMethod } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
+import { TestData } from '../_helpers/globals';
+import { prettyLog } from '../_helpers/pretty-log';
 
 let eventDefaults = {
   endAt: 0,
@@ -496,16 +498,51 @@ Tinytest.add(
   }
 );
 
+addAsyncTest.only('Tracer - Build Trace - Async Parallel Events', async function (test) {
+  const Email = Package['email'].Email;
+
+  let info;
+
+  let methodId = registerMethod(async function () {
+    await TestData.insertAsync({ _id: 'a', n: 1 });
+    await TestData.insertAsync({ _id: 'b', n: 2 });
+    await TestData.insertAsync({ _id: 'c', n: 3 });
+
+    await Meteor.userAsync();
+
+    let backgroundPromise = Promise.resolve().then(async () => {
+      // Email
+      Email.sendAsync({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
+    });
+
+    // Compute
+    await sleep(30);
+
+    const ids = ['a', 'b', 'c'];
+
+    // DB
+    await Promise.all(ids.map(_id => TestData.findOneAsync({_id})));
+
+    info = Kadira._getInfo();
+
+    return backgroundPromise;
+  });
+
+  await callAsync(methodId);
+
+  prettyLog(info);
+});
+
 function startTrace () {
-  let ddpMessage = {
+  const ddpMessage = {
     id: 'the-id',
     msg: 'method',
     method: 'method-name'
   };
-  let info = {id: 'session-id', userId: 'uid'};
-  let traceInfo = Kadira.tracer.start(info, ddpMessage);
 
-  return traceInfo;
+  const info = {id: 'session-id', userId: 'uid'};
+
+  return Kadira.tracer.start(info, ddpMessage);
 }
 
 function cleanTrace (traceInfo) {
