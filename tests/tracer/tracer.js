@@ -3,6 +3,7 @@ import { Tracer } from '../../lib/tracer/tracer';
 import { addAsyncTest, callAsync, registerMethod } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
+import { mergeSegmentIntervals } from '../../lib/utils/time';
 import { prettyLog } from '../_helpers/pretty-log';
 
 let eventDefaults = {
@@ -530,7 +531,7 @@ addAsyncTest.only('Tracer - Build Trace - Async Parallel Events', async function
 
   await callAsync(methodId);
 
-  prettyLog(info);
+  prettyLog(mergeSegmentIntervals(info._traces));
 });
 
 function startTrace () {
