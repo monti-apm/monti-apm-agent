@@ -180,6 +180,7 @@ function configurePackage (api, isTesting) {
     'lib/environment_variables.js',
     'lib/auto_connect.js',
     'lib/conflicting_agents.js',
+    'lib/als/async-hook.js',
   ], 'server');
 
   // only client

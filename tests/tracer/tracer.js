@@ -531,7 +531,7 @@ addAsyncTest.only('Tracer - Build Trace - Async Parallel Events', async function
 
   await callAsync(methodId);
 
-  prettyLog(mergeSegmentIntervals(info._traces));
+  prettyLog(mergeSegmentIntervals(info.resources));
 });
 
 function startTrace () {
