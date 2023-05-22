@@ -505,6 +505,8 @@ addAsyncTest.only('Tracer - Build Trace - Async Parallel Events', async function
   let info;
 
   let methodId = registerMethod(async function () {
+    const event = Kadira.startEvent('test');
+
     await TestData.insertAsync({ _id: 'a', n: 1 });
     await TestData.insertAsync({ _id: 'b', n: 2 });
     await TestData.insertAsync({ _id: 'c', n: 3 });
@@ -524,6 +526,8 @@ addAsyncTest.only('Tracer - Build Trace - Async Parallel Events', async function
     // DB
     await Promise.all(ids.map(_id => TestData.findOneAsync({_id})));
 
+    Kadira.endEvent(event);
+
     info = Kadira._getInfo();
 
     return backgroundPromise;
@@ -531,6 +535,9 @@ addAsyncTest.only('Tracer - Build Trace - Async Parallel Events', async function
 
   await callAsync(methodId);
 
+  prettyLog(info.trace);
+
+  console.log('resources');
   prettyLog(mergeSegmentIntervals(info.resources));
 });
 
