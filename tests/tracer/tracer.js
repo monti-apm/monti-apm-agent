@@ -508,8 +508,6 @@ addAsyncTest.only('Tracer - Build Trace - Async Parallel Events', async function
     let backgroundPromise;
 
     await Kadira.startEvent('test', null, async (event) => {
-      console.log('it ruuuuns');
-
       await TestData.insertAsync({ _id: 'a', n: 1 });
       await TestData.insertAsync({ _id: 'b', n: 2 });
       await TestData.insertAsync({ _id: 'c', n: 3 });
