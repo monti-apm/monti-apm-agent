@@ -42,7 +42,7 @@ export namespace Monti {
 
     function ignoreErrorTracking(error: Error): void;
 
-    function startEvent(name: string, data?: Record<string, any>): MontiEvent | false;
+    function startEvent(name: string, data?: Record<string, any>, fn?: Function): MontiEvent | false;
     function endEvent(event: MontiEvent | false, data?: Record<string, any>): void;
 }
 

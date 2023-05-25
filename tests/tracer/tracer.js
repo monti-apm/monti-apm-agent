@@ -505,28 +505,38 @@ addAsyncTest.only('Tracer - Build Trace - Async Parallel Events', async function
   let info;
 
   let methodId = registerMethod(async function () {
-    const event = Kadira.startEvent('test');
+    let backgroundPromise;
 
-    await TestData.insertAsync({ _id: 'a', n: 1 });
-    await TestData.insertAsync({ _id: 'b', n: 2 });
-    await TestData.insertAsync({ _id: 'c', n: 3 });
+    await Kadira.startEvent('test', null, async (event) => {
+      console.log('it ruuuuns');
 
-    await Meteor.userAsync();
+      await TestData.insertAsync({ _id: 'a', n: 1 });
+      await TestData.insertAsync({ _id: 'b', n: 2 });
+      await TestData.insertAsync({ _id: 'c', n: 3 });
 
-    let backgroundPromise = Promise.resolve().then(async () => {
-      // Email
-      Email.sendAsync({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
+      await Meteor.userAsync();
+
+      backgroundPromise = Promise.resolve().then(async () => {
+        // Email
+        Email.sendAsync({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
+      });
+
+      // Compute
+      await sleep(30);
+
+      const ids = ['a', 'b', 'c'];
+
+      // DB
+      await Promise.all(ids.map(_id => TestData.findOneAsync({_id})));
+
+
+      await TestData.findOneAsync({ _id: 'a1'}).then(() =>
+        // Is this nested under the previous findOneAsync or is it a sibling?
+        TestData.findOneAsync({ _id: 'a2' })
+      );
+
+      Kadira.endEvent(event);
     });
-
-    // Compute
-    await sleep(30);
-
-    const ids = ['a', 'b', 'c'];
-
-    // DB
-    await Promise.all(ids.map(_id => TestData.findOneAsync({_id})));
-
-    Kadira.endEvent(event);
 
     info = Kadira._getInfo();
 
