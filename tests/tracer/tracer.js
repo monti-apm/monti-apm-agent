@@ -45,7 +45,7 @@ addAsyncTest(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Tracer - Trace Method - complete after errored',
   function (test) {
     let ddpMessage = {
@@ -53,11 +53,15 @@ Tinytest.add(
       msg: 'method',
       method: 'method-name'
     };
+
     let traceInfo = Kadira.tracer.start({id: 'session-id', userId: 'uid'}, ddpMessage);
+
     Kadira.tracer.event(traceInfo, 'start');
     Kadira.tracer.event(traceInfo, 'error');
     Kadira.tracer.event(traceInfo, 'complete');
+
     cleanTrace(traceInfo);
+
     let expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
@@ -70,6 +74,7 @@ Tinytest.add(
         {type: 'error'}
       ],
     };
+
     test.equal(traceInfo, expected);
   }
 );

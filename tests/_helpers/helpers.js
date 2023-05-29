@@ -267,6 +267,8 @@ export function cleanEvents (events) {
 
     delete event.at;
     delete event._id;
+    delete event.asyncId;
+    delete event.level;
 
     if (event.nested?.length === 0) {
       delete event.nested;
