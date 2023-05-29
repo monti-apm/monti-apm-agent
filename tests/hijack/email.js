@@ -1,18 +1,18 @@
-import { callAsync, cleanTestData, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
+import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
 
 async function sendTestEmailThroughMethod () {
   const Email = Package['email'].Email;
 
   const methodId = registerMethod(async function () {
-    Email.send({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
+    await Email.sendAsync({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
   });
 
   await callAsync(methodId);
 }
 
-Tinytest.addAsync(
+addAsyncTest(
   'Email - success',
-  async function (test, done) {
+  async function (test) {
     await sendTestEmailThroughMethod();
 
     const events = getLastMethodEvents([0]);
@@ -20,14 +20,10 @@ Tinytest.addAsync(
     const expected = [
       ['start'],
       ['wait'],
-      ['email'],
+      ['emailAsync'],
       ['complete']
     ];
 
     test.equal(events, expected);
-
-    await cleanTestData();
-
-    done();
   }
 );

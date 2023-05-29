@@ -500,7 +500,7 @@ Tinytest.add(
   }
 );
 
-addAsyncTest.only('Tracer - Build Trace - Nested Async Parallel Events', async function (test) {
+addAsyncTest('Tracer - Build Trace - Nested Async Parallel Events', async function (test) {
   const Email = Package['email'].Email;
 
   let info;
