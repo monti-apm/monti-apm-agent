@@ -4,7 +4,7 @@ import { addAsyncTest, callAsync, cleanOptEvents, cleanTrace, registerMethod } f
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
 import { mergeSegmentIntervals } from '../../lib/utils/time';
-import { diffObjects, prettyLog } from '../_helpers/pretty-log';
+import { prettyLog } from '../_helpers/pretty-log';
 import { getInfo } from '../../lib/als/als';
 
 let eventDefaults = {
@@ -252,6 +252,7 @@ addAsyncTest(
   'Tracer - Build Trace - simple',
   async function (test) {
     let now = new Date().getTime();
+
     let traceInfo = {
       events: [
         {...eventDefaults, type: 'start', at: now, endAt: now},
@@ -260,6 +261,7 @@ addAsyncTest(
         {type: 'complete', at: now + 2500}
       ]
     };
+
     Kadira.tracer.buildTrace(traceInfo);
 
     const expected = {
@@ -335,9 +337,9 @@ Tinytest.add(
 addAsyncTest(
   'Tracer - Build Trace - event not ended',
   function (test) {
-    let now = new Date().getTime();
+    const now = 0;
 
-    let traceInfo = {
+    const traceInfo = {
       events: [
         {type: 'start', at: now},
         {type: 'wait', at: now, endAt: null},
@@ -350,8 +352,8 @@ addAsyncTest(
 
     const expected = [
       ['start'],
-      ['wait', 0, { forcedEnd: true }],
-      ['db', 500],
+      ['wait', 0, null, { at: 0, endAt: 0, forcedEnd: true }],
+      ['db', 500, null, { at: 2000, endAt: 2500}],
       ['complete']
     ];
 
@@ -507,7 +509,7 @@ Tinytest.add(
   }
 );
 
-addAsyncTest('Tracer - Build Trace - Nested Async Parallel Events', async function (test) {
+addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async function (test) {
   const Email = Package['email'].Email;
 
   let info;
@@ -552,12 +554,35 @@ addAsyncTest('Tracer - Build Trace - Nested Async Parallel Events', async functi
 
   const cleanedEvents = cleanOptEvents(info.trace.events);
 
-  prettyLog(cleanedEvents);
-
   console.log('resources');
   prettyLog(mergeSegmentIntervals(info.resources));
 
-  const expected = [['start',0,{userId: null,params: '[]'}],['wait',0,{waitOn: []},{at: 0,endAt: 0,asyncId: 1}],['custom',0,null,{name: 'test',nested: [['db',0,{coll: 'tinytest-data',func: 'insertAsync'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'insertAsync'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'insertAsync'},{at: 0,endAt: 0,asyncId: 1}],['emailAsync',0,{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'findOneAsync',selector: '{"_id":"a"}'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'findOneAsync',selector: '{"_id":"b"}'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'findOneAsync',selector: '{"_id":"c"}'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'findOneAsync',selector: '{"_id":"a1"}'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'findOneAsync',selector: '{"_id":"a2"}'},{at: 0,endAt: 0,asyncId: 1}]],at: 0,endAt: 0,asyncId: 1}],['complete',0]];
+  const expected = [
+    ['start',0,{userId: null,params: '[]'}],
+    ['wait',0,{waitOn: []},{at: 0,endAt: 0,asyncId: 1}],
+    [
+      'custom',
+      0,
+      null,
+      {
+        name: 'test',
+        nested: [
+          ['db',0,{coll: 'tinytest-data',func: 'insertAsync'},{at: 0,endAt: 0,asyncId: 1}],
+          ['db',0,{coll: 'tinytest-data',func: 'insertAsync'},{at: 0,endAt: 0,asyncId: 1}],
+          ['db',0,{coll: 'tinytest-data',func: 'insertAsync'},{at: 0,endAt: 0,asyncId: 1}],
+          ['emailAsync',0,{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com'},{at: 0,endAt: 0,asyncId: 1}],
+          ['db',0,{coll: 'tinytest-data',func: 'fetch',limit: 1,docsFetched: 1,docSize: 17,cursor: true,selector: '{"_id":"a"}'},{at: 0,endAt: 0,asyncId: 1}],
+          ['db',0,{coll: 'tinytest-data',func: 'fetch',limit: 1,docsFetched: 1,docSize: 17,cursor: true,selector: '{"_id":"b"}'},{at: 0,endAt: 0,asyncId: 1}],
+          ['db',0,{coll: 'tinytest-data',func: 'fetch',limit: 1,docsFetched: 1,docSize: 17,cursor: true,selector: '{"_id":"c"}'},{at: 0,endAt: 0,asyncId: 1}],
+          ['db',0,{coll: 'tinytest-data',func: 'fetch',limit: 1,docsFetched: 0,docSize: 0,cursor: true,selector: '{"_id":"a1"}'},{at: 0,endAt: 0,asyncId: 1}],
+          ['db',0,{coll: 'tinytest-data',func: 'fetch',limit: 1,docsFetched: 0,docSize: 0,cursor: true,selector: '{"_id":"a2"}'},{at: 0,endAt: 0,asyncId: 1}]
+        ],
+        at: 0,
+        endAt: 0,
+        asyncId: 1
+      }
+    ],
+    ['complete',0]];
 
   test.stableEqual(cleanedEvents, expected);
 });
