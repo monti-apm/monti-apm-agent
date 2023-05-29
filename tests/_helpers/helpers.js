@@ -38,6 +38,13 @@ export const EnableTrackingMethods = function () {
   // };
 };
 
+export const getLastMethodTrace = () => {
+  if (MethodStore.length < 1) {
+    return [];
+  }
+  return MethodStore[MethodStore.length - 1];
+};
+
 export const GetLastMethodEvents = function (_indices) {
   if (MethodStore.length < 1) {
     return [];
@@ -245,6 +252,58 @@ addAsyncTest.only = function (name, fn) {
 };
 
 addAsyncTest.skip = function () {};
+
+export function cleanTrace (trace) {
+  cleanEvents(trace.events);
+}
+
+export function cleanEvents (events) {
+  events?.forEach(function (event) {
+    if (event.endAt > event.at) {
+      event.endAt = 10;
+    } else if (event.endAt) {
+      delete event.endAt;
+    }
+
+    delete event.at;
+    delete event._id;
+
+    if (event.nested?.length === 0) {
+      delete event.nested;
+    } else {
+      cleanEvents(event.nested);
+    }
+  });
+}
+
+export const cleanOptEvents = events =>
+  events.map((event) => {
+    const _event = [...event];
+
+    _event[1] = 0;
+
+    const data = _event[3];
+
+    if (data) {
+      _event[3] = {
+        ...data,
+        at: 0,
+        endAt: 0,
+        asyncId: 1,
+        nested: data.nested ? cleanOptEvents(data.nested) : undefined,
+      };
+    }
+
+    return _event;
+  });
+
+export function cleanOptTrace (trace) {
+  const _trace = { ...trace };
+
+  _trace.events = cleanOptEvents(trace.events);
+
+  return _trace;
+}
 
 export const TestHelpers = {
   methodStore: MethodStore,

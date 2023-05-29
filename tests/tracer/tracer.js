@@ -1,10 +1,11 @@
 import { _ } from 'meteor/underscore';
 import { Tracer } from '../../lib/tracer/tracer';
-import { addAsyncTest, callAsync, registerMethod } from '../_helpers/helpers';
+import { addAsyncTest, callAsync, cleanOptEvents, cleanTrace, registerMethod } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
 import { mergeSegmentIntervals } from '../../lib/utils/time';
 import { prettyLog } from '../_helpers/pretty-log';
+import { getInfo } from '../../lib/als/als';
 
 let eventDefaults = {
   endAt: 0,
@@ -499,7 +500,7 @@ Tinytest.add(
   }
 );
 
-addAsyncTest.only('Tracer - Build Trace - Async Parallel Events', async function (test) {
+addAsyncTest.only('Tracer - Build Trace - Nested Async Parallel Events', async function (test) {
   const Email = Package['email'].Email;
 
   let info;
@@ -507,7 +508,7 @@ addAsyncTest.only('Tracer - Build Trace - Async Parallel Events', async function
   let methodId = registerMethod(async function () {
     let backgroundPromise;
 
-    await Kadira.startEvent('test', null, async (event) => {
+    await Kadira.event('test', async (event) => {
       await TestData.insertAsync({ _id: 'a', n: 1 });
       await TestData.insertAsync({ _id: 'b', n: 2 });
       await TestData.insertAsync({ _id: 'c', n: 3 });
@@ -527,7 +528,6 @@ addAsyncTest.only('Tracer - Build Trace - Async Parallel Events', async function
       // DB
       await Promise.all(ids.map(_id => TestData.findOneAsync({_id})));
 
-
       await TestData.findOneAsync({ _id: 'a1'}).then(() =>
         // Is this nested under the previous findOneAsync or is it a sibling?
         TestData.findOneAsync({ _id: 'a2' })
@@ -536,17 +536,23 @@ addAsyncTest.only('Tracer - Build Trace - Async Parallel Events', async function
       Kadira.endEvent(event);
     });
 
-    info = Kadira._getInfo();
+    info = getInfo();
 
     return backgroundPromise;
   });
 
   await callAsync(methodId);
 
-  prettyLog(info.trace);
+  const cleanedEvents = cleanOptEvents(info.trace.events);
+
+  prettyLog(cleanedEvents);
 
   console.log('resources');
   prettyLog(mergeSegmentIntervals(info.resources));
+
+  const expected = [['start',0,{userId: null,params: '[]'}],['wait',0,{waitOn: []},{at: 0,endAt: 0,asyncId: 1}],['custom',0,null,{name: 'test',nested: [['db',0,{coll: 'tinytest-data',func: 'insertAsync'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'insertAsync'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'insertAsync'},{at: 0,endAt: 0,asyncId: 1}],['emailAsync',0,{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'findOneAsync',selector: '{"_id":"a"}'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'findOneAsync',selector: '{"_id":"b"}'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'findOneAsync',selector: '{"_id":"c"}'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'findOneAsync',selector: '{"_id":"a1"}'},{at: 0,endAt: 0,asyncId: 1}],['db',0,{coll: 'tinytest-data',func: 'findOneAsync',selector: '{"_id":"a2"}'},{at: 0,endAt: 0,asyncId: 1}]],at: 0,endAt: 0,asyncId: 1}],['complete',0]];
+
+  test.stableEqual(cleanedEvents, expected);
 });
 
 function startTrace () {
@@ -559,26 +565,4 @@ function startTrace () {
   const info = {id: 'session-id', userId: 'uid'};
 
   return Kadira.tracer.start(info, ddpMessage);
-}
-
-function cleanTrace (traceInfo) {
-  cleanEvents(traceInfo.events);
-}
-
-function cleanEvents (events) {
-  events.forEach(function (event) {
-    if (event.endAt > event.at) {
-      event.endAt = 10;
-    } else if (event.endAt) {
-      delete event.endAt;
-    }
-    delete event.at;
-    delete event._id;
-
-    if (event.nested.length === 0) {
-      delete event.nested;
-    } else {
-      cleanEvents(event.nested);
-    }
-  });
 }
