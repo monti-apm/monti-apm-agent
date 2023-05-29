@@ -4,7 +4,7 @@ import { addAsyncTest, callAsync, cleanOptEvents, cleanTrace, registerMethod } f
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
 import { mergeSegmentIntervals } from '../../lib/utils/time';
-import { prettyLog } from '../_helpers/pretty-log';
+import { diffObjects, prettyLog } from '../_helpers/pretty-log';
 import { getInfo } from '../../lib/als/als';
 
 let eventDefaults = {
@@ -217,6 +217,7 @@ addAsyncTest(
 
     let eventId = Kadira.tracer.event(traceInfo, 'db');
 
+    // Due to parallelization, we should not assume the order of events.
     Kadira.tracer.event(traceInfo, 'db');
 
     await sleep(20);
@@ -235,7 +236,8 @@ addAsyncTest(
       name: 'method-name',
       events: [
         {type: 'start', data: {abc: 100}},
-        {type: 'db', endAt: 10, nested: [{ type: 'db', endAt: null }]},
+        {type: 'db', endAt: 10},
+        {type: 'db', endAt: null},
         {type: 'end', data: {abc: 200}}
       ]
     };
