@@ -1,5 +1,4 @@
 import { addAsyncTest } from './_helpers/helpers';
-import { diffObjects } from './_helpers/pretty-log';
 
 Tinytest.add(
   'Errors - enableErrorTracking',
@@ -111,8 +110,6 @@ addAsyncTest(
         ],
         metrics: {total: 0}
       };
-
-      diffObjects(trace, expected);
 
       test.equal(trace, expected);
     };
