@@ -7,8 +7,8 @@ import { sleep } from '../../lib/utils';
 addAsyncTest(
   'Models - Method - buildPayload simple',
   async function (test) {
-    CreateMethodCompleted('aa', 'hello', 1, 100, 5);
-    CreateMethodCompleted('aa', 'hello', 2, 800 , 10);
+    createMethodCompleted('aa', 'hello', 1, 100, 5);
+    createMethodCompleted('aa', 'hello', 2, 800 , 10);
 
     let payload = model.buildPayload();
     payload.methodRequests = [];
@@ -59,8 +59,8 @@ addAsyncTest(
 addAsyncTest(
   'Models - Method - buildPayload with errors',
   async function (test) {
-    CreateMethodCompleted('aa', 'hello', 1, 100, 5);
-    CreateMethodErrored('aa', 'hello', 2, 'the-error', 800, 10);
+    createMethodCompleted('aa', 'hello', 1, 100, 5);
+    createMethodErrored('aa', 'hello', 2, 'the-error', 800, 10);
     let payload = model.buildPayload();
     let expected = [{
       startTime: 100,
@@ -188,7 +188,7 @@ addAsyncTest(
 
 export const model = new MethodsModel();
 
-function CreateMethodCompleted (sessionName, methodName, methodId, startTime, methodDelay) {
+function createMethodCompleted (sessionName, methodName, methodId, startTime, methodDelay) {
   methodDelay = methodDelay || 5;
   let method = {session: sessionName, name: methodName, id: methodId, events: []};
   method.events.push({type: 'start', at: startTime});
@@ -197,7 +197,7 @@ function CreateMethodCompleted (sessionName, methodName, methodId, startTime, me
   model.processMethod(method);
 }
 
-function CreateMethodErrored (sessionName, methodName, methodId, errorMessage, startTime, methodDelay) {
+function createMethodErrored (sessionName, methodName, methodId, errorMessage, startTime, methodDelay) {
   methodDelay = methodDelay || 5;
   let method = {session: sessionName, name: methodName, id: methodId, events: []};
   method.events.push({type: 'start', at: startTime});
