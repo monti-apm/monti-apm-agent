@@ -509,13 +509,16 @@ Tinytest.add(
   }
 );
 
-addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async function (test) {
+addAsyncTest.only('Tracer - Build Trace - custom with nested parallel events', async function (test) {
   const Email = Package['email'].Email;
 
   let info;
 
   let methodId = registerMethod(async function () {
     let backgroundPromise;
+
+    // Compute
+    await sleep(30);
 
     await Kadira.event('test', async (event) => {
       await TestData.insertAsync({ _id: 'a', n: 1 });
@@ -553,6 +556,9 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   await callAsync(methodId);
 
   const cleanedEvents = cleanOptEvents(info.trace.events);
+
+  console.log(info.trace.rootAsyncId);
+  prettyLog(info.trace.events);
 
   console.log('resources');
   prettyLog(mergeSegmentIntervals(info.resources));

@@ -3,6 +3,7 @@ import { Random } from 'meteor/random';
 import { DDP } from 'meteor/ddp';
 import { MethodStore, TestData } from './globals';
 import { EJSON } from 'meteor/ejson';
+import { EventType } from '../../lib/constants';
 
 const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
@@ -283,6 +284,8 @@ export const cleanOptEvents = events =>
   events.map((event) => {
     const _event = [...event];
 
+    if (_event[0] === EventType.Async) return false;
+
     _event[1] = 0;
 
     const data = _event[3];
@@ -298,7 +301,7 @@ export const cleanOptEvents = events =>
     }
 
     return _event;
-  });
+  }).filter(Boolean);
 
 export function cleanOptTrace (trace) {
   const _trace = { ...trace };
