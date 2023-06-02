@@ -3,8 +3,6 @@ import { Tracer } from '../../lib/tracer/tracer';
 import { addAsyncTest, callAsync, cleanOptEvents, cleanTrace, registerMethod } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
-import { mergeSegmentIntervals } from '../../lib/utils/time';
-import { prettyLog } from '../_helpers/pretty-log';
 import { getInfo } from '../../lib/als/als';
 
 let eventDefaults = {
@@ -558,10 +556,9 @@ addAsyncTest.only('Tracer - Build Trace - custom with nested parallel events', a
   const cleanedEvents = cleanOptEvents(info.trace.events);
 
   console.log(info.trace.rootAsyncId);
-  prettyLog(info.trace.events);
+  // prettyLog(info.trace.events);
 
-  console.log('resources');
-  prettyLog(mergeSegmentIntervals(info.resources));
+  // prettyLog(mergeSegmentIntervals(info.resources));
 
   const expected = [
     ['start',0,{userId: null,params: '[]'}],
