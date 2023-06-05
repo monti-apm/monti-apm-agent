@@ -53,12 +53,16 @@ export const GetLastMethodEvents = function (_indices) {
   let indices = _indices || [0];
   let events = MethodStore[MethodStore.length - 1].events;
   events = Array.prototype.slice.call(events, 0);
-  events = events.filter(isNotCompute);
+  events = events.filter(isNotCompute).filter(isNotAsync);
   events = events.map(filterFields);
   return events;
 
   function isNotCompute (event) {
     return event[0] !== 'compute';
+  }
+
+  function isNotAsync (event) {
+    return event[0] !== 'async';
   }
 
   function filterFields (event) {
@@ -255,6 +259,8 @@ addAsyncTest.only = function (name, fn) {
 addAsyncTest.skip = function () {};
 
 export function cleanTrace (trace) {
+  delete trace.rootAsyncId;
+
   cleanEvents(trace.events);
 }
 

@@ -4,6 +4,9 @@ import { addAsyncTest, callAsync, cleanOptEvents, cleanTrace, registerMethod } f
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
 import { getInfo } from '../../lib/als/als';
+import { mergeParallelIntervalsArray, subtractIntervals } from '../../lib/utils/time';
+import { diffObjects } from '../_helpers/pretty-log';
+import { EventType } from '../../lib/constants';
 
 let eventDefaults = {
   endAt: 0,
@@ -38,6 +41,8 @@ addAsyncTest(
         {type: 'end', data: {abc: 200}}
       ]
     };
+
+    diffObjects(traceInfo, expected);
 
     test.equal(traceInfo, expected);
   }
@@ -256,17 +261,19 @@ addAsyncTest(
         {...eventDefaults, type: 'start', at: now, endAt: now},
         {...eventDefaults, type: 'wait', at: now, endAt: now + 1000},
         {...eventDefaults, type: 'db', at: now + 2000, endAt: now + 2500},
-        {type: 'complete', at: now + 2500}
+        {...eventDefaults, type: 'async', at: now + 2500, endAt: now + 3500},
+        {type: EventType.Complete, at: now + 4500}
       ]
     };
 
     Kadira.tracer.buildTrace(traceInfo);
 
     const expected = {
-      total: 2500,
+      total: 4500,
       wait: 1000,
       db: 500,
       compute: 1000,
+      async: 1000,
     };
 
     test.equal(traceInfo.metrics, expected);
@@ -278,6 +285,7 @@ addAsyncTest(
   'Tracer - Build Trace - errored',
   function (test) {
     let now = new Date().getTime();
+
     let traceInfo = {
       events: [
         {...eventDefaults, type: 'start', at: now},
@@ -286,6 +294,7 @@ addAsyncTest(
         {...eventDefaults, type: 'error', at: now + 2500}
       ]
     };
+
     Kadira.tracer.buildTrace(traceInfo);
 
     const expected = {
@@ -293,6 +302,7 @@ addAsyncTest(
       wait: 1000,
       db: 500,
       compute: 1000,
+      async: 0,
     };
 
     test.equal(traceInfo.metrics, expected);
@@ -507,7 +517,7 @@ Tinytest.add(
   }
 );
 
-addAsyncTest.only('Tracer - Build Trace - custom with nested parallel events', async function (test) {
+addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async function (test) {
   const Email = Package['email'].Email;
 
   let info;
@@ -588,6 +598,90 @@ addAsyncTest.only('Tracer - Build Trace - custom with nested parallel events', a
     ['complete',0]];
 
   test.stableEqual(cleanedEvents, expected);
+});
+
+addAsyncTest('Tracer - Time - Subtract Intervals', async function (test) {
+  function testSubtractIntervals (arr1, arr2, expected) {
+    const result = subtractIntervals(arr1, arr2);
+    test.stableEqual(result, expected);
+  }
+
+  testSubtractIntervals([
+    [0, 10],
+    [20, 30],
+    [40, 50],
+  ],[
+    [5, 15],
+    [25, 35],
+    [35, 45],
+  ],[
+    [0, 5],
+    [20, 25],
+    [45, 50],
+  ]);
+
+  testSubtractIntervals(
+    [
+      [0, 10],
+      [20, 30],
+      [40, 50],
+    ],
+    [[0, 50]],
+    []
+  );
+
+  testSubtractIntervals(
+    [
+      [0, 100],
+    ],
+    [
+      [0, 50],
+    ],
+    [
+      [50, 100],
+    ]
+  );
+});
+
+addAsyncTest('Tracer- Time - Merge Parallel Intervals', async function (test) {
+  function testMergeParallelIntervals (arr, expected) {
+    const result = mergeParallelIntervalsArray(arr);
+    test.stableEqual(result, expected);
+  }
+
+  testMergeParallelIntervals([
+    [0, 10],
+    [20, 30],
+    [40, 50],
+  ],[
+    [0, 10],
+    [20, 30],
+    [40, 50],
+  ]);
+
+  testMergeParallelIntervals([
+    [0, 10],
+    [5, 15],
+    [20, 30],
+    [25, 35],
+    [40, 50],
+    [35, 45],
+  ],[
+    [0, 15],
+    [20, 50],
+  ]);
+
+  testMergeParallelIntervals([
+    [0, 10],
+    [5, 15],
+    [20, 30],
+    [25, 35],
+    [40, 50],
+    [35, 45],
+    [0, 50],
+  ],[
+    [0, 50],
+  ]);
 });
 
 function startTrace () {

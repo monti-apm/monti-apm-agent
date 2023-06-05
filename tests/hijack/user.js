@@ -1,5 +1,5 @@
 import { TestData } from '../_helpers/globals';
-import { addAsyncTest, callAsync, cleanTestData, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
+import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
 
 addAsyncTest(
   'User - not logged in',
@@ -22,7 +22,5 @@ addAsyncTest(
     ];
 
     test.equal(events, expected);
-
-    await cleanTestData();
   }
 );
