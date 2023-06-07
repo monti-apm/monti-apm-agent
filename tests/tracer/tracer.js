@@ -600,6 +600,25 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   test.stableEqual(cleanedEvents, expected);
 });
 
+addAsyncTest('Tracer - Build Trace - the correct number of async events are captured', async (test) => {
+  let info;
+
+  const methodId = registerMethod(async function () {
+    await sleep(100);
+    await sleep(200);
+
+    info = getInfo();
+
+    return sleep(300);
+  });
+
+  await callAsync(methodId);
+
+  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration > 100);
+
+  test.equal(asyncEvents.length, 3);
+});
+
 addAsyncTest('Tracer - Time - Subtract Intervals', async function (test) {
   function testSubtractIntervals (arr1, arr2, expected) {
     const result = subtractIntervals(arr1, arr2);
