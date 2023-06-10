@@ -10,7 +10,7 @@ import {
 } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
-import { getInfo } from '../../lib/als/als';
+import { getInfo } from '../../lib/async/als';
 import { mergeParallelIntervalsArray, subtractIntervals } from '../../lib/utils/time';
 import { diffObjects, prettyLog } from '../_helpers/pretty-log';
 import { EventType } from '../../lib/constants';
