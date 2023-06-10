@@ -1,0 +1,80 @@
+## How Async Hooks work
+
+Async Hooks is a module in Node.js that provides an API to track asynchronous resources in your application. This is crucial when building and maintaining large-scale applications, as it allows developers to understand what's happening under the hood of their asynchronous operations, providing a deeper level of insight into the event loop, promises, and other asynchronous behaviors.
+
+Here's a basic rundown of how Async Hooks works:
+
+- **Initialization** (`init`): This is the first step in the life cycle of an async operation. When an async operation is initialized, the init hook is called. This hook function receives several arguments: the unique id of the async operation, the type of the operation (e.g., 'TIMERWRAP', 'PROMISE', etc.), the id of the parent async operation (which caused the current operation), and the resource object.
+
+- **Before** (`before`): Just before the async operation's callback is about to be called, the before hook is invoked. The callback receives the id of the async operation.
+
+- **After** (`after`): Just after the async operation's callback has finished, the after hook is invoked. Like the before hook, it also receives the id of the async operation.
+
+- **Destruction** (`destroy`): When the async operation is about to be garbage collected, the destroy hook is invoked. This hook receives the id of the async operation.
+
+- **Promise Resolve** (`promiseResolve`): This is a special hook that is invoked when a Promise-based operation is resolved. It receives the id of the async operation.
+
+To use Async Hooks, you need to create a hooks object with the desired lifecycle hooks, and then call `async_hooks.createHook(hooks)` to create a new AsyncHooks instance. This instance has `enable()` and `disable()` methods to start and stop the tracking of async operations.
+
+## Some promises do not call `before` or `after`
+
+Async Hooks is a powerful feature in Node.js that allows developers to track the lifetime of asynchronous resources in a Node.js application. However, not all asynchronous operations are guaranteed to trigger Async Hooks events, including the before and after events.
+
+Promises in particular can behave somewhat differently than other asynchronous resources in regards to Async Hooks.
+
+The before and after events of async hooks correspond to the execution of a JavaScript callback function. If a Promise is resolved (or rejected) with a value that is not another Promise, and there are no `.then()` or `.catch()` handlers registered on it by the end of the current "tick" of the event loop, then no JavaScript callback is ever executed for that Promise. As a result, no before or after events would be emitted by Async Hooks for that Promise.
+
+This is because the Promise implementation in JavaScript engines is optimized to avoid unnecessary operations when possible. If a Promise is resolved and no handlers are registered on it, the engine may decide not to queue any microtask for that Promise, since doing so would have no observable effect. Since Async Hooks hooks into the Node.js event loop and not the JavaScript engine itself, it would not see any activity for such Promises.
+
+> So in short, if you're seeing some Promises not triggering before or after events in Async Hooks, it could be because those Promises are being resolved without any handlers registered on them.
+
+Keep in mind that the behavior of Async Hooks and Promises can be complex and may vary between different versions of Node.js and different JavaScript engines, so it's possible there may be other factors at play as well.
+
+## After each `await` there is a new Async Resource
+
+When you use `await` in JavaScript (and thus in Node.js), you're essentially pausing the execution of async function and waiting for a Promise to be resolved or rejected. The function execution is resumed with the resolved value of the Promise, or throws an error if the Promise was rejected.
+
+During the pause in execution, control is given back to the JavaScript runtime, which can go on to handle other tasks. This is what allows JavaScript to handle multiple tasks "at the same time" despite being single-threaded; while one async function is paused, waiting for a Promise, another function can run.
+
+When you use `await`, a new async operation is created, which is why you see a new async resource for each `await` in Async Hooks. The operation is completed when the Promise that you're waiting for is resolved or rejected. The init hook in Async Hooks is called when the operation is created (i.e., when `await` is encountered), and the destroy hook is called when the operation is completed (i.e., when the Promise is resolved or rejected).
+
+It's also worth noting that each `await` creates a new microtask. The JavaScript event loop handles tasks and microtasks differently: a new task can't start until the current task and all of its associated microtasks have completed. By creating a new microtask with each `await`, JavaScript ensures that async functions behave predictably: the function will always resume where it left off, even if other tasks or functions have run in the meantime.
+
+> To summarize, each `await` results in a new async operation (and thus a new async resource in Async Hooks) because `await` pauses the execution of the current async function and allows the JavaScript runtime to handle other tasks. This new async operation is completed when the Promise that's being awaited is resolved or rejected. This mechanism allows JavaScript to handle multiple tasks "at the same time" despite being single-threaded.
+
+## In an Async Function, the first section of the code up to the first `await` is actually synchronous
+
+The execution of an Async Function (up to the first `await` expression) is indeed synchronous. When an async function is called, it runs synchronously until it encounters an `await` expression. At that point, it yields execution back to the caller and waits for the Promise to either resolve or reject.
+
+Here's a simple example:
+
+```js
+async function example() {
+    console.log('1. This is synchronous');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log('2. This is asynchronous');
+}
+
+console.log('Start');
+example();
+console.log('End');
+```
+
+When you run this code, you will see the following output:
+
+```
+Start
+1. This is synchronous
+End
+2. This is asynchronous
+```
+
+The call to `example()` runs synchronously until it encounters the `await` expression, at which point it pauses and allows the rest of the synchronous code to run. Then, after the Promise resolves (after one second in this case), the async function resumes and runs the rest of its code.
+
+## The first part of an Async Function has the same Async ID as the caller
+
+The initial **synchronous** part of an async function (up to the first `await`) is executed in the same turn of the event loop as the calling code. This means it shares the same async context, so it has the same Async ID as the parent in the context of Node.js async hooks.
+
+When the async function hits an `await` statement, a new asynchronous operation is created, and it will be given a new async id. This is why you see a different Async ID after an `await` statement.
+
+To put it simply, everything in an async function before the first `await` is executed in the same context (and thus has the same Async ID) as the calling code. After an `await`, a new context (and a new Async ID) is created.
