@@ -30,6 +30,50 @@ This is because the Promise implementation in JavaScript engines is optimized to
 
 Keep in mind that the behavior of Async Hooks and Promises can be complex and may vary between different versions of Node.js and different JavaScript engines, so it's possible there may be other factors at play as well.
 
+## The `before` and `after` hooks are called for `await` operations
+
+When an `await` operation is encountered in an async function, the function is paused, and control is returned to the event loop, which can then process other tasks. This pausing of the function creates an asynchronous boundary. When the awaited promise is resolved, the function is resumed.
+
+In the context of Async Hooks, when a new async operation is created (such as when a promise is awaited), the `init` hook is called. Then, just before the async operation's callback is called (i.e., just before the async function is resumed after an `await`), the `before` hook is called. Similarly, just after the callback has completed, the `after` hook is called.
+
+If you have multiple `await` expressions in a row in an async function, each `await` creates a new async operation. So for each `await`, the `before` and `after` hooks are called when the function is paused and resumed. Here's a simplified view:
+
+```javascript
+async function example() {
+  // Before any awaits - function is running synchronously
+  await doSomething(); // `before` hook called here, then `after` hook when promise is resolved
+  await doSomethingElse(); // `before` hook called here, then `after` hook when promise is resolved
+  // After all awaits - function resumes running synchronously
+}
+```
+
+In this example, the `before` and `after` hooks are called twice: once for each `await`.
+
+Remember that the `before` and `after` hooks are associated with the async operations, not directly with the `await` keyword. Any operation that creates a new async operation (which includes any operation that returns a promise) will trigger the `before` and `after` hooks. The `await` keyword just makes it easy to create async operations by pausing and resuming async functions.
+
+It's important to note that while the `before` and `after` hooks give you visibility into when async operations are starting and finishing, they don't necessarily provide information about what's happening inside those operations. For that, you would need to look at the code of the operations themselves or use other debugging tools.
+
+## The last `await` also triggers `before` or `after` even though there is nothing to do
+
+The `before` and `after` hooks in Async Hooks are triggered around the execution of the callback associated with an asynchronous operation. In the case of `await`, the "callback" could be considered as the remaining part of the async function that follows the `await` expression.
+
+When you use `await` on a promise, the part of the function that follows the `await` expression is effectively a callback that gets executed when the promise is resolved. So, even if an `await` expression is the last statement in an async function, it would still trigger the `before` and `after` hooks because there's still a "callback" to execute: the rest of the function (even if it's just the function's implicit `return` statement).
+
+Here's a simplified example:
+
+```javascript
+async function example() {
+  await doSomething();  // `before` hook called here, then `after` hook when promise is resolved
+  await doSomethingElse();  // `before` hook called here, then `after` hook when promise is resolved
+  await doOneLastThing();  // `before` hook called here, then `after` hook when promise is resolved
+  // Implicit return statement here
+}
+```
+
+In this example, the `before` and `after` hooks are called for each `await`, including the last one. Even though there's no explicit code after the last `await`, there's still an implicit `return` statement that ends the function, and the `after` hook would be called before this `return` statement.
+
+That said, it's important to remember that the `before` and `after` hooks are a somewhat low-level feature that provide visibility into the execution of asynchronous operations. They can be useful for debugging and understanding the flow of execution in complex applications, but they don't necessarily provide a complete picture of what your code is doing.
+
 ## After each `await` there is a new Async Resource
 
 When you use `await` in JavaScript (and thus in Node.js), you're essentially pausing the execution of async function and waiting for a Promise to be resolved or rejected. The function execution is resumed with the resolved value of the Promise, or throws an error if the Promise was rejected.
