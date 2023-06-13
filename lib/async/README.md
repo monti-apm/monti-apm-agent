@@ -16,6 +16,16 @@ Here's a basic rundown of how Async Hooks works:
 
 To use Async Hooks, you need to create a hooks object with the desired lifecycle hooks, and then call `async_hooks.createHook(hooks)` to create a new AsyncHooks instance. This instance has `enable()` and `disable()` methods to start and stop the tracking of async operations.
 
+## Clarification on the `destroy` hook
+
+The `destroy` hook in Node.js's Async Hooks API is called when an asynchronous resource is about to be garbage collected, not necessarily immediately after the resource's work has completed.
+
+It's important to understand that in JavaScript, and Node.js in particular, the timing of garbage collection is not guaranteed. The JavaScript engine decides when to perform garbage collection based on a variety of factors, including memory pressure and CPU usage. This means that there can be a delay between when an async resource's work is finished and when the `destroy` hook is called.
+
+So while the `destroy` hook can give you an indication that an async resource is no longer in use and is about to be cleaned up, it's not a reliable way to determine exactly when the resource's work has finished. For that, you would typically use the `after` hook, which is called immediately after the callback associated with an async operation has completed.
+
+In the case of Promise-based async operations, like those created with `then` or `catch`, the `destroy` hook would typically be called sometime after the Promise has settled (i.e., either resolved or rejected) and the associated callbacks have run. But the exact timing would depend on when the JavaScript engine decides to perform garbage collection.
+
 ## Some promises do not call `before` or `after`
 
 Async Hooks is a powerful feature in Node.js that allows developers to track the lifetime of asynchronous resources in a Node.js application. However, not all asynchronous operations are guaranteed to trigger Async Hooks events, including the before and after events.
@@ -29,6 +39,32 @@ This is because the Promise implementation in JavaScript engines is optimized to
 > So in short, if you're seeing some Promises not triggering before or after events in Async Hooks, it could be because those Promises are being resolved without any handlers registered on them.
 
 Keep in mind that the behavior of Async Hooks and Promises can be complex and may vary between different versions of Node.js and different JavaScript engines, so it's possible there may be other factors at play as well.
+
+## The `then` and `catch` callbacks create new async operations which trigger `before` and `after`
+
+Promises in JavaScript provide `then` and `catch` methods for handling the resolution and rejection of the promise, respectively. These methods take callbacks that are called when the promise is resolved or rejected.
+
+In the context of Async Hooks in Node.js, when you attach a `then` or `catch` callback to a promise, a new asynchronous operation is created. This means that the `init` hook is called when you attach the `then` or `catch` callback.
+
+When the promise is resolved (for `then`) or rejected (for `catch`), and it's time to call the callback, the `before` hook is called. After the callback has been executed, the `after` hook is called.
+
+Here's a simplified example:
+
+```javascript
+doSomethingAsync()  // `init` hook called here
+  .then(result => {  // `init` hook called here for the `then` callback
+    console.log(result);  // `before` hook called here, then `after` hook after console.log
+  })  // `destroy` hook called here after the `then` callback is finished
+  .catch(error => {  // `init` hook called here for the `catch` callback
+    console.error(error);  // `before` hook called here, then `after` hook after console.error
+  });  // `destroy` hook called here after the `catch` callback is finished
+```
+
+In this example, the `init`, `before`, and `after` hooks are called for the `doSomethingAsync` operation, as well as for the `then` and `catch` callbacks. The `destroy` hook is called after each operation is completed and the resource is about to be garbage collected.
+
+Remember that the `then` and `catch` callbacks are associated with new async operations, not with the original promise. This means that they have their own async IDs and can be tracked independently in Async Hooks.
+
+It's also worth noting that if the `then` or `catch` callbacks themselves return a promise or include an `await` expression, this would create additional async operations and trigger additional hook calls.
 
 ## The `before` and `after` hooks are called for `await` operations
 
@@ -53,7 +89,7 @@ Remember that the `before` and `after` hooks are associated with the async opera
 
 It's important to note that while the `before` and `after` hooks give you visibility into when async operations are starting and finishing, they don't necessarily provide information about what's happening inside those operations. For that, you would need to look at the code of the operations themselves or use other debugging tools.
 
-## The last `await` also triggers `before` or `after` even though there is nothing to do
+## The last `await` also triggers `before` or `after` even though there is nothing else to do
 
 The `before` and `after` hooks in Async Hooks are triggered around the execution of the callback associated with an asynchronous operation. In the case of `await`, the "callback" could be considered as the remaining part of the async function that follows the `await` expression.
 
