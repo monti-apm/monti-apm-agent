@@ -26,6 +26,55 @@ So while the `destroy` hook can give you an indication that an async resource is
 
 In the case of Promise-based async operations, like those created with `then` or `catch`, the `destroy` hook would typically be called sometime after the Promise has settled (i.e., either resolved or rejected) and the associated callbacks have run. But the exact timing would depend on when the JavaScript engine decides to perform garbage collection.
 
+## The Promise executor function is called synchronously
+
+When you create a new Promise, you provide a function as an argument. This function is often referred to as the "executor function". The executor function takes two arguments: a `resolve` function and a `reject` function.
+
+Here's an example:
+
+```javascript
+new Promise((resolve, reject) => {
+  // This is the executor function
+});
+```
+
+The executor function is called immediately, synchronously when the Promise is created. This is by design, as it allows you to start any asynchronous operations needed to eventually resolve or reject the Promise. However, the Promise itself doesn't resolve or reject until you call the provided `resolve` or `reject` function, and that can happen synchronously or asynchronously depending on your code.
+
+Because the executor function is called synchronously, if you call `async_hooks.executionAsyncId()` inside the executor function, it will return the async ID of the current synchronous execution context, not the async ID of the Promise itself. This can be misleading if you're trying to track the async ID of the Promise.
+
+Here's an example that illustrates this:
+
+```javascript
+const async_hooks = require('async_hooks');
+
+new Promise((resolve, reject) => {
+  console.log(async_hooks.executionAsyncId());  // Logs the async ID of the current synchronous execution context
+  setTimeout(resolve, 1000);  // Resolve the Promise asynchronously after 1 second
+});
+```
+
+In this example, the `console.log` statement is executed synchronously when the Promise is created, so it logs the async ID of the current synchronous execution context. The Promise is then resolved asynchronously after 1 second by the `setTimeout` call.
+
+To get the async ID of the Promise itself, you would need to use the `init` hook in the Async Hooks API, which is called when an async resource is created:
+
+```javascript
+const async_hooks = require('async_hooks');
+
+async_hooks.createHook({
+  init: (asyncId, type, triggerAsyncId) => {
+    if (type === 'PROMISE') {
+      console.log(asyncId);  // Logs the async ID of the Promise
+    }
+  }
+}).enable();
+
+new Promise((resolve, reject) => {
+  setTimeout(resolve, 1000);  // Resolve the Promise asynchronously after 1 second
+});
+```
+
+In this modified example, the `init` hook logs the async ID of the Promise when the Promise is created.
+
 ## Some promises do not call `before` or `after`
 
 Async Hooks is a powerful feature in Node.js that allows developers to track the lifetime of asynchronous resources in a Node.js application. However, not all asynchronous operations are guaranteed to trigger Async Hooks events, including the before and after events.
