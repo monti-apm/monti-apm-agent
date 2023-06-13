@@ -40,6 +40,28 @@ This is because the Promise implementation in JavaScript engines is optimized to
 
 Keep in mind that the behavior of Async Hooks and Promises can be complex and may vary between different versions of Node.js and different JavaScript engines, so it's possible there may be other factors at play as well.
 
+## All promises trigger `promiseResolve`, except when they are rejected
+
+The `promiseResolve` hook in Node.js's Async Hooks API is called when a Promise has been resolved, that is when the Promise has completed its work and has a result ready. This happens regardless of how the Promise was created or used.
+
+Here's a simple example:
+
+```javascript
+const async_hooks = require('async_hooks');
+
+async_hooks.createHook({
+  promiseResolve: (asyncId) => {
+    console.log(`Promise resolved with id ${asyncId}`);
+  },
+}).enable();
+
+Promise.resolve(42);
+```
+
+In this code, a Promise is created and immediately resolved with the value `42`. The `promiseResolve` hook is called when this Promise is resolved, and logs a message with the async ID of the Promise.
+
+> It's important to note that the `promiseResolve` hook is not called when a Promise is rejected. If you want to track when Promises are rejected, you would typically need to attach a `catch` callback to the Promise and handle the rejection there.
+
 ## The `then` and `catch` callbacks create new async operations which trigger `before` and `after`
 
 Promises in JavaScript provide `then` and `catch` methods for handling the resolution and rejection of the promise, respectively. These methods take callbacks that are called when the promise is resolved or rejected.
