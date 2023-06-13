@@ -75,6 +75,43 @@ new Promise((resolve, reject) => {
 
 In this modified example, the `init` hook logs the async ID of the Promise when the Promise is created.
 
+The `init` hook in Node.js's Async Hooks API is called whenever an asynchronous resource is being initialized. This means that it's called at the point when the system sets up the internal state for the resource but before the resource's asynchronous operation has actually started.
+
+For example, in the case of a Promise, the `init` hook is called when the Promise is created but before the executor function has started running. Here's a simplified illustration:
+
+```javascript
+const async_hooks = require('async_hooks');
+
+async_hooks.createHook({
+  init: (asyncId, type, triggerAsyncId) => {
+    // You need this check as `console.log` also spawns an async resource and will cause an infinite loop
+    if (type === 'PROMISE') {
+      console.log(`init: ${asyncId}`);
+    }
+  }
+}).enable();
+
+console.log('before promise');
+new Promise((resolve, reject) => {
+  console.log('inside promise');
+  resolve();
+});
+console.log('after promise');
+```
+
+In this code, the `init` hook logs a message whenever an async resource is initialized. The output would look something like this:
+
+```
+before promise
+init: 5
+inside promise
+after promise
+```
+
+This shows that the `init` hook is called in between the 'before promise' and 'inside promise' log messages, i.e., after the Promise is created but before the executor function runs. Note that the specific async ID (5 in this example) may vary between runs.
+
+It's important to understand that while the `init` hook is called at the initialization stage of an async operation, the associated async resource may not have completed its construction when the hook runs. Therefore, you shouldn't rely on all properties of the async resource being available in the `init` hook.
+
 ## Some promises do not call `before` or `after`
 
 Async Hooks is a powerful feature in Node.js that allows developers to track the lifetime of asynchronous resources in a Node.js application. However, not all asynchronous operations are guaranteed to trigger Async Hooks events, including the before and after events.
