@@ -4,6 +4,7 @@ import { DDP } from 'meteor/ddp';
 import { MethodStore, TestData } from './globals';
 import { EJSON } from 'meteor/ejson';
 import { EventType } from '../../lib/constants';
+import { last } from '../../lib/utils';
 
 const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
@@ -45,6 +46,9 @@ export const getLastMethodTrace = () => {
   }
   return MethodStore[MethodStore.length - 1];
 };
+
+
+export const getMethodEvents = () => last(MethodStore).events;
 
 export const GetLastMethodEvents = function (_indices) {
   if (MethodStore.length < 1) {
@@ -316,6 +320,7 @@ export function cleanOptTrace (trace) {
 
   return _trace;
 }
+
 
 export const TestHelpers = {
   methodStore: MethodStore,
