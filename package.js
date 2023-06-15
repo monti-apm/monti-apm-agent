@@ -172,7 +172,7 @@ function configurePackage (api, isTesting) {
     'lib/hijack/wrap_observers.js',
     'lib/hijack/wrap_ddp_stringify.js',
     'lib/hijack/instrument.js',
-    'lib/hijack/db.js',
+    'lib/hijack/db/index.js',
     'lib/hijack/http.js',
     'lib/hijack/email.js',
     'lib/hijack/error.js',
