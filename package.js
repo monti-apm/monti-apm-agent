@@ -121,7 +121,6 @@ function configurePackage (api, isTesting) {
   api.use('montiapm:meteorx@2.2.0', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
-  api.use('zodern:meteor-package-versions@0.2.0');
 
   /**
    * Uncomment once fibers is removed from the package.
@@ -132,9 +131,9 @@ function configurePackage (api, isTesting) {
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-  api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server', { weak: !isTesting });
+  api.use(['http@1.0.0||2.0.0', 'email@3.0.0-alpha300.9'], 'server', { weak: !isTesting });
 
-  api.use('fetch@0.1.0', 'server', {
+  api.use('fetch@1.0.0-alpha300.9', 'server', {
     weak: !(isTesting && canRunTestsWithFetch()),
   });
 
