@@ -4,7 +4,7 @@ import { DDP } from 'meteor/ddp';
 import { MethodStore, TestData } from './globals';
 import { EJSON } from 'meteor/ejson';
 import { EventType } from '../../lib/constants';
-import { last } from '../../lib/utils';
+import { isPlainObject, last, omit } from '../../lib/utils';
 
 const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
@@ -50,37 +50,37 @@ export const getLastMethodTrace = () => {
 
 export const getMethodEvents = () => last(MethodStore).events;
 
-export const GetLastMethodEvents = function (_indices) {
+export function getLastMethodEvents (_indices) {
   if (MethodStore.length < 1) {
     return [];
   }
   let indices = _indices || [0];
   let events = MethodStore[MethodStore.length - 1].events;
   events = Array.prototype.slice.call(events, 0);
-  events = events.filter(isNotCompute).filter(isNotAsync);
+  events = events.filter(isNotCompute).filter(isNotEmptyAsync);
   events = events.map(filterFields);
   return events;
 
   function isNotCompute (event) {
-    return event[0] !== 'compute';
+    return event[0] !== EventType.Compute;
   }
 
-  function isNotAsync (event) {
-    return event[0] !== 'async';
+  function isNotEmptyAsync (event) {
+    return event[0] !== EventType.Async || event[3]?.nested?.length > 0;
   }
 
   function filterFields (event) {
     let filteredEvent = [];
     indices.forEach(function (index) {
-      if (event[index]) {
-        filteredEvent[index] = event[index];
+      const param = event[index];
+
+      if (param) {
+        filteredEvent[index] = isPlainObject(param) ? omit(param, ['asyncId', 'stack']) : param;
       }
     });
     return filteredEvent;
   }
-};
-
-export const getLastMethodEvents = GetLastMethodEvents;
+}
 
 export const GetPubSubMetrics = function () {
   let metricsArr = [];
@@ -329,7 +329,6 @@ export const TestHelpers = {
   registerMethod: RegisterMethod,
   registerPublication,
   enableTrackingMethods: EnableTrackingMethods,
-  getLastMethodEvents: GetLastMethodEvents,
   getPubSubMetrics: GetPubSubMetrics,
   findMetricsForPub: FindMetricsForPub,
   getPubSubPayload,

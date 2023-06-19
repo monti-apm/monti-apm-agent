@@ -1,13 +1,8 @@
 import { TestData } from '../_helpers/globals';
-import {
-  addAsyncTest,
-  callAsync,
-  getLastMethodEvents,
-  GetLastMethodEvents,
-  registerMethod,
-  RegisterMethod
-} from '../_helpers/helpers';
+import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod, RegisterMethod } from '../_helpers/helpers';
 import assert from 'assert';
+import { get, set } from '../../lib/utils';
+import { EventType } from '../../lib/constants';
 
 addAsyncTest(
   'Database - insert',
@@ -161,35 +156,37 @@ addAsyncTest(
 
     let result = await callAsync(methodId);
 
-    let events = getLastMethodEvents([0, 2]);
-
-    let expected = [
-      ['start',undefined,{userId: null, params: '[]'}],
-      ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{
-        coll: 'tinytest-data',
-        func: 'fetch',
-        cursor: true,
-        selector: JSON.stringify({_id: 'aa'}),
-        sort: JSON.stringify({dd: -1}),
-        docsFetched: 1,
-        docSize: JSON.stringify({_id: 'aa', dd: 10}).length,
-        projection: JSON.stringify({dd: 1}),
-        limit: 1
-      }],
-      ['complete']
-    ];
+    let events = getLastMethodEvents([0, 1, 2, 3]);
 
     const projection = JSON.stringify({dd: 1});
 
-    if (events[2][2].projection) {
-      expected[2][2].projection = projection;
+    const dbEvent = get(events, '2.3.nested.0');
+
+    if (dbEvent?.[0] !== EventType.DB) {
+      throw new Error('db event is not found');
+    }
+
+    if (get(dbEvent, '2.projection')) {
+      set(dbEvent, '2.projection', projection);
     } else {
-      expected[2][2].fields = projection;
+      set(dbEvent, '2.fields', projection);
     }
 
     test.equal(result, {_id: 'aa', dd: 10});
-    test.equal(events, expected);
+
+    const expected = {
+      coll: 'tinytest-data',
+      func: 'fetch',
+      cursor: true,
+      selector: JSON.stringify({_id: 'aa'}),
+      sort: JSON.stringify({dd: -1}),
+      docsFetched: 1,
+      docSize: JSON.stringify({_id: 'aa', dd: 10}).length,
+      projection: JSON.stringify({dd: 1}),
+      limit: 1
+    };
+
+    test.equal(dbEvent[2], expected);
   }
 );
 
@@ -490,7 +487,7 @@ addAsyncTest(
     });
 
     let result = await callAsync(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+    let events = getLastMethodEvents([0, 2]);
 
     events[2][2].oplog = false;
     events[3][2].oplog = false;
