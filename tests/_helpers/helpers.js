@@ -4,7 +4,8 @@ import { DDP } from 'meteor/ddp';
 import { MethodStore, TestData } from './globals';
 import { EJSON } from 'meteor/ejson';
 import { EventType } from '../../lib/constants';
-import { isPlainObject, last, omit } from '../../lib/utils';
+import { isPlainObject, last } from '../../lib/utils';
+import { isNumber } from '../../lib/common/utils';
 
 const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
@@ -50,15 +51,17 @@ export const getLastMethodTrace = () => {
 
 export const getMethodEvents = () => last(MethodStore).events;
 
-export function getLastMethodEvents (_indices) {
+export function getLastMethodEvents (indices = [0]) {
   if (MethodStore.length < 1) {
     return [];
   }
-  let indices = _indices || [0];
-  let events = MethodStore[MethodStore.length - 1].events;
+
+  let events = last(MethodStore).events;
+
   events = Array.prototype.slice.call(events, 0);
   events = events.filter(isNotCompute).filter(isNotEmptyAsync);
   events = events.map(filterFields);
+
   return events;
 
   function isNotCompute (event) {
@@ -69,13 +72,47 @@ export function getLastMethodEvents (_indices) {
     return event[0] !== EventType.Async || event[3]?.nested?.length > 0;
   }
 
+  function clean (data) {
+    if (!isPlainObject(data)) {
+      return data;
+    }
+
+    const rejectedKeys = ['asyncId', 'stack'];
+
+    for ( const [key, value] of Object.entries(data)) {
+      if (rejectedKeys.includes(key)) {
+        delete data[key];
+        continue;
+      }
+
+      if (key === 'nested' && value?.length) {
+        data[key] = value.map(filterFields);
+      }
+
+      // In tests, we can't use numbers like timestamps,
+      // but it is still useful to know if a number is positive or negative
+      // i.e. when an interval subtraction when awry
+      if (isNumber(value)) {
+        if (value > 0) {
+          data[key] = 1;
+        } else if (value < 0) {
+          data[key] = -1;
+        } else {
+          data[key] = 0;
+        }
+      }
+    }
+
+    return data;
+  }
+
   function filterFields (event) {
     let filteredEvent = [];
     indices.forEach(function (index) {
       const param = event[index];
 
       if (param) {
-        filteredEvent[index] = isPlainObject(param) ? omit(param, ['asyncId', 'stack']) : param;
+        filteredEvent[index] = clean(param);
       }
     });
     return filteredEvent;
@@ -166,7 +203,7 @@ export const closeClient = function (client) {
 
     client.disconnect();
 
-    function checkClientExtence (_sessionId) {
+    function checkClientExistence (_sessionId) {
       let sessionExists;
       if (Meteor.server.sessions instanceof Map) {
         // Meteor 1.8.1 and newer
@@ -177,14 +214,14 @@ export const closeClient = function (client) {
 
       if (sessionExists) {
         setTimeout(function () {
-          checkClientExtence(_sessionId);
+          checkClientExistence(_sessionId);
         }, 20);
       } else {
         resolve();
       }
     }
 
-    checkClientExtence(sessionId);
+    checkClientExistence(sessionId);
   });
 };
 
