@@ -89,6 +89,10 @@ export function getLastMethodEvents (indices = [0]) {
         data[key] = value.map(filterFields);
       }
 
+      if (key === 'err' && value?.startsWith('E11000')) {
+        data[key] = 'E11000';
+      }
+
       // In tests, we can't use numbers like timestamps,
       // but it is still useful to know if a number is positive or negative
       // i.e. when an interval subtraction when awry

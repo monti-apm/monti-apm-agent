@@ -14,16 +14,22 @@ addAsyncTest(
 
     await callAsync(methodId);
 
-    let events = getLastMethodEvents([0, 2]);
+    let events = getLastMethodEvents([0, 2, 3]);
 
     let expected = [
-      ['start',undefined,{userId: null, params: '[]'}],
-      ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'insertAsync'}],
-      ['complete']
-    ];
+      ['start',null,{userId: null,params: '[]'}],
+      ['wait',null,{waitOn: []},{at: 1,endAt: 1}],
+      ['async',null,{},{
+        nested: [
+          ['db',null,{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
+          ['async',null,{},{at: 1,endAt: 1}
+          ]],
+        at: 1,
+        endAt: 1
+      }],
+      ['complete']];
 
-    test.equal(events, expected);
+    test.stableEqual(events, expected);
   }
 );
 
@@ -40,21 +46,48 @@ addAsyncTest(
 
     await callAsync(methodId);
 
-    let events = getLastMethodEvents([0, 2]);
-
-    if (events && events[3] && events[3][2] && events[3][2].err) {
-      events[3][2].err = events[3][2].err.indexOf('E11000') >= 0 ? 'E11000' : null;
-    }
+    let events = getLastMethodEvents([0, 2, 3]);
 
     let expected = [
-      ['start',undefined,{userId: null, params: '[]'}],
-      ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'insertAsync'}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'insertAsync', err: 'E11000'}],
+      ['start', null, { userId: null, params: '[]' }],
+      ['wait', null, { waitOn: [] },{ at: 1, endAt: 1 }],
+      [
+        'async',
+        null,
+        {},
+        {
+          nested: [
+            [
+              'db',
+              null,
+              {
+                coll: 'tinytest-data',
+                func: 'insertAsync'
+              },
+              {
+                at: 1,
+                endAt: 1
+              }
+            ],
+            [
+              'async',
+              null,
+              {},
+              {
+                at: 1,
+                endAt: 1
+              }
+            ]
+          ],
+          at: 1,
+          endAt: 1
+        }
+      ],
+      ['db', null, { coll: 'tinytest-data', func: 'insertAsync', err: 'E11000' },{ at: 1, endAt: 1 }],
       ['complete']
     ];
 
-    test.equal(events, expected);
+    test.stableEqual(events, expected);
   }
 );
 
@@ -70,16 +103,21 @@ addAsyncTest(
 
     await callAsync(methodId);
 
-    let events = getLastMethodEvents([0, 2]);
+    let events = getLastMethodEvents([0, 2, 3]);
 
     let expected = [
-      ['start',undefined,{userId: null, params: '[]'}],
-      ['wait',undefined,{waitOn: []}],
-      ['db',undefined, {coll: 'tinytest-data', func: 'updateAsync', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}],
-      ['complete']
-    ];
+      ['start',null,{userId: null,params: '[]'}],
+      ['wait',null,{waitOn: []},{at: 1,endAt: 1}],
+      ['async',null,{},{
+        nested: [
+          ['db',null,{coll: 'tinytest-data',func: 'updateAsync',selector: '{"_id":"aa"}',updatedDocs: 1},{at: 1,endAt: 1}],
+          ['async',null,{},{at: 1,endAt: 1}]
+        ],
+        at: 1,
+        endAt: 1}],
+      ['complete']];
 
-    test.equal(events, expected);
+    test.stableEqual(events, expected);
   }
 );
 
@@ -95,16 +133,23 @@ addAsyncTest(
 
     await callAsync(methodId);
 
-    let events = getLastMethodEvents([0, 2]);
+    let events = getLastMethodEvents([0, 2, 3]);
 
     let expected = [
-      ['start',undefined,{userId: null, params: '[]'}],
-      ['wait',undefined,{waitOn: []}],
-      ['db',undefined, {coll: 'tinytest-data', func: 'removeAsync', selector: JSON.stringify({_id: 'aa'}), removedDocs: 1}],
+      ['start',null,{userId: null,params: '[]'}],
+      ['wait',null,{waitOn: []},{at: 1,endAt: 1}],
+      ['async',null,{},{
+        nested: [
+          ['db',null,{coll: 'tinytest-data',func: 'removeAsync',selector: '{"_id":"aa"}',removedDocs: 1},{at: 1,endAt: 1}],
+          ['async',null,{},{at: 1,endAt: 1}]
+        ],
+        at: 1,
+        endAt: 1
+      }],
       ['complete']
     ];
 
-    test.equal(events, expected);
+    test.stableEqual(events, expected);
   }
 );
 
@@ -119,26 +164,24 @@ addAsyncTest(
 
     let result = await callAsync(methodId);
 
-    let events = getLastMethodEvents([0, 2]);
+    let events = getLastMethodEvents([0, 2, 3]);
 
     let expected = [
-      ['start',undefined,{userId: null, params: '[]'}],
-      ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{
-        coll: 'tinytest-data',
-        func: 'fetch',
-        cursor: true,
-        selector: JSON.stringify({_id: 'aa'}),
-        docsFetched: 1,
-        docSize: JSON.stringify({_id: 'aa', dd: 10}).length,
-        limit: 1
+      ['start',null,{userId: null,params: '[]'}],
+      ['wait',null,{waitOn: []},{at: 1,endAt: 1}],
+      ['async',null,{},{
+        nested: [
+          ['db',null,{coll: 'tinytest-data',selector: '{"_id":"aa"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
+          ['async',null,{},{at: 1,endAt: 1}]],
+        at: 1,
+        endAt: 1
       }],
       ['complete']
     ];
 
     test.equal(result, {_id: 'aa', dd: 10});
 
-    test.equal(events, expected);
+    test.stableEqual(events, expected);
   }
 );
 
@@ -181,12 +224,12 @@ addAsyncTest(
       selector: JSON.stringify({_id: 'aa'}),
       sort: JSON.stringify({dd: -1}),
       docsFetched: 1,
-      docSize: JSON.stringify({_id: 'aa', dd: 10}).length,
+      docSize: 1,
       projection: JSON.stringify({dd: 1}),
       limit: 1
     };
 
-    test.equal(dbEvent[2], expected);
+    test.stableEqual(dbEvent[2], expected);
   }
 );
 

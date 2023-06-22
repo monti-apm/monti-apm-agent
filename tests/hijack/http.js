@@ -12,15 +12,22 @@ addAsyncTest('HTTP - meteor/http - call a server', async function (test) {
 
   const result = await callAsync(methodId);
 
-  const events = getLastMethodEvents([0, 2]);
+  const events = getLastMethodEvents([0, 2, 3]);
 
   const expected = [
-    ['start', undefined, { userId: null, params: '[]' }],
-    ['wait', undefined, { waitOn: [] }],
-    ['http', undefined, { url: 'http://localhost:3301', method: 'GET', statusCode: 200, async: true, library: 'meteor/http' }],
-    ['complete']
-  ];
+    ['start',null,{userId: null,params: '[]'}],
+    ['wait',null,{waitOn: []},{at: 1,endAt: 1}],
+    ['async',null,{},{
+      nested: [
+        ['http',null,{method: 'GET',url: 'http://localhost:3301',library: 'meteor/http',statusCode: 1,async: true},{at: 1,endAt: 1}],
+        ['async',null,{},{at: 1,endAt: 1}]
+      ],
+      at: 1,
+      endAt: 1
+    }],
+    ['complete']]
+  ;
 
-  test.equal(events, expected);
+  test.stableEqual(events, expected);
   test.equal(result, 200);
 });
