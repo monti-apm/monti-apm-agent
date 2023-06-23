@@ -244,17 +244,145 @@ addAsyncTest(
 
     await callAsync(methodId);
 
-    let events = getLastMethodEvents([0, 2]);
+    let events = getLastMethodEvents([0, 2, 3]);
 
     let expected = [
-      ['start',undefined,{userId: null, params: '[]'}],
-      ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: 'aa'}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: undefined}],
-      ['complete']
+      [
+        'start',
+        null,
+        {
+          userId: null,
+          params: '[]'
+        }
+      ],
+      [
+        'wait',
+        null,
+        {
+          waitOn: []
+        },
+        {
+          at: 1,
+          endAt: 1
+        }
+      ],
+      [
+        'async',
+        null,
+        {
+          triggerAsyncId: 1,
+          executionAsyncId: 1,
+          shouldBeSibling: true
+        },
+        {
+          nested: [
+            [
+              'db',
+              null,
+              {
+                coll: 'tinytest-data',
+                func: 'upsert',
+                selector: '{"_id":"aa"}',
+                updatedDocs: 1,
+                insertedId: 'aa'
+              },
+              {
+                at: 1,
+                endAt: 1
+              }
+            ],
+            [
+              'async',
+              null,
+              {
+                triggerAsyncId: 1,
+                executionAsyncId: 1,
+                shouldBeSibling: true
+              },
+              {
+                at: 1,
+                endAt: 1
+              }
+            ],
+            [
+              'async',
+              null,
+              {
+                triggerAsyncId: 1,
+                executionAsyncId: 1,
+                shouldBeSibling: false
+              },
+              {
+                at: 1,
+                endAt: 1
+              }
+            ]
+          ],
+          at: 1,
+          endAt: 1
+        }
+      ],
+      [
+        'async',
+        null,
+        {
+          triggerAsyncId: 1,
+          executionAsyncId: 1,
+          shouldBeSibling: true
+        },
+        {
+          nested: [
+            [
+              'db',
+              null,
+              {
+                coll: 'tinytest-data',
+                func: 'upsert',
+                selector: '{"_id":"aa"}',
+                updatedDocs: 1
+              },
+              {
+                at: 1,
+                endAt: 1
+              }
+            ],
+            [
+              'async',
+              null,
+              {
+                triggerAsyncId: 1,
+                executionAsyncId: 1,
+                shouldBeSibling: true
+              },
+              {
+                at: 1,
+                endAt: 1
+              }
+            ],
+            [
+              'async',
+              null,
+              {
+                triggerAsyncId: 1,
+                executionAsyncId: 1,
+                shouldBeSibling: false
+              },
+              {
+                at: 1,
+                endAt: 1
+              }
+            ]
+          ],
+          at: 1,
+          endAt: 1
+        }
+      ],
+      [
+        'complete'
+      ]
     ];
 
-    test.equal(events, expected);
+    test.stableEqual(events, expected);
   }
 );
 
