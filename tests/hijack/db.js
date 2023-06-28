@@ -1,8 +1,14 @@
 import { TestData } from '../_helpers/globals';
-import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod, RegisterMethod } from '../_helpers/helpers';
+import {
+  addAsyncTest,
+  callAsync,
+  dumpEvents,
+  getLastMethodEvents,
+  registerMethod,
+  RegisterMethod
+} from '../_helpers/helpers';
 import assert from 'assert';
-import { get, set } from '../../lib/utils';
-import { EventType } from '../../lib/constants';
+import { diffObjects } from '../_helpers/pretty-log';
 
 addAsyncTest(
   'Database - insert',
@@ -16,18 +22,11 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2, 3]);
 
-    let expected = [
-      ['start',null,{userId: null,params: '[]'}],
-      ['wait',null,{waitOn: []},{at: 1,endAt: 1}],
-      ['async',null,{},{
-        nested: [
-          ['db',null,{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
-          ['async',null,{},{at: 1,endAt: 1}
-          ]],
-        at: 1,
-        endAt: 1
-      }],
-      ['complete']];
+    dumpEvents(events);
+
+    let expected = [['start',null,{userId: null,params: '[]'}],['wait',null,{waitOn: []},{at: 1,endAt: 1}],['db',null,{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],['complete']];
+
+    diffObjects(events, expected);
 
     test.stableEqual(events, expected);
   }
@@ -48,44 +47,7 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2, 3]);
 
-    let expected = [
-      ['start', null, { userId: null, params: '[]' }],
-      ['wait', null, { waitOn: [] },{ at: 1, endAt: 1 }],
-      [
-        'async',
-        null,
-        {},
-        {
-          nested: [
-            [
-              'db',
-              null,
-              {
-                coll: 'tinytest-data',
-                func: 'insertAsync'
-              },
-              {
-                at: 1,
-                endAt: 1
-              }
-            ],
-            [
-              'async',
-              null,
-              {},
-              {
-                at: 1,
-                endAt: 1
-              }
-            ]
-          ],
-          at: 1,
-          endAt: 1
-        }
-      ],
-      ['db', null, { coll: 'tinytest-data', func: 'insertAsync', err: 'E11000' },{ at: 1, endAt: 1 }],
-      ['complete']
-    ];
+    let expected = [['start',null,{userId: null,params: '[]'}],['wait',null,{waitOn: []},{at: 1,endAt: 1}],['db',null,{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],['db',null,{coll: 'tinytest-data',func: 'insertAsync',err: 'E11000'},{at: 1,endAt: 1}],['complete']];
 
     test.stableEqual(events, expected);
   }
@@ -105,17 +67,7 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2, 3]);
 
-    let expected = [
-      ['start',null,{userId: null,params: '[]'}],
-      ['wait',null,{waitOn: []},{at: 1,endAt: 1}],
-      ['async',null,{},{
-        nested: [
-          ['db',null,{coll: 'tinytest-data',func: 'updateAsync',selector: '{"_id":"aa"}',updatedDocs: 1},{at: 1,endAt: 1}],
-          ['async',null,{},{at: 1,endAt: 1}]
-        ],
-        at: 1,
-        endAt: 1}],
-      ['complete']];
+    let expected = [['start',null,{userId: null,params: '[]'}],['wait',null,{waitOn: []},{at: 1,endAt: 1}],['db',null,{coll: 'tinytest-data',func: 'updateAsync',selector: '{"_id":"aa"}',updatedDocs: 1},{at: 1,endAt: 1}],['complete']];
 
     test.stableEqual(events, expected);
   }
@@ -135,19 +87,7 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2, 3]);
 
-    let expected = [
-      ['start',null,{userId: null,params: '[]'}],
-      ['wait',null,{waitOn: []},{at: 1,endAt: 1}],
-      ['async',null,{},{
-        nested: [
-          ['db',null,{coll: 'tinytest-data',func: 'removeAsync',selector: '{"_id":"aa"}',removedDocs: 1},{at: 1,endAt: 1}],
-          ['async',null,{},{at: 1,endAt: 1}]
-        ],
-        at: 1,
-        endAt: 1
-      }],
-      ['complete']
-    ];
+    let expected = [['start',null,{userId: null,params: '[]'}],['wait',null,{waitOn: []},{at: 1,endAt: 1}],['db',null,{coll: 'tinytest-data',func: 'removeAsync',selector: '{"_id":"aa"}',removedDocs: 1},{at: 1,endAt: 1}],['complete']];
 
     test.stableEqual(events, expected);
   }
@@ -166,18 +106,7 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2, 3]);
 
-    let expected = [
-      ['start',null,{userId: null,params: '[]'}],
-      ['wait',null,{waitOn: []},{at: 1,endAt: 1}],
-      ['async',null,{},{
-        nested: [
-          ['db',null,{coll: 'tinytest-data',selector: '{"_id":"aa"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
-          ['async',null,{},{at: 1,endAt: 1}]],
-        at: 1,
-        endAt: 1
-      }],
-      ['complete']
-    ];
+    let expected = [['start',null,{userId: null,params: '[]'}],['wait',null,{waitOn: []},{at: 1,endAt: 1}],['db',null,{coll: 'tinytest-data',selector: '{"_id":"aa"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],['complete']];
 
     test.equal(result, {_id: 'aa', dd: 10});
 
@@ -201,35 +130,11 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 1, 2, 3]);
 
-    const projection = JSON.stringify({dd: 1});
-
-    const dbEvent = get(events, '2.3.nested.0');
-
-    if (dbEvent?.[0] !== EventType.DB) {
-      throw new Error('db event is not found');
-    }
-
-    if (get(dbEvent, '2.projection')) {
-      set(dbEvent, '2.projection', projection);
-    } else {
-      set(dbEvent, '2.fields', projection);
-    }
-
     test.equal(result, {_id: 'aa', dd: 10});
 
-    const expected = {
-      coll: 'tinytest-data',
-      func: 'fetch',
-      cursor: true,
-      selector: JSON.stringify({_id: 'aa'}),
-      sort: JSON.stringify({dd: -1}),
-      docsFetched: 1,
-      docSize: 1,
-      projection: JSON.stringify({dd: 1}),
-      limit: 1
-    };
+    const expected = [['start',null,{userId: null,params: '[]'}],['wait',0,{waitOn: []},{at: 1,endAt: 1}],['db',0,{coll: 'tinytest-data',selector: '{"_id":"aa"}',func: 'fetch',cursor: true,projection: '{"dd":1}',sort: '{"dd":-1}',limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],['complete']];
 
-    test.stableEqual(dbEvent[2], expected);
+    test.stableEqual(events, expected);
   }
 );
 

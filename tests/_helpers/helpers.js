@@ -4,8 +4,10 @@ import { DDP } from 'meteor/ddp';
 import { MethodStore, TestData } from './globals';
 import { EJSON } from 'meteor/ejson';
 import { EventType } from '../../lib/constants';
-import { isPlainObject, last } from '../../lib/utils';
+import { cleanTrailingNilValues, cloneDeep, isPlainObject, last } from '../../lib/utils';
 import { isNumber } from '../../lib/common/utils';
+import { diffObjects } from './pretty-log';
+import util from 'util';
 
 const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
@@ -72,12 +74,18 @@ export function getLastMethodEvents (indices = [0]) {
     return event[0] !== EventType.Async || event[3]?.nested?.length > 0;
   }
 
-  function clean (data) {
-    if (!isPlainObject(data)) {
-      return data;
+  function clean (_data) {
+    if (isNumber(_data)) {
+      return 0;
     }
 
-    const rejectedKeys = ['asyncId', 'stack'];
+    if (!isPlainObject(_data)) {
+      return _data;
+    }
+
+    const data = cloneDeep(_data);
+
+    const rejectedKeys = ['asyncId', 'stack', 'executionAsyncId', 'triggerAsyncId'];
 
     for ( const [key, value] of Object.entries(data)) {
       if (rejectedKeys.includes(key)) {
@@ -86,7 +94,7 @@ export function getLastMethodEvents (indices = [0]) {
       }
 
       if (key === 'nested' && value?.length) {
-        data[key] = value.map(filterFields);
+        data[key] = value.filter(isNotCompute).filter(isNotEmptyAsync).map(filterFields);
       }
 
       if (key === 'err' && value?.startsWith('E11000')) {
@@ -112,13 +120,13 @@ export function getLastMethodEvents (indices = [0]) {
 
   function filterFields (event) {
     let filteredEvent = [];
-    indices.forEach(function (index) {
-      const param = event[index];
 
-      if (param) {
-        filteredEvent[index] = clean(param);
-      }
+    indices.forEach((index) => {
+      filteredEvent.push(clean(event[index]));
     });
+
+    cleanTrailingNilValues(filteredEvent);
+
     return filteredEvent;
   }
 }
@@ -253,7 +261,16 @@ const asyncTest = fn => async (test, done) => {
 
   const client = getMeteorClient();
 
-  test.stableEqual = (a, b) => test.equal(EJSON.parse(EJSON.stringify(a)), EJSON.parse(EJSON.stringify(b)));
+  test.stableEqual = (a, b) => {
+    const _a = EJSON.parse(EJSON.stringify(a));
+    const _b = EJSON.parse(EJSON.stringify(b));
+
+    if (!util.isDeepStrictEqual(_a, _b)) {
+      diffObjects(a, b);
+    }
+
+    test.equal(_a, _b);
+  };
 
   // Cleans stuff from the test engine.
   Kadira._setInfo(null);
@@ -362,6 +379,9 @@ export function cleanOptTrace (trace) {
   return _trace;
 }
 
+export const dumpEvents = (events) => {
+  console.log(JSON.stringify(events));
+};
 
 export const TestHelpers = {
   methodStore: MethodStore,

@@ -574,11 +574,6 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
 
   const cleanedEvents = cleanOptEvents(info.trace.events);
 
-  console.log(info.trace.rootAsyncId);
-  // prettyLog(info.trace.events);
-
-  // prettyLog(mergeSegmentIntervals(info.resources));
-
   const expected = [
     ['start',0,{userId: null,params: '[]'}],
     ['wait',0,{waitOn: []},{at: 0,endAt: 0,asyncId: 1}],

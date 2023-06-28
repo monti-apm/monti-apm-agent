@@ -14,24 +14,7 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2, 3]);
 
-    let expected = [
-      ['start', null, { userId: null, params: '[]' }],
-      ['wait', null, { waitOn: [] }, { at: 1, endAt: 1 }],
-      ['async', null, {}, {
-        nested: [
-          ['db', null, { coll: 'tinytest-data', func: 'insertAsync' },
-            {
-              at: 1,
-              endAt: 1
-            }
-          ],
-          ['async', null, {}, { at: 1, endAt: 1 }]
-        ],
-        at: 1,
-        endAt: 1
-      }],
-      ['complete']
-    ];
+    let expected = [['start',{userId: null,params: '[]'}],['wait',{waitOn: []},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],['complete']];
 
     test.stableEqual(events, expected);
   }

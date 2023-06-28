@@ -4,7 +4,7 @@ import { stringify } from 'yaml';
 import Diff from 'diff';
 
 export function diffStrings (a, b) {
-  const diff = Diff.diffLines(a, b);
+  const diff = Diff.diffLines(b, a);
 
   let result = '';
 
