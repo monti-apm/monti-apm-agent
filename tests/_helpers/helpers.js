@@ -53,7 +53,7 @@ export const getLastMethodTrace = () => {
 
 export const getMethodEvents = () => last(MethodStore).events;
 
-export function getLastMethodEvents (indices = [0]) {
+export function getLastMethodEvents (indices = [0], keysToPreserve = []) {
   if (MethodStore.length < 1) {
     return [];
   }
@@ -85,7 +85,12 @@ export function getLastMethodEvents (indices = [0]) {
 
     const data = cloneDeep(_data);
 
-    const rejectedKeys = ['asyncId', 'stack', 'executionAsyncId', 'triggerAsyncId'];
+    const rejectedKeys = [
+      'asyncId',
+      'stack',
+      'executionAsyncId',
+      'triggerAsyncId',
+    ];
 
     for ( const [key, value] of Object.entries(data)) {
       if (rejectedKeys.includes(key)) {
@@ -104,7 +109,7 @@ export function getLastMethodEvents (indices = [0]) {
       // In tests, we can't use numbers like timestamps,
       // but it is still useful to know if a number is positive or negative
       // i.e. when an interval subtraction when awry
-      if (isNumber(value)) {
+      if (isNumber(value) && !keysToPreserve.includes(key)) {
         if (value > 0) {
           data[key] = 1;
         } else if (value < 0) {
@@ -266,6 +271,8 @@ const asyncTest = fn => async (test, done) => {
     const _b = EJSON.parse(EJSON.stringify(b));
 
     if (!util.isDeepStrictEqual(_a, _b)) {
+      dumpEvents(a);
+
       diffObjects(a, b);
     }
 
@@ -339,6 +346,7 @@ export function cleanEvents (events) {
     delete event.asyncId;
     delete event.triggerAsyncId;
     delete event.level;
+    delete event.duration;
 
     if (event.nested?.length === 0) {
       delete event.nested;
@@ -346,37 +354,6 @@ export function cleanEvents (events) {
       cleanEvents(event.nested);
     }
   });
-}
-
-export const cleanOptEvents = events =>
-  events.map((event) => {
-    const _event = [...event];
-
-    if (_event[0] === EventType.Async) return false;
-
-    _event[1] = 0;
-
-    const data = _event[3];
-
-    if (data) {
-      _event[3] = {
-        ...data,
-        at: 0,
-        endAt: 0,
-        asyncId: 1,
-        nested: data.nested ? cleanOptEvents(data.nested) : undefined,
-      };
-    }
-
-    return _event;
-  }).filter(Boolean);
-
-export function cleanOptTrace (trace) {
-  const _trace = { ...trace };
-
-  _trace.events = cleanOptEvents(trace.events);
-
-  return _trace;
 }
 
 export const dumpEvents = (events) => {

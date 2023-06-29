@@ -3,8 +3,8 @@ import { Tracer } from '../../lib/tracer/tracer';
 import {
   addAsyncTest,
   callAsync,
-  cleanOptEvents,
   cleanTrace,
+  getLastMethodEvents,
   registerMethod,
   subscribeAndWait
 } from '../_helpers/helpers';
@@ -170,7 +170,7 @@ addAsyncTest(
 
     delete traceInfo.userId;
 
-    test.equal(traceInfo, expected);
+    test.stableEqual(traceInfo, expected);
   }
 );
 
@@ -249,14 +249,14 @@ addAsyncTest(
       events: [
         {type: 'start', data: {abc: 100}},
         {type: 'db', endAt: 10},
-        {type: 'db', endAt: null},
+        {type: 'db'},
         {type: 'end', data: {abc: 200}}
       ]
     };
 
     delete traceInfo.userId;
 
-    test.equal(traceInfo, expected);
+    test.stableEqual(traceInfo, expected);
   }
 );
 
@@ -285,8 +285,8 @@ addAsyncTest(
       async: 1000,
     };
 
-    test.equal(traceInfo.metrics, expected);
-    test.equal(traceInfo.errored, false);
+    test.stableEqual(traceInfo.metrics, expected);
+    test.stableEqual(traceInfo.errored, false);
   }
 );
 
@@ -529,8 +529,6 @@ Tinytest.add(
 addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async function (test) {
   const Email = Package['email'].Email;
 
-  let info;
-
   let methodId = registerMethod(async function () {
     let backgroundPromise;
 
@@ -565,43 +563,16 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
       Kadira.endEvent(event);
     });
 
-    info = getInfo();
-
     return backgroundPromise;
   });
 
   await callAsync(methodId);
 
-  const cleanedEvents = cleanOptEvents(info.trace.events);
+  const events = getLastMethodEvents([0, 2, 3]);
 
-  const expected = [
-    ['start',0,{userId: null,params: '[]'}],
-    ['wait',0,{waitOn: []},{at: 0,endAt: 0,asyncId: 1}],
-    [
-      'custom',
-      0,
-      null,
-      {
-        name: 'test',
-        nested: [
-          ['db',0,{coll: 'tinytest-data',func: 'insertAsync'},{at: 0,endAt: 0,asyncId: 1}],
-          ['db',0,{coll: 'tinytest-data',func: 'insertAsync'},{at: 0,endAt: 0,asyncId: 1}],
-          ['db',0,{coll: 'tinytest-data',func: 'insertAsync'},{at: 0,endAt: 0,asyncId: 1}],
-          ['emailAsync',0,{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com'},{at: 0,endAt: 0,asyncId: 1}],
-          ['db',0,{coll: 'tinytest-data',func: 'fetch',limit: 1,docsFetched: 1,docSize: 17,cursor: true,selector: '{"_id":"a"}'},{at: 0,endAt: 0,asyncId: 1}],
-          ['db',0,{coll: 'tinytest-data',func: 'fetch',limit: 1,docsFetched: 1,docSize: 17,cursor: true,selector: '{"_id":"b"}'},{at: 0,endAt: 0,asyncId: 1}],
-          ['db',0,{coll: 'tinytest-data',func: 'fetch',limit: 1,docsFetched: 1,docSize: 17,cursor: true,selector: '{"_id":"c"}'},{at: 0,endAt: 0,asyncId: 1}],
-          ['db',0,{coll: 'tinytest-data',func: 'fetch',limit: 1,docsFetched: 0,docSize: 0,cursor: true,selector: '{"_id":"a1"}'},{at: 0,endAt: 0,asyncId: 1}],
-          ['db',0,{coll: 'tinytest-data',func: 'fetch',limit: 1,docsFetched: 0,docSize: 0,cursor: true,selector: '{"_id":"a2"}'},{at: 0,endAt: 0,asyncId: 1}]
-        ],
-        at: 0,
-        endAt: 0,
-        asyncId: 1
-      }
-    ],
-    ['complete',0]];
+  const expected = [['start',{userId: null,params: '[]'}],['wait',{waitOn: []},{at: 1,endAt: 1}],['custom',null,{name: 'test',at: 1,endAt: 1,nested: [['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],['emailAsync',{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com'},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',selector: '{"_id":"a"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',selector: '{"_id":"b"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',selector: '{"_id":"c"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',selector: '{"_id":"a1"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',selector: '{"_id":"a2"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0},{at: 1,endAt: 1}]]}],['complete']];
 
-  test.stableEqual(cleanedEvents, expected);
+  test.stableEqual(events, expected);
 });
 
 addAsyncTest('Tracer - Build Trace - the correct number of async events are captured for methods', async (test) => {
@@ -619,6 +590,8 @@ addAsyncTest('Tracer - Build Trace - the correct number of async events are capt
   await callAsync(methodId);
 
   const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 100);
+
+  prettyLog(info.trace.events);
 
   test.equal(asyncEvents.length, 3);
 });

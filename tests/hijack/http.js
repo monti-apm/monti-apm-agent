@@ -15,9 +15,9 @@ addAsyncTest('HTTP - meteor/http - call a server', async function (test) {
   const events = getLastMethodEvents([0, 2, 3]);
 
   const expected = [
-    ['start',null,{userId: null,params: '[]'}],
-    ['wait',null,{waitOn: []},{at: 1,endAt: 1}],
-    ['http',null,{method: 'GET',url: 'http://localhost:3301',library: 'meteor/http',statusCode: 1,async: true},{at: 1,endAt: 1}],
+    ['start',{userId: null,params: '[]'}],
+    ['wait',{waitOn: []},{at: 1,endAt: 1}],
+    ['http',{method: 'GET',url: 'http://localhost:3301',library: 'meteor/http',statusCode: 1,async: true},{at: 1,endAt: 1}],
     ['complete']
   ];
 
