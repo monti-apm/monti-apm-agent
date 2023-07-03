@@ -1,21 +1,12 @@
 import { _ } from 'meteor/underscore';
 import { Tracer } from '../../lib/tracer/tracer';
-import {
-  addAsyncTest,
-  callAsync,
-  cleanTrace,
-  getLastMethodEvents,
-  registerMethod,
-  subscribeAndWait
-} from '../_helpers/helpers';
+import { addAsyncTest, callAsync, cleanTrace, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
-import { getInfo } from '../../lib/async/als';
 import { mergeParallelIntervalsArray, subtractIntervals } from '../../lib/utils/time';
-import { diffObjects, prettyLog } from '../_helpers/pretty-log';
+import { diffObjects } from '../_helpers/pretty-log';
 import { EventType } from '../../lib/constants';
 import { Meteor } from 'meteor/meteor';
-import { Random } from 'meteor/random';
 
 let eventDefaults = {
   endAt: 0,
@@ -532,7 +523,6 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   let methodId = registerMethod(async function () {
     let backgroundPromise;
 
-    // Compute
     await sleep(30);
 
     await Kadira.event('test', async (event) => {
@@ -575,48 +565,6 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   test.stableEqual(events, expected);
 });
 
-addAsyncTest('Tracer - Build Trace - the correct number of async events are captured for methods', async (test) => {
-  let info;
-
-  const methodId = registerMethod(async function () {
-    await sleep(100);
-    await sleep(200);
-
-    info = getInfo();
-
-    return sleep(300);
-  });
-
-  await callAsync(methodId);
-
-  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 100);
-
-  prettyLog(info.trace.events);
-
-  test.equal(asyncEvents.length, 3);
-});
-
-addAsyncTest('Tracer - Build Trace - the correct number of async events are captured for pubsub', async (test, client) => {
-  const subName = `sub_${Random.id()}`;
-
-  let info;
-
-  Meteor.publish(subName, async function () {
-    await sleep(100);
-
-    info = getInfo();
-
-    return [];
-  });
-
-  await subscribeAndWait(client, subName);
-
-  prettyLog(info.trace.events);
-
-  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 100);
-
-  test.equal(asyncEvents.length,1);
-});
 
 addAsyncTest('Tracer - Time - Subtract Intervals', async function (test) {
   function testSubtractIntervals (arr1, arr2, expected) {

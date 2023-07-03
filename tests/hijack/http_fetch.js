@@ -5,7 +5,6 @@ addAsyncTest('HTTP - meteor/fetch - async call', async function (test) {
   const methodId = registerMethod(async function () {
     const result = await fetch('http://localhost:3301/');
 
-
     return result.status;
   });
 
@@ -14,12 +13,13 @@ addAsyncTest('HTTP - meteor/fetch - async call', async function (test) {
   const events = getLastMethodEvents([0, 2]);
 
   const expected = [
-    ['start', undefined, { userId: null, params: '[]' }],
-    ['wait', undefined, { waitOn: [] }],
-    ['http', undefined, { method: 'GET', url: 'http://localhost:3301/', library: 'meteor/fetch' }],
+    ['start', { userId: null, params: '[]' }],
+    ['wait', { waitOn: [] }],
+    ['http', { method: 'GET', url: 'http://localhost:3301/', library: 'meteor/fetch' }],
     ['complete']
   ];
-  test.equal(events, expected);
+
+  test.stableEqual(events, expected);
   test.equal(result, 200);
 });
 
@@ -36,10 +36,10 @@ addAsyncTest('HTTP - meteor/fetch - trace error', async function (test) {
   const events = getLastMethodEvents([0, 2]);
 
   const expected = [
-    ['start', undefined, { userId: null, params: '[]' }],
-    ['wait', undefined, { waitOn: [] }],
+    ['start', { userId: null, params: '[]' }],
+    ['wait', { waitOn: [] }],
     [
-      'http',undefined,
+      'http',
       {
         method: 'GET',
         url: 'http://localhost:9999/',
