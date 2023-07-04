@@ -3,7 +3,7 @@ import { Tracer } from '../../lib/tracer/tracer';
 import { addAsyncTest, callAsync, cleanTrace, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
-import { mergeParallelIntervalsArray, subtractIntervals } from '../../lib/utils/time';
+import { mergeIntervals, subtractIntervals } from '../../lib/utils/time';
 import { diffObjects } from '../_helpers/pretty-log';
 import { EventType } from '../../lib/constants';
 import { Meteor } from 'meteor/meteor';
@@ -611,7 +611,7 @@ addAsyncTest('Tracer - Time - Subtract Intervals', async function (test) {
 
 addAsyncTest('Tracer- Time - Merge Parallel Intervals', async function (test) {
   function testMergeParallelIntervals (arr, expected) {
-    const result = mergeParallelIntervalsArray(arr);
+    const result = mergeIntervals(arr);
     test.stableEqual(result, expected);
   }
 
