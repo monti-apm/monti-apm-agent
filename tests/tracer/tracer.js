@@ -261,7 +261,6 @@ addAsyncTest(
         {...eventDefaults, type: 'start', at: now, endAt: now},
         {...eventDefaults, type: 'wait', at: now, endAt: now + 1000},
         {...eventDefaults, type: 'db', at: now + 2000, endAt: now + 2500},
-        {...eventDefaults, type: 'async', at: now + 2500, endAt: now + 3500},
         {type: EventType.Complete, at: now + 4500}
       ]
     };
@@ -272,8 +271,8 @@ addAsyncTest(
       total: 4500,
       wait: 1000,
       db: 500,
-      compute: 1000,
-      async: 1000,
+      compute: 3000,
+      async: 0,
     };
 
     test.stableEqual(traceInfo.metrics, expected);
