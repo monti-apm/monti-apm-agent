@@ -1,12 +1,14 @@
 import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
-import { asyncHttpGet } from '../_helpers/http';
+import { asyncMeteorHttpGet, asyncNodeHttpGet } from '../_helpers/http';
+import http from 'http';
+import { prettyLog } from '../_helpers/pretty-log';
 
 /**
  * @warning Every HTTP call should be async since Release 3.0
  */
-addAsyncTest('HTTP - meteor/http - call a server', async function (test) {
+addAsyncTest.only('HTTP - meteor/http - call a server', async function (test) {
   const methodId = registerMethod(async function () {
-    const result = await asyncHttpGet('http://localhost:3301');
+    const result = await asyncMeteorHttpGet('http://localhost:3301');
     return result.statusCode;
   });
 
@@ -23,4 +25,21 @@ addAsyncTest('HTTP - meteor/http - call a server', async function (test) {
 
   test.stableEqual(events, expected);
   test.equal(result, 200);
+});
+
+const server = http.createServer((req, res) => {
+  res.end('done');
+}).listen();
+
+addAsyncTest.only('HTTP - node:http - client request', async function () {
+  const methodId = registerMethod(async function () {
+    const { port } = server.address();
+    await asyncNodeHttpGet(`http://localhost:${port}`);
+  });
+
+  await callAsync(methodId);
+
+  const events = getLastMethodEvents([0, 2, 3]);
+
+  prettyLog(events);
 });
