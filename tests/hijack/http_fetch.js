@@ -1,7 +1,7 @@
 import { fetch } from 'meteor/fetch';
 import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod, } from '../_helpers/helpers';
 
-addAsyncTest.only('HTTP - meteor/fetch - async call', async function (test) {
+addAsyncTest('HTTP - meteor/fetch - async call', async function (test) {
   const methodId = registerMethod(async function () {
     const result = await fetch('http://localhost:3301/');
 
