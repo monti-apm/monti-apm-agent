@@ -1,7 +1,6 @@
 import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
 import { asyncMeteorHttpGet, asyncNodeHttpGet } from '../_helpers/http';
 import http from 'http';
-import { prettyLog } from '../_helpers/pretty-log';
 
 /**
  * @warning Every HTTP call should be async since Release 3.0
@@ -50,14 +49,23 @@ addAsyncTest('HTTP - node:http - client request', async function (test) {
   ]);
 });
 
-addAsyncTest.only('HTTP - node:http - request failure', async function () {
+addAsyncTest('HTTP - node:http - request failure', async function (test) {
   const methodId = registerMethod(async function () {
-    await asyncNodeHttpGet('http://localhost:9999');
+    try {
+      await asyncNodeHttpGet('http://localhost:9999');
+    } catch (error) {
+      return error;
+    }
   });
 
   await callAsync(methodId);
 
   const events = getLastMethodEvents([0, 2, 3]);
 
-  prettyLog(events);
+  test.stableEqual(events, [
+    ['start',{userId: null,params: '[]'}],
+    ['wait',{waitOn: []},{at: 1,endAt: 1}],
+    ['http',{method: 'GET',url: 'http://localhost:9999/',library: 'node:http',err: 'connect ECONNREFUSED 127.0.0.1:9999'},{at: 1,endAt: 1}],
+    ['complete']
+  ]);
 });
