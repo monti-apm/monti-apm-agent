@@ -20,8 +20,7 @@ let npmModules = {
   // version that is compatible with the version
   // used by WebApp.
   parseurl: '1.3.3',
-  'lodash.get': '4.4.2',
-  'lodash.set': '4.3.2',
+  remeda: '1.24.0'
 };
 
 Npm.depends(npmModules);
