@@ -20,8 +20,3 @@ export const asyncNodeHttpGet = (url) => new Promise((resolve, reject) => {
     reject(e);
   });
 });
-
-export const getFullUrl = (req) => {
-  const protocol = req.connection.encrypted ? 'https' : 'http';
-  return `${protocol}://${req.headers.host}${req.url}`;
-};
