@@ -1,0 +1,99 @@
+import React from 'react';
+import { Tests } from './tests';
+import { runWithProfiler } from './utils';
+import { TrashIcon } from '@heroicons/react/20/solid';
+import { TestButton } from './test-button';
+import { useReactive, useReactiveLocalStorage } from './use-reactive-ls';
+
+export const PerformanceMethods = ({ historyState, historyListRef }) => {
+  const [history, setHistory] = historyState;
+
+  const state = useReactiveLocalStorage('monti-overhead-state', {
+    total: 1000,
+    averageCallDuration: null,
+    profilerEnabled: true,
+  });
+
+  const ephemeralState = useReactive({
+    isRunning: false,
+    curProgress: null,
+  })
+
+  const onTestRun = async (test) => {
+    ephemeralState.isRunning = true;
+
+    const payload = {
+      id: crypto.randomUUID(),
+      num: history.length + 1,
+      testName: test,
+      profilerEnabled: state.profilerEnabled,
+      createdAt: new Date().toISOString(),
+      montiApmInstalled: !!Package['montiapm:agent'],
+    };
+
+    const testCallback = typeof Tests[test] === 'object' ? Tests[test].test : Tests[test];
+
+    if (state.profilerEnabled) {
+      const { filename, diff, heapAfterPath, heapBeforePath } = await runWithProfiler('monti-overhead', async () => {
+        await testCallback(state, ephemeralState, payload);
+      });
+
+      payload.profilerFilename = filename;
+      payload.diff = diff;
+      payload.heapAfterPath = heapAfterPath;
+      payload.heapBeforePath = heapBeforePath;
+    } else {
+      await testCallback(state, ephemeralState, payload);
+    }
+
+    setHistory([...history, payload]);
+
+    ephemeralState.isRunning = false;
+
+    historyListRef?.current?.scrollTo({
+      top: 0,
+    });
+  };
+
+  return (
+    <article className='mt-0 mb-0 overflow-y-auto max-h-full'>
+      <header>Performance Tests</header>
+
+      <label>
+        Total Calls
+        <input
+          type='number' min={ 100 } max={ 100000 } onChange={ (e) => {
+            state.total = Number(e.target.value);
+          } } value={ state.total }
+        />
+      </label>
+
+      <label>
+        <input
+          type='checkbox' checked={ state.profilerEnabled } onChange={ e => {
+            state.profilerEnabled = e.target.checked;
+          } }
+        />
+        Enable Profiler
+      </label>
+
+      <hr />
+
+      {Object.keys(Tests).map(test => {
+          return <TestButton key={test} test={test} onTestRun={onTestRun} ephemeralState={ephemeralState} />
+      })}
+
+      {state.memBefore ? <p>Heap Usage Before: {state.memBefore.heapUsed.toFixed(2)}kb</p> : null}
+      {state.memAfter ? <p>Heap Usage After: {state.memAfter.heapUsed.toFixed(2)}kb</p> : null}
+      {state.averageCallDuration ? <p>Average Call Duration: {state.averageCallDuration.toFixed(2)}ms</p> : null}
+
+      <progress value={ ephemeralState.curProgress } max={ state.total } />
+
+      <div>
+        <button onClick={ () => setHistory([]) } className='inline-flex w-auto outline secondary text-xs px-3 py-2' disabled={ !history.length }>
+          <TrashIcon className='w-3 h-3 self-center mr-1' /> Clear History
+        </button>
+      </div>
+    </article>
+  );
+};

@@ -77,6 +77,7 @@ Package.onTest(function (api) {
     'tests/docsize_cache.js',
     'tests/timeout.js',
     'tests/event_loop_monitor.js',
+    'tests/resource_management.js'
   ], 'server');
 
   if (canRunTestsWithFetch()) {

@@ -2,6 +2,7 @@
 parser: '@babel/eslint-parser'
 extends:
   - es/2015/server
+  - plugin:react/recommended
 plugins:
   - babel
 env:
@@ -24,7 +25,13 @@ parserOptions:
   requireConfigFile: false
   sourceType: 'module'
   ecmaVersion: 2017
+  ecmaFeatures:
+    jsx: true
+  babelOptions:
+    presets:
+      - '@babel/preset-react'
 rules:
+  react/prop-types: 0
   arrow-parens: 0
   prefer-arrow-callback: 0
   newline-before-return: 0
@@ -126,7 +133,7 @@ rules:
   no-extend-native: 2
   no-extra-bind: 2
   no-extra-boolean-cast: 2
-  no-extra-parens: [2, 'all', { nestedBinaryExpressions: false }]
+  no-extra-parens: 0
   no-extra-semi: 2
   no-fallthrough: 2
   no-floating-decimal: 2
