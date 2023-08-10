@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.47.3
+August 10, 2023
+
+* Fix logging payload size only when enabled
+* Fix crash when promise rejected with `undefined`
+
 ## 2.47.2
 January 9, 2023
 
