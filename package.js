@@ -119,8 +119,8 @@ function canRunTestsWithFetch () {
 }
 
 function configurePackage (api, isTesting) {
-  api.versionsFrom('METEOR@1.4');
-  api.use('montiapm:meteorx@2.2.0', ['server']);
+  api.versionsFrom('METEOR@2.0');
+  api.use('montiapm:meteorx@3.0.0', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
 
