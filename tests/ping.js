@@ -1,8 +1,8 @@
-import { callAsync, registerMethod } from './_helpers/helpers';
+import { addAsyncTest, callAsync, registerMethod } from './_helpers/helpers';
 
-Tinytest.addAsync(
+addAsyncTest(
   'Helpers - ddp server connection',
-  async function (test, done) {
+  async function (test) {
     const methodId = registerMethod(function () {
       return 'pong';
     });
@@ -10,7 +10,5 @@ Tinytest.addAsync(
     const result = await callAsync(methodId);
 
     test.equal(result, 'pong');
-
-    done();
   }
 );
