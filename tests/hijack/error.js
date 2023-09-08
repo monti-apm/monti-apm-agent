@@ -8,7 +8,6 @@ import {
   RegisterMethod,
   registerPublication
 } from '../_helpers/helpers';
-
 const HTTP = Package['http'].HTTP;
 
 Tinytest.add(
@@ -228,6 +227,29 @@ addAsyncTest(
       let error = payload.errors[0];
 
       test.equal(1, payload.errors.length);
+      test.equal(error.type, 'server-internal');
+      test.equal(error.subType, 'unhandledRejection');
+
+      _resetErrorTracking(originalErrorTrackingStatus);
+    });
+  }
+);
+
+addAsyncTest(
+  'Errors - unhandledRejection - undefined reason',
+  async function (test) {
+    let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+    Promise.reject(undefined);
+
+    Meteor.defer(function () {
+      let payload = Kadira.models.error.buildPayload();
+      // eslint-disable-next-line no-shadow
+      let error = payload.errors[0];
+
+      test.equal(1, payload.errors.length);
+      test.equal(error.name, 'unhandledRejection: undefined');
       test.equal(error.type, 'server-internal');
       test.equal(error.subType, 'unhandledRejection');
 
