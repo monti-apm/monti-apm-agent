@@ -6,3 +6,4 @@ versions.json
 .idea
 .eslintcache
 packages/
+.envrc
