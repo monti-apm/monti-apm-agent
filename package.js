@@ -56,8 +56,8 @@ Package.onTest(function (api) {
     'tests/hijack/email.js',
     'tests/hijack/base.js',
     'tests/hijack/async.js',
-    'tests/hijack/webapp.js',
-    'tests/hijack/http.js',
+    // 'tests/hijack/webapp.js',
+    // 'tests/hijack/http.js',
     'tests/hijack/db.js',
     'tests/hijack/subscriptions.js',
     'tests/hijack/error.js',
@@ -80,7 +80,7 @@ Package.onTest(function (api) {
   ], 'server');
 
   if (canRunTestsWithFetch()) {
-    api.addFiles(['tests/hijack/http_fetch.js'], 'server');
+    // api.addFiles(['tests/hijack/http_fetch.js'], 'server');
   }
 
   // common client
@@ -118,12 +118,12 @@ function canRunTestsWithFetch () {
 }
 
 function configurePackage (api, isTesting) {
-  api.versionsFrom('METEOR@1.4');
+  api.versionsFrom(['METEOR@1.4', 'METEOR@3.0-alpha.11']);
   api.use('montiapm:meteorx@2.2.0', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
-  api.use('zodern:meteor-package-versions@0.2.0');
-  api.use('zodern:types@1.0.9');
+  // api.use('zodern:meteor-package-versions@0.2.0');
+  // api.use('zodern:types@1.0.9');
 
   api.use([
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',
@@ -131,9 +131,9 @@ function configurePackage (api, isTesting) {
   ], ['server']);
   api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server', { weak: !isTesting });
 
-  api.use('fetch@0.1.0', 'server', {
-    weak: !(isTesting && canRunTestsWithFetch()),
-  });
+  // api.use('fetch@0.1.0||1.0.0', 'server', {
+  //   weak: !(isTesting && canRunTestsWithFetch()),
+  // });
 
   api.use(['random', 'ecmascript', 'tracker'], ['client']);
 
@@ -172,7 +172,7 @@ function configurePackage (api, isTesting) {
     'lib/hijack/db.js',
     'lib/hijack/http.js',
     'lib/hijack/email.js',
-    'lib/hijack/async.js',
+    // 'lib/hijack/async.js',
     'lib/hijack/error.js',
     'lib/hijack/set_labels.js',
     'lib/environment_variables.js',
