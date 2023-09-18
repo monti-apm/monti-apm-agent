@@ -2,7 +2,7 @@
 
 Package.describe({
   summary: 'Performance Monitoring for Meteor',
-  version: '3.0.0-alpha.1',
+  version: '2.47.3',
   git: 'https://github.com/monti-apm/monti-apm-agent.git',
   name: 'montiapm:agent'
 });
@@ -119,8 +119,8 @@ function canRunTestsWithFetch () {
 }
 
 function configurePackage (api, isTesting) {
-  api.versionsFrom('METEOR@2.0');
-  api.use('montiapm:meteorx@3.0.0', ['server']);
+  api.versionsFrom('METEOR@1.4');
+  api.use('montiapm:meteorx@2.3.0', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
 
@@ -133,7 +133,7 @@ function configurePackage (api, isTesting) {
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-  api.use(['http@1.0.0||2.0.0', 'email@3.0.0-alpha300.9'], 'server', { weak: !isTesting });
+  api.use(['http@1.0.0||2.0.0', 'email@3.0.0-alpha300.10'], 'server', { weak: !isTesting });
 
   api.use('fetch@1.0.0-alpha300.9', 'server', {
     weak: !(isTesting && canRunTestsWithFetch()),
