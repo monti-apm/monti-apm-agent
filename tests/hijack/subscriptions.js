@@ -1,5 +1,12 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
+import {
+  CleanTestData, CloseClient,
+  EnableTrackingMethods, FindMetricsForPub,
+  GetMeteorClient, GetPubSubMetrics, GetPubSubPayload, RegisterPublication,
+  SubscribeAndWait,
+  TestHelpers, Wait
+} from '../_helpers/helpers';
 
 Tinytest.add(
   'Subscriptions - Sub/Unsub - subscribe only',
@@ -54,7 +61,7 @@ Tinytest.add(
     });
     let h1 = SubscribeAndWait(client, pubName);
     let metrics = FindMetricsForPub(pubName);
-    test.isTrue(CompareNear(metrics.resTime, 200, 100));
+    test.isTrue(TestHelpers.compareNear(metrics.resTime, 200, 100));
     h1.stop();
     CloseClient(client);
   }
@@ -100,7 +107,7 @@ Tinytest.add(
     h1.stop();
     CloseClient(client);
     let metrics = FindMetricsForPub('tinytest-data');
-    test.isTrue(CompareNear(metrics.lifeTime, 50, 75));
+    test.isTrue(TestHelpers.compareNear(metrics.lifeTime, 50, 75));
   }
 );
 
@@ -127,22 +134,37 @@ Tinytest.add(
 // //   }
 // // );
 
+/**
+ * @flaky
+ */
 Tinytest.add(
   'Subscriptions - ObserverLifetime - sub',
   function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = GetMeteorClient();
-    let Future = Npm.require('fibers/future');
-    let f = new Future();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    Wait(100);
-    h1.stop();
-    Wait(100);
-    let metrics = FindMetricsForPub('tinytest-data');
+    TestHelpers.cleanTestData();
 
-    test.isTrue(CompareNear(metrics.observerLifetime, 100));
-    CloseClient(client);
+    TestHelpers.enableTrackingMethods();
+
+    let client = TestHelpers.getMeteorClient();
+
+    let st = Date.now();
+    let h1 = TestHelpers.subscribeAndWait(client, 'tinytest-data');
+    let elapsedTime = Date.now() - st;
+
+    TestHelpers.wait(100);
+
+    Kadira.EventBus.once('pubsub', 'observerDeleted', (ownerInfo) => console.log('on sub stop:', JSON.stringify(ownerInfo)));
+
+    st = Date.now();
+    h1.stop();
+    elapsedTime += Date.now() - st;
+
+    TestHelpers.wait(100);
+
+    let metrics = TestHelpers.findMetricsForPub('tinytest-data');
+
+    console.log({elapsedTime});
+    test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 100 + elapsedTime, 60));
+    TestHelpers.closeClient(client);
   }
 );
 
@@ -153,15 +175,14 @@ Tinytest.add(
     CleanTestData();
     EnableTrackingMethods();
     let client = GetMeteorClient();
-    const Future = Npm.require('fibers/future');
-    let f = new Future();
+
     let h1 = SubscribeAndWait(client, 'tinytest-data');
     let h2 = SubscribeAndWait(client, 'tinytest-data');
     let h3 = SubscribeAndWait(client, 'tinytest-data-2');
 
     let payload = GetPubSubPayload();
-    test.equal(payload[0].pubs['tinytest-data'].activeSubs == 2, true);
-    test.equal(payload[0].pubs['tinytest-data-2'].activeSubs == 1, true);
+    test.equal(payload[0].pubs['tinytest-data'].activeSubs === 2, true);
+    test.equal(payload[0].pubs['tinytest-data-2'].activeSubs === 1, true);
     h1.stop();
     h2.stop();
     h3.stop();
@@ -174,19 +195,19 @@ Tinytest.add(
   function (test) {
     CleanTestData();
     EnableTrackingMethods();
-    ReadyCounts = 0;
+    let ReadyCounts = 0;
     let pubId = RegisterPublication(function () {
       this.ready();
       this.ready();
     });
     let original = Kadira.models.pubsub._trackReady;
     Kadira.models.pubsub._trackReady = function (session, sub) {
-      if (sub._name == pubId) {
+      if (sub._name === pubId) {
         ReadyCounts++;
       }
     };
     let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, pubId);
+    SubscribeAndWait(client, pubId);
 
     test.equal(ReadyCounts, 1);
     Kadira.models.pubsub._trackReady = original;

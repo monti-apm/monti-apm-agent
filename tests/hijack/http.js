@@ -1,4 +1,5 @@
 import { HTTP } from 'meteor/http';
+import { CleanTestData, GetLastMethodEvents, GetMeteorClient, RegisterMethod } from '../_helpers/helpers';
 const Future = Npm.require('fibers/future');
 
 Tinytest.add('HTTP - meteor/http - call a server', function (test) {
@@ -10,9 +11,9 @@ Tinytest.add('HTTP - meteor/http - call a server', function (test) {
   const result = client.call(methodId);
   const events = GetLastMethodEvents([0, 2]);
   const expected = [
-    ['start', , { userId: null, params: '[]' }],
-    ['wait', , { waitOn: [] }],
-    ['http', , { url: 'http://localhost:3301', method: 'GET', statusCode: 200, library: 'meteor/http' }],
+    ['start', undefined, { userId: null, params: '[]' }],
+    ['wait', undefined, { waitOn: [] }],
+    ['http', undefined, { url: 'http://localhost:3301', method: 'GET', statusCode: 200, library: 'meteor/http' }],
     ['complete']
   ];
   test.equal(events, expected);
@@ -36,10 +37,10 @@ Tinytest.add('HTTP - meteor/http - async callback', function (test) {
   const result = client.call(methodId);
   const events = GetLastMethodEvents([0, 2]);
   const expected = [
-    ['start', , { userId: null, params: '[]' }],
-    ['wait', , { waitOn: [] }],
-    ['http', , { url: 'http://localhost:3301', method: 'GET', async: true, library: 'meteor/http' }],
-    ['async', , {}],
+    ['start', undefined, { userId: null, params: '[]' }],
+    ['wait', undefined, { waitOn: [] }],
+    ['http', undefined, { url: 'http://localhost:3301', method: 'GET', async: true, library: 'meteor/http' }],
+    ['async', undefined, {}],
     ['complete']
   ];
   test.equal(events, expected);

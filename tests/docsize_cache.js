@@ -1,5 +1,6 @@
 import { Random } from 'meteor/random';
 const LRU = Npm.require('lru-cache');
+import { DocSzCache, DocSzCacheItem } from '../lib/docsize_cache';
 
 Tinytest.add(
   'DocSize Cache - DocSzCache - constructor',
@@ -152,7 +153,6 @@ Tinytest.add(
 Tinytest.add(
   'DocSize Cache - DocSzCache - needsUpdate',
   function (test) {
-    let timeError = 0.001;
     let cache = new DocSzCache(5, 10);
     let item = new DocSzCacheItem(10);
     item.values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];

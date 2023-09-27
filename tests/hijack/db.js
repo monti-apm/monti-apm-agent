@@ -1,3 +1,12 @@
+import { TestData } from '../_helpers/globals';
+import {
+  CleanTestData,
+  EnableTrackingMethods,
+  GetLastMethodEvents,
+  GetMeteorClient,
+  RegisterMethod
+} from '../_helpers/helpers';
+
 Tinytest.add(
   'Database - insert',
   function (test) {
@@ -7,12 +16,12 @@ Tinytest.add(
       return 'insert';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'insert'}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'insert'}],
       ['complete']
     ];
     test.equal(events, expected);
@@ -31,12 +40,12 @@ Tinytest.add(
       return 'insert';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'insert', async: true}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'insert', async: true}],
       ['complete']
     ];
     test.equal(events, expected);
@@ -52,22 +61,20 @@ Tinytest.add(
       try {
         TestData.insert({_id: 'aa'});
         TestData.insert({_id: 'aa', aa: 10});
-      } catch (ex) {
-
-      }
+      } catch (ex) { /* empty */ }
       return 'insert';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     if (events && events[3] && events[3][2] && events[3][2].err) {
       events[3][2].err = events[3][2].err.indexOf('E11000') >= 0 ? 'E11000' : null;
     }
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'insert'}],
-      ['db',,{coll: 'tinytest-data', func: 'insert', err: 'E11000'}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'insert'}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'insert', err: 'E11000'}],
       ['complete']
     ];
     test.equal(events, expected);
@@ -85,12 +92,12 @@ Tinytest.add(
       return 'update';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',, {coll: 'tinytest-data', func: 'update', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined, {coll: 'tinytest-data', func: 'update', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}],
       ['complete']
     ];
     test.equal(events, expected);
@@ -108,12 +115,12 @@ Tinytest.add(
       return 'remove';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',, {coll: 'tinytest-data', func: 'remove', selector: JSON.stringify({_id: 'aa'}), removedDocs: 1}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined, {coll: 'tinytest-data', func: 'remove', selector: JSON.stringify({_id: 'aa'}), removedDocs: 1}],
       ['complete']
     ];
     test.equal(events, expected);
@@ -133,10 +140,10 @@ Tinytest.add(
     let result = client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: 'aa'})}],
-      ['db',,{
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: 'aa'})}],
+      ['db',undefined,{
         coll: 'tinytest-data',
         func: 'fetch',
         cursor: true,
@@ -169,10 +176,10 @@ Tinytest.add(
     let result = client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: 'aa'})}],
-      ['db',,{
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: 'aa'})}],
+      ['db',undefined,{
         coll: 'tinytest-data',
         func: 'fetch',
         cursor: true,
@@ -206,13 +213,13 @@ Tinytest.add(
       return 'upsert';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: 'aa'}],
-      ['db',,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: undefined}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: 'aa'}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: undefined}],
       ['complete']
     ];
     test.equal(events, expected);
@@ -230,13 +237,13 @@ Tinytest.add(
       return 'upsert';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}],
-      ['db',,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}],
       ['complete']
     ];
     test.equal(events, expected);
@@ -255,13 +262,13 @@ Tinytest.add(
       return 'indexes';
     });
     let client = GetMeteorClient();
-    let result = client.call(methodId);
+    client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: name, index: JSON.stringify({aa: 1, bb: 1})}],
-      ['db',,{coll: 'tinytest-data', func: '_dropIndex', index: JSON.stringify({aa: 1, bb: 1})}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: name, index: JSON.stringify({aa: 1, bb: 1})}],
+      ['db',undefined,{coll: 'tinytest-data', func: '_dropIndex', index: JSON.stringify({aa: 1, bb: 1})}],
       ['complete']
     ];
     test.equal(events, expected);
@@ -282,10 +289,10 @@ Tinytest.add(
     let result = client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
-      ['db',,{coll: 'tinytest-data', cursor: true, func: 'count', selector: JSON.stringify({})}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
+      ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'count', selector: JSON.stringify({})}],
       ['complete']
     ];
     test.equal(result, 2);
@@ -307,10 +314,10 @@ Tinytest.add(
     let result = client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
-      ['db',,{coll: 'tinytest-data', cursor: true, func: 'fetch', selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2, docSize: JSON.stringify({_id: 'aa'}).length * 2}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
+      ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'fetch', selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2, docSize: JSON.stringify({_id: 'aa'}).length * 2}],
       ['complete']
     ];
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
@@ -334,10 +341,10 @@ Tinytest.add(
     let result = client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
-      ['db',,{coll: 'tinytest-data', cursor: true, func: 'map', selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
+      ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'map', selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2}],
       ['complete']
     ];
     test.equal(result, ['aa', 'bb']);
@@ -363,10 +370,10 @@ Tinytest.add(
     let result = client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
-      ['db',,{coll: 'tinytest-data', cursor: true, func: 'forEach', selector: JSON.stringify({_id: {$exists: true}})}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
+      ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'forEach', selector: JSON.stringify({_id: {$exists: true}})}],
       ['complete']
     ];
     test.equal(result, ['aa', 'bb']);
@@ -393,10 +400,10 @@ Tinytest.add(
     let result = client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
-      ['db',,{coll: 'tinytest-data', cursor: true, func: 'forEach', selector: JSON.stringify({_id: {$exists: true}})}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
+      ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'forEach', selector: JSON.stringify({_id: {$exists: true}})}],
       ['complete']
     ];
     test.equal(result, ['aa', 'bb']);
@@ -427,10 +434,10 @@ Tinytest.add(
     let events = GetLastMethodEvents([0, 2]);
     events[3][2].oplog = false;
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
-      ['db',,{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: false}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
+      ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: false}],
       ['complete']
     ];
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
@@ -455,7 +462,7 @@ Tinytest.add(
         }
       });
       let handle2 = TestData.find({}).observeChanges({
-        added (id, fields) {
+        added () {
           // body
         }
       });
@@ -469,12 +476,12 @@ Tinytest.add(
     events[3][2].oplog = false;
     events[5][2].oplog = false;
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
-      ['db',,{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: false}],
-      ['db',,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
-      ['db',,{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: true}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
+      ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: false}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
+      ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: true}],
       ['complete']
     ];
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
@@ -506,10 +513,10 @@ Tinytest.add(
     let events = GetLastMethodEvents([0, 2]);
     events[3][2].oplog = false;
     let expected = [
-      ['start',,{userId: null, params: '[]'}],
-      ['wait',,{waitOn: []}],
-      ['db',,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
-      ['db',,{coll: 'tinytest-data', func: 'observe', cursor: true, selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: false}],
+      ['start',undefined,{userId: null, params: '[]'}],
+      ['wait',undefined,{waitOn: []}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
+      ['db',undefined,{coll: 'tinytest-data', func: 'observe', cursor: true, selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: false}],
       ['complete']
     ];
 

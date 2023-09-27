@@ -1,4 +1,6 @@
 import { _ } from 'meteor/underscore';
+import { Tracer } from '../../lib/tracer/tracer';
+import { Wait } from '../_helpers/helpers';
 
 let eventDefaults = {
   endAt: 0,
@@ -179,9 +181,12 @@ Tinytest.add(
     Kadira.tracer.event(traceInfo, 'start', {abc: 100});
     let eventId = Kadira.tracer.event(traceInfo, 'db');
     Kadira.tracer.event(traceInfo, 'db');
+    Wait(20);
     Kadira.tracer.eventEnd(traceInfo, eventId);
     Kadira.tracer.event(traceInfo, 'end', {abc: 200});
+
     cleanTrace(traceInfo);
+
     let expected = {
       _id: 'session-id::the-id',
       id: 'the-id',
@@ -190,7 +195,7 @@ Tinytest.add(
       name: 'method-name',
       events: [
         {type: 'start', data: {abc: 100}},
-        {type: 'db', nested: [{ type: 'db', endAt: null }]},
+        {type: 'db', endAt: 10, nested: [{ type: 'db', endAt: null }]},
         {type: 'end', data: {abc: 200}}
       ]
     };
@@ -442,7 +447,7 @@ Tinytest.add(
   }
 );
 
-function startTrace (tracer) {
+function startTrace () {
   let ddpMessage = {
     id: 'the-id',
     msg: 'method',

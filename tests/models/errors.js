@@ -95,7 +95,7 @@ Tinytest.add(
     let trace = {type: '_type', subType: '_subType', name: '_name'};
     model.trackError(error, trace);
     test.equal(true, !!model.errors['_type:_message']);
-    let metrics = model.buildPayload().errors;
+    model.buildPayload();
     test.equal(false, !!model.errors['_type:_message']);
   }
 );
@@ -219,7 +219,7 @@ Tinytest.add(
     let error = new Meteor.Error('code', 'message', details);
     let traceError = {stack: 'oldstack'};
     let trace = {events: [0, 1, [0, 1, {error: traceError}]]};
-    let payload = model._formatError(error, trace);
+    model._formatError(error, trace);
 
     let hasDetails = traceError.stack.indexOf(details);
     test.isTrue(hasDetails >= 0);

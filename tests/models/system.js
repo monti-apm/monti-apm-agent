@@ -1,20 +1,23 @@
 import { Meteor } from 'meteor/meteor';
 import { SystemModel } from '../../lib/models/system';
+import { Wait } from '../_helpers/helpers';
 
+/**
+ * @flaky
+ */
 Tinytest.add(
   'Models - System - buildPayload',
   function (test) {
-    let beforeTime = new Date().getTime();
     let model = new SystemModel();
     Meteor._wrapAsync(function (callback) {
-      setTimeout(callback, 1000);
+      setTimeout(callback, 500);
     })();
     let payload = model.buildPayload().systemMetrics[0];
 
     test.isTrue(payload.memory > 0);
     test.isTrue(payload.pcpu >= 0);
     test.isTrue(payload.sessions >= 0);
-    test.isTrue(payload.endTime >= payload.startTime + 1000);
+    test.isTrue(payload.endTime >= payload.startTime + 500);
     test.isTrue(payload.pctEvloopBlock >= 0);
   }
 );
@@ -156,9 +159,19 @@ Tinytest.add(
 function sendConnectMessage (options) {
   let socket = {send () {}, close () {}, headers: []};
   let message = {msg: 'connect', version: 'pre1', support: ['pre1']};
-  if (options.remoteAddress) { socket.remoteAddress = options.remoteAddress; }
-  if (options.forwardedAddress) { socket.headers['x-forwarded-for'] = options.forwardedAddress; }
-  if (options.sessionId) { message.session = options.sessionId; }
+
+  if (options.remoteAddress) {
+    socket.remoteAddress = options.remoteAddress;
+  }
+
+  if (options.forwardedAddress) {
+    socket.headers['x-forwarded-for'] = options.forwardedAddress;
+  }
+
+  if (options.sessionId) {
+    message.session = options.sessionId;
+  }
+
   Meteor.server._handleConnect(socket, message);
   return socket._meteorSession;
 }

@@ -3,7 +3,7 @@ import { Random } from 'meteor/random';
 Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - window.onunhandledrejection - error object',
   TestWithErrorTrackingAsync(function (test, next) {
-    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    hijackKadiraSendErrors(mockKadiraSendErrors);
     let message = Random.id();
     let error = new Error(message);
     let timeout = setTimeout(() => {
@@ -12,15 +12,15 @@ Tinytest.addAsync(
     }, 500);
     Promise.reject(error);
 
-    function mock_KadiraSendErrors (error) {
+    function mockKadiraSendErrors (_error) {
       clearTimeout(timeout);
-      test.equal('string', typeof error.appId);
-      test.equal('object', typeof error.info);
-      test.equal(message, error.name);
-      test.equal('client', error.type);
-      test.equal(true, Array.isArray(JSON.parse(error.stacks)));
-      test.equal('number', typeof error.startTime);
-      test.equal('window.onunhandledrejection', error.subType);
+      test.equal('string', typeof _error.appId);
+      test.equal('object', typeof _error.info);
+      test.equal(message, _error.name);
+      test.equal('client', _error.type);
+      test.equal(true, Array.isArray(JSON.parse(_error.stacks)));
+      test.equal('number', typeof _error.startTime);
+      test.equal('window.onunhandledrejection', _error.subType);
       restoreKadiraSendErrors();
       next();
     }
@@ -30,7 +30,7 @@ Tinytest.addAsync(
 Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - window.onunhandledrejection - string',
   TestWithErrorTrackingAsync(function (test, next) {
-    hijackKadiraSendErrors(mock_KadiraSendErrors);
+    hijackKadiraSendErrors(mockKadiraSendErrors);
     let message = Random.id();
     let timeout = setTimeout(() => {
       test.equal('false', 'browser supports onunhandledrejection');
@@ -38,7 +38,7 @@ Tinytest.addAsync(
     }, 500);
     Promise.reject(message);
 
-    function mock_KadiraSendErrors (error) {
+    function mockKadiraSendErrors (error) {
       clearTimeout(timeout);
       test.equal('string', typeof error.appId);
       test.equal('object', typeof error.info);
@@ -53,15 +53,15 @@ Tinytest.addAsync(
   })
 );
 
-let original_KadiraSendErrors;
+let originalKadiraSendError;
 
 function hijackKadiraSendErrors (mock) {
-  original_KadiraSendErrors = Kadira.errors.sendError;
+  originalKadiraSendError = Kadira.errors.sendError;
   Kadira.errors.sendError = mock;
 }
 
 function restoreKadiraSendErrors () {
-  Kadira.errors.sendError = original_KadiraSendErrors;
+  Kadira.errors.sendError = originalKadiraSendError;
 }
 
 function TestWithErrorTrackingAsync (testFunction) {
@@ -72,7 +72,11 @@ function TestWithErrorTrackingAsync (testFunction) {
     Kadira.enableErrorTracking();
     testFunction(test, function () {
       Kadira.options.appId = appId;
-      status ? Kadira.enableErrorTracking() : Kadira.disableErrorTracking();
+      if (status) {
+        Kadira.enableErrorTracking();
+      } else {
+        Kadira.disableErrorTracking();
+      }
       next();
     });
   };

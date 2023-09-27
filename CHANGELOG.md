@@ -1,9 +1,39 @@
 # Changelog
 
-## Next
+## 2.47.3
+August 10, 2023
+
+* Fix logging payload size only when enabled
+* Fix crash when promise rejected with `undefined`
+
+## 2.47.2
+January 9, 2023
+
+* Add type definitions for apps that use [zodern:types](https://github.com/zodern/meteor-types)
+* Add stalled method or publication detection. If a method is still running or a publication is not ready after 30 minutes, the agent will record an error to inform you.
+* Add `stalledTimeout` option to configure how long it waits before deciding a method or publication is stalled.
+* If called while there is an active trace, `Monti.trackError` will send the trace events with the error
+* Improve checks for why a query is not using the oplog. Many of the checks were out of date with new Meteor versions. We've also added some new checks, including for the reactive publish package.
+* Add `disableClientErrorTracking` option to only disable error tracking on the client
+* Fix possible error when running app tests, and global.window is set using jsdom
+* Fix ending async events in traces when an async function throws an error
+* Improve stack trace generated in safari for errors that are missing one
+* Sends the Meteor release in every request to the engine, instead of only when the app starts
+
+## 2.46.1
+November 8, 2022
+
+* Publish again without dev npm dependencies
+
+## 2.46.0
+November 8, 2022
 
 * Instrument fetch package (@afrokick)
-* Handle `RangeError: Invalid string length` error 
+* Remove `Monti APM: completed instrumenting the app` logged every time the app starts
+* When already connected, calling `Monti.connect` again does nothing
+* Change to only auto-connect after instrumentation is finished
+* Handle `RangeError: Invalid string length` error
+* Add `disableNtp` option
 
 ## 2.45.1
 February 13, 2022

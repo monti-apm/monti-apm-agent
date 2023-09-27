@@ -1,3 +1,5 @@
+import { Tracer } from '../../lib/tracer/tracer';
+
 Tinytest.add(
   'Tracer - Default filters - Tracer.stripSensitive - filter db',
   function (test) {
@@ -54,11 +56,11 @@ Tinytest.add(
   'Tracer - Default filters - Tracer.stripSensitive - with given types',
   function (test) {
     let filter = Tracer.stripSensitive(['db', 'http']);
-    var filtered = filter(
+    let filtered = filter(
       'db', {selector: 'something-else'}, {type: 'method', name: 'name'});
     test.equal(filtered, {selector: '[stripped]'});
 
-    var filtered = filter(
+    filtered = filter(
       'start', {params: 'something-else'}, {type: 'method', name: 'name'});
     test.equal(filtered, {params: 'something-else'});
   }
@@ -68,11 +70,11 @@ Tinytest.add(
   'Tracer - Default filters - Tracer.stripSensitive - with given receiverType',
   function (test) {
     let filter = Tracer.stripSensitive(['db'], 'method');
-    var filtered = filter(
+    let filtered = filter(
       'db', {selector: 'some-selector'}, {type: 'method', name: 'name'});
     test.equal(filtered, {selector: '[stripped]'});
 
-    var filtered = filter(
+    filtered = filter(
       'db', {selector: 'some-selector'}, {type: 'sub', name: 'name'});
     test.equal(filtered, {selector: 'some-selector'});
   }
@@ -82,11 +84,11 @@ Tinytest.add(
   'Tracer - Default filters - Tracer.stripSensitive - with given receiverType and name',
   function (test) {
     let filter = Tracer.stripSensitive(['db'], 'method', 'name');
-    var filtered = filter(
+    let filtered = filter(
       'db', {selector: 'some-selector'}, {type: 'method', name: 'name'});
     test.equal(filtered, {selector: '[stripped]'});
 
-    var filtered = filter(
+    filtered = filter(
       'db', {selector: 'some-selector'}, {type: 'method', name: 'not-name'});
     test.equal(filtered, {selector: 'some-selector'});
   }
