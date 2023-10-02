@@ -22,7 +22,7 @@ Tinytest.addAsync('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', f
 
       const info = Kadira._getInfo();
 
-      const event = _.last(info.trace.events);
+      const event = info.trace.events[2];
       observeChangesEvent = _.first(event.nested);
 
       return TestData.find({});

@@ -144,7 +144,11 @@ Tinytest.add(
       ['wait',undefined,{waitOn: []}],
       ['db',undefined,{
         coll: 'tinytest-data',
-        func: 'findOne',
+        func: 'fetch',
+        cursor: true,
+        docSize: 20,
+        docsFetched: 1,
+        limit: 1,
         selector: JSON.stringify({_id: 'aa'})
       }],
       ['complete']
@@ -176,8 +180,13 @@ Tinytest.add(
       ['wait',undefined,{waitOn: []}],
       ['db',undefined,{
         coll: 'tinytest-data',
-        func: 'findOne',
+        func: 'fetch',
+        cursor: true,
+        docSize: 20,
+        docsFetched: 1,
+        limit: 1,
         selector: JSON.stringify({_id: 'aa'}),
+        sort: JSON.stringify({dd: -1}),
       }],
       ['complete']
     ];
