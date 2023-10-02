@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "test": "meteor test-packages ./",
+    "test": "FORCE_COLOR=true meteor test-packages ./",
     "lint": "eslint . --cache . --ext .js",
     "publish": "npm prune --production && meteor publish"
   },

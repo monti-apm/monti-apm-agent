@@ -142,15 +142,10 @@ Tinytest.add(
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: 'aa'})}],
       ['db',undefined,{
         coll: 'tinytest-data',
-        func: 'fetch',
-        cursor: true,
-        selector: JSON.stringify({_id: 'aa'}),
-        docsFetched: 1,
-        docSize: JSON.stringify({_id: 'aa', dd: 10}).length,
-        limit: 1
+        func: 'findOne',
+        selector: JSON.stringify({_id: 'aa'})
       }],
       ['complete']
     ];
@@ -164,6 +159,7 @@ Tinytest.add(
 Tinytest.add(
   'Database - findOne with sort and fields',
   function (test) {
+    CleanTestData();
     EnableTrackingMethods();
     TestData.insert({_id: 'aa', dd: 10});
     let methodId = RegisterMethod(function () {
@@ -178,25 +174,22 @@ Tinytest.add(
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: 'aa'})}],
       ['db',undefined,{
         coll: 'tinytest-data',
-        func: 'fetch',
-        cursor: true,
+        func: 'findOne',
         selector: JSON.stringify({_id: 'aa'}),
-        sort: JSON.stringify({dd: -1}),
-        docsFetched: 1,
-        docSize: JSON.stringify({_id: 'aa', dd: 10}).length,
-        limit: 1
       }],
       ['complete']
     ];
+
     const projection = JSON.stringify({dd: 1});
-    if (events[3][2].projection) {
-      expected[3][2].projection = projection;
+
+    if (events[2][2].projection) {
+      expected[2][2].projection = projection;
     } else {
-      expected[3][2].fields = projection;
+      expected[2][2].fields = projection;
     }
+
     test.equal(result, {_id: 'aa', dd: 10});
     test.equal(events, expected);
     CleanTestData();
@@ -291,7 +284,6 @@ Tinytest.add(
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'count', selector: JSON.stringify({})}],
       ['complete']
     ];
@@ -316,7 +308,6 @@ Tinytest.add(
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'fetch', selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2, docSize: JSON.stringify({_id: 'aa'}).length * 2}],
       ['complete']
     ];
@@ -343,7 +334,6 @@ Tinytest.add(
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'map', selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2}],
       ['complete']
     ];
@@ -372,7 +362,6 @@ Tinytest.add(
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'forEach', selector: JSON.stringify({_id: {$exists: true}})}],
       ['complete']
     ];
@@ -402,7 +391,6 @@ Tinytest.add(
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({_id: {$exists: true}})}],
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'forEach', selector: JSON.stringify({_id: {$exists: true}})}],
       ['complete']
     ];
@@ -416,6 +404,7 @@ Tinytest.add(
   'Database - Cursor - observeChanges',
   function (test) {
     EnableTrackingMethods();
+    CleanTestData();
     TestData.insert({_id: 'aa'});
     TestData.insert({_id: 'bb'});
     let methodId = RegisterMethod(function () {
@@ -432,16 +421,15 @@ Tinytest.add(
     let client = GetMeteorClient();
     let result = client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
-    events[3][2].oplog = false;
+    events[2][2].oplog = false;
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: false}],
       ['complete']
     ];
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
-    clearAdditionalObserverInfo(events[3][2]);
+    clearAdditionalObserverInfo(events[2][2]);
     test.equal(events, expected);
     CleanTestData();
   }
@@ -450,6 +438,7 @@ Tinytest.add(
 Tinytest.add(
   'Database - Cursor - observeChanges:re-using-multiflexer',
   function (test) {
+    CleanTestData();
     EnableTrackingMethods();
     TestData.insert({_id: 'aa'});
     TestData.insert({_id: 'bb'});
@@ -473,20 +462,20 @@ Tinytest.add(
     let client = GetMeteorClient();
     let result = client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
+
+    events[2][2].oplog = false;
     events[3][2].oplog = false;
-    events[5][2].oplog = false;
+
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: false}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
       ['db',undefined,{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: true}],
       ['complete']
     ];
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
+    clearAdditionalObserverInfo(events[2][2]);
     clearAdditionalObserverInfo(events[3][2]);
-    clearAdditionalObserverInfo(events[5][2]);
     test.equal(events, expected);
     CleanTestData();
   }
@@ -511,17 +500,16 @@ Tinytest.add(
     let client = GetMeteorClient();
     let result = client.call(methodId);
     let events = GetLastMethodEvents([0, 2]);
-    events[3][2].oplog = false;
+    events[2][2].oplog = false;
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'find', selector: JSON.stringify({})}],
       ['db',undefined,{coll: 'tinytest-data', func: 'observe', cursor: true, selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2, wasMultiplexerReady: false}],
       ['complete']
     ];
 
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
-    clearAdditionalObserverInfo(events[3][2]);
+    clearAdditionalObserverInfo(events[2][2]);
     test.equal(events, expected);
     CleanTestData();
   }
