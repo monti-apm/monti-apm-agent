@@ -30,7 +30,19 @@ Package.onUse(function (api) {
 });
 
 Package.onTest(function (api) {
+  if (process.env.REDIS_OPLOG_SETTINGS) {
+    api.use([
+      'cultofcoders:redis-oplog',
+      'disable-oplog'
+    ], ['server']);
+
+    api.addFiles([
+      'tests/hijack/redis_oplog.js',
+    ], 'server');
+  }
+
   configurePackage(api, true);
+
   api.use([
     'peerlibrary:reactive-publish',
     'tinytest',
@@ -42,14 +54,18 @@ Package.onTest(function (api) {
     'tests/models/base_error.js'
   ], ['client', 'server']);
 
+  // helpers
+  api.addFiles([
+    'tests/_helpers/globals.js',
+    'tests/_helpers/helpers.js',
+    'tests/_helpers/init.js',
+  ], ['server']);
+
   // common server
   api.addFiles([
     'tests/utils.js',
     'tests/ntp.js',
     'tests/jobs.js',
-    'tests/_helpers/globals.js',
-    'tests/_helpers/helpers.js',
-    'tests/_helpers/init.js',
     'tests/ping.js',
     'tests/hijack/info.js',
     'tests/hijack/user.js',
