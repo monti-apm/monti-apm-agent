@@ -30,6 +30,8 @@ Package.onUse(function (api) {
 });
 
 Package.onTest(function (api) {
+  configurePackage(api, true);
+
   if (process.env.REDIS_OPLOG_SETTINGS) {
     api.use([
       'cultofcoders:redis-oplog',
@@ -40,8 +42,6 @@ Package.onTest(function (api) {
       'tests/hijack/redis_oplog.js',
     ], 'server');
   }
-
-  configurePackage(api, true);
 
   api.use([
     'peerlibrary:reactive-publish',
