@@ -194,6 +194,8 @@ export function addTestWithRoundedTime (name, fn) {
   Tinytest.add(name, withRoundedTime(fn));
 }
 
+export const isRedisOplogEnabled = !!process.env.REDIS_OPLOG_SETTINGS;
+
 export const TestHelpers = {
   methodStore: MethodStore,
   getLatestEventsFromMethodStore: () => MethodStore[MethodStore.length - 1].events,

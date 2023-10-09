@@ -4,6 +4,7 @@ import {
   EnableTrackingMethods,
   GetLastMethodEvents,
   GetMeteorClient,
+  isRedisOplogEnabled,
   RegisterMethod
 } from '../_helpers/helpers';
 
@@ -45,7 +46,11 @@ Tinytest.add(
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'insert', async: true}],
+      ['db',undefined,{
+        coll: 'tinytest-data',
+        func: 'insert',
+        ...!isRedisOplogEnabled ? { async: true } : {}
+      }],
       ['complete']
     ];
     test.equal(events, expected);
