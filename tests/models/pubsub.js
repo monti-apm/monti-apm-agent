@@ -3,11 +3,13 @@ import {
   addTestWithRoundedTime,
   CleanTestData,
   CloseClient,
-  GetMeteorClient, GetPubSubPayload,
+  GetMeteorClient,
+  GetPubSubPayload,
   SubscribeAndWait,
-  Wait, WithDocCacheGetSize
+  Wait,
+  WithDocCacheGetSize
 } from '../_helpers/helpers';
-import {TestData} from '../_helpers/globals';
+import { TestData } from '../_helpers/globals';
 
 addTestWithRoundedTime(
   'Models - PubSub - Metrics - same date',
@@ -671,6 +673,7 @@ addTestWithRoundedTime(
     }, 25);
 
     let payload = GetPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data-random'].liveFetchedDocSize, 50);
     CloseClient(client);
   }
