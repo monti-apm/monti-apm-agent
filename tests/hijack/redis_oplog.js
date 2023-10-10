@@ -63,3 +63,39 @@ Tinytest.add('Database - Redis Oplog - Removed', function (test) {
   sub.stop();
   TestData.remove({});
 });
+
+Tinytest.add('Database - Redis Oplog - Changed', function (test) {
+  const pub = RegisterPublication(() => TestData.find({}));
+
+  TestData.remove({});
+
+  const client = GetMeteorClient();
+  const sub = SubscribeAndWait(client, pub);
+
+  TestData.insert({ name: 'test1' });
+  TestData.insert({ name: 'test2' });
+  TestData.insert({ name: 'test3' });
+
+  Meteor._sleepForMs(100);
+
+  TestData.update({ name: 'test2' }, { $set: { name: 'test4' } });
+
+  Meteor._sleepForMs(100);
+
+  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+
+  test.equal(metrics.totalObservers, 1);
+  test.equal(metrics.liveChangedDocuments, 1);
+
+  TestData.update({}, { $set: { name: 'test5' } }, { multi: true });
+
+  Meteor._sleepForMs(100);
+
+  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+
+  test.equal(metrics.totalObservers, 1);
+  test.equal(metrics.liveChangedDocuments, 4);
+
+  sub.stop();
+  TestData.remove({});
+});
