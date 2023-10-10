@@ -7,7 +7,6 @@ import {
   isRedisOplogEnabled,
   RegisterMethod
 } from '../_helpers/helpers';
-import { diffObjects } from '../_helpers/pretty-log';
 
 Tinytest.add(
   'Database - insert',
@@ -245,7 +244,6 @@ Tinytest.add(
       ['complete']
     ];
     test.equal(events, expected);
-    diffObjects(events, expected);
     CleanTestData();
   }
 );
