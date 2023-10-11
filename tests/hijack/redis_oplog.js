@@ -26,6 +26,8 @@ Tinytest.add('Database - Redis Oplog - Added', function (test) {
 
   sub.stop();
   TestData.remove({});
+
+  Meteor._sleepForMs(100);
 });
 
 Tinytest.add('Database - Redis Oplog - Removed', function (test) {
@@ -62,6 +64,8 @@ Tinytest.add('Database - Redis Oplog - Removed', function (test) {
 
   sub.stop();
   TestData.remove({});
+
+  Meteor._sleepForMs(100);
 });
 
 Tinytest.add('Database - Redis Oplog - Changed', function (test) {
@@ -98,4 +102,6 @@ Tinytest.add('Database - Redis Oplog - Changed', function (test) {
 
   sub.stop();
   TestData.remove({});
+
+  Meteor._sleepForMs(100);
 });
