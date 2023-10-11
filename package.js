@@ -32,17 +32,6 @@ Package.onUse(function (api) {
 Package.onTest(function (api) {
   configurePackage(api, true);
 
-  if (process.env.REDIS_OPLOG_SETTINGS) {
-    api.use([
-      'cultofcoders:redis-oplog',
-      'disable-oplog'
-    ], ['server']);
-
-    api.addFiles([
-      'tests/hijack/redis_oplog.js',
-    ], 'server');
-  }
-
   api.use([
     'peerlibrary:reactive-publish',
     'tinytest',
@@ -195,6 +184,17 @@ function configurePackage (api, isTesting) {
     'lib/auto_connect.js',
     'lib/conflicting_agents.js',
   ], 'server');
+
+  if (isTesting && process.env.REDIS_OPLOG_SETTINGS) {
+    api.use([
+      'cultofcoders:redis-oplog',
+      'disable-oplog'
+    ], ['server']);
+
+    api.addFiles([
+      'tests/hijack/redis_oplog.js',
+    ], 'server');
+  }
 
   // only client
   api.addFiles([
