@@ -1,0 +1,38 @@
+name: Test Redis Oplog
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        meteorRelease:
+          - '--release 1.4.4.6'
+          - '--release 1.12.1'
+          - '--release 2.1.1'
+          # Latest version
+          -
+    env:
+      REDIS_OPLOG_SETTINGS: '{"debug":true}'
+    steps:
+      - uses: supercharge/redis-github-action@1.4.0
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Install Dependencies
+        run: |
+          curl https://install.meteor.com | /bin/sh
+          npm i -g @zodern/mtest
+
+      - name: Run Tests
+        run: |
+          # Fix using old versions of Meteor
+          export NODE_TLS_REJECT_UNAUTHORIZED=0
+
+          mtest --package ./ --once ${{ matrix.meteorRelease }}
