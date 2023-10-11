@@ -270,8 +270,8 @@ Tinytest.add(
         ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: undefined}],
         ['db',undefined,{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docsFetched: 1, docSize: 20 }]
       ] : [
-        ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: 'aa'}],
-        ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: undefined}]
+        ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}],
+        ['db',undefined,{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}]
       ],
       ['complete']
     ];
