@@ -18,7 +18,7 @@ jobs:
           # Latest version
           -
     env:
-      REDIS_OPLOG_SETTINGS: '{"debug":true}'
+      REDIS_OPLOG_SETTINGS: '{"redis":{"port": 6379,"host": "redis"},"debug":true}'
     steps:
       - uses: supercharge/redis-github-action@1.4.0
       - uses: actions/checkout@v2
