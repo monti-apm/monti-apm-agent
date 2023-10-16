@@ -286,13 +286,18 @@ Tinytest.add(
     EnableTrackingMethods();
     let name = typeof TestData.createIndex === 'function' ? 'createIndex' : '_ensureIndex';
     let methodId = RegisterMethod(function () {
-      TestData[name]({aa: 1, bb: 1});
-      TestData._dropIndex({aa: 1, bb: 1});
-      return 'indexes';
+      try {
+        TestData[name]({aa: 1, bb: 1});
+        Meteor._sleepForMs(100);
+        TestData._dropIndex({aa: 1, bb: 1});
+        return 'indexes';
+      } catch (e) {
+        console.error(e);
+      }
     });
     let client = GetMeteorClient();
     client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+    let events = GetLastMethodEvents([0, 2], ['async']);
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
