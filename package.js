@@ -187,7 +187,7 @@ function configurePackage (api, isTesting) {
 
   if (isTesting && process.env.REDIS_OPLOG_SETTINGS) {
     api.use([
-      'cultofcoders:redis-oplog@2.2.1',
+      'cultofcoders:redis-oplog@1.0.14||2.2.1',
       'disable-oplog@1.0.7'
     ], ['server']);
 
