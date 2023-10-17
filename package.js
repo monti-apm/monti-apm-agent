@@ -124,6 +124,14 @@ function canRunTestsWithFetch () {
 
 function configurePackage (api, isTesting) {
   api.versionsFrom('METEOR@1.4');
+
+  if (isTesting && process.env.REDIS_OPLOG_SETTINGS) {
+    api.use([
+      'cultofcoders:redis-oplog@1.0.14||2.2.1',
+      'disable-oplog@1.0.7'
+    ], ['server']);
+  }
+
   api.use('montiapm:meteorx@2.2.0', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
@@ -186,11 +194,6 @@ function configurePackage (api, isTesting) {
   ], 'server');
 
   if (isTesting && process.env.REDIS_OPLOG_SETTINGS) {
-    api.use([
-      'cultofcoders:redis-oplog@1.0.14||2.2.1',
-      'disable-oplog@1.0.7'
-    ], ['server']);
-
     api.addFiles([
       'tests/hijack/redis_oplog.js',
     ], 'server');
