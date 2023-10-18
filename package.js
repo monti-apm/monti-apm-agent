@@ -188,6 +188,7 @@ function configurePackage (api, isTesting) {
     'lib/hijack/async.js',
     'lib/hijack/error.js',
     'lib/hijack/set_labels.js',
+    'lib/hijack/redis_oplog.js',
     'lib/environment_variables.js',
     'lib/auto_connect.js',
     'lib/conflicting_agents.js',
