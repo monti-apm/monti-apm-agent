@@ -9,17 +9,23 @@ Tinytest.add('Database - Redis Oplog - Added', function (test) {
 
   TestData.remove({});
 
-  const client = GetMeteorClient();
-  const sub = SubscribeAndWait(client, pub);
-
   TestData.insert({ name: 'test1' });
   TestData.insert({ name: 'test2' });
   TestData.insert({ name: 'test3' });
+  TestData.insert({ name: 'test4' });
+
+  const client = GetMeteorClient();
+  const sub = SubscribeAndWait(client, pub);
+
+  TestData.insert({ name: 'test5' });
+  TestData.insert({ name: 'test6' });
+  TestData.insert({ name: 'test7' });
 
   Meteor._sleepForMs(100);
 
   const metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
 
+  test.equal(metrics.initiallyAddedDocuments, 4);
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.oplogInsertedDocuments, 3);
   test.equal(metrics.liveAddedDocuments, 3);
