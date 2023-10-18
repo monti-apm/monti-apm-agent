@@ -102,6 +102,10 @@ Tinytest.add(
 //   }
 // );
 
+/**
+ * The `lifeTime` metric seems flaky on Meteor v2.8.2 specifically,
+ * shouldn't be something worry about but leaving this comment just in case.
+ */
 Tinytest.add(
   'Subscriptions - Lifetime - sub',
   function (test) {
