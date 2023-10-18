@@ -12,7 +12,6 @@ jobs:
       fail-fast: false
       matrix:
         meteorRelease:
-          - '--release 1.4.4.6'
           - '--release 1.12.1'
           - '--release 2.1.1'
           # Latest version
