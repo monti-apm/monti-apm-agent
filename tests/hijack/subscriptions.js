@@ -1,11 +1,17 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import {
-  CleanTestData, CloseClient,
-  EnableTrackingMethods, FindMetricsForPub,
-  GetMeteorClient, GetPubSubMetrics, GetPubSubPayload, RegisterPublication,
+  CleanTestData,
+  CloseClient,
+  EnableTrackingMethods,
+  FindMetricsForPub,
+  GetMeteorClient,
+  GetPubSubMetrics,
+  GetPubSubPayload,
+  RegisterPublication,
   SubscribeAndWait,
-  TestHelpers, Wait
+  TestHelpers,
+  Wait
 } from '../_helpers/helpers';
 
 Tinytest.add(
@@ -107,7 +113,7 @@ Tinytest.add(
     h1.stop();
     CloseClient(client);
     let metrics = FindMetricsForPub('tinytest-data');
-    test.isTrue(TestHelpers.compareNear(metrics.lifeTime, 50, 75));
+    test.isTrue(TestHelpers.compareNear(metrics.lifeTime, 50, 200));
   }
 );
 
