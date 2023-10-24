@@ -119,7 +119,7 @@ function canRunTestsWithFetch () {
 }
 
 function configurePackage (api, isTesting) {
-  api.versionsFrom('METEOR@1.4');
+  api.versionsFrom('METEOR@2.0');
   api.use('montiapm:meteorx@2.3.1', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
@@ -133,9 +133,9 @@ function configurePackage (api, isTesting) {
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-  api.use(['http@1.0.0||2.0.0', 'email@3.0.0-alpha300.10'], 'server', { weak: !isTesting });
+  api.use(['http', 'email'], 'server', { weak: !isTesting });
 
-  api.use('fetch@1.0.0-alpha300.9', 'server', {
+  api.use('fetch', 'server', {
     weak: !(isTesting && canRunTestsWithFetch()),
   });
 
