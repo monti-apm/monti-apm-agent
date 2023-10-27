@@ -26,11 +26,12 @@ jobs:
       - name: Install Dependencies
         run: |
           curl https://install.meteor.com | /bin/sh
-          npm i -g @zodern/mtest
 
       - name: Run Tests
         run: |
           # Fix using old versions of Meteor
-          export NODE_TLS_REJECT_UNAUTHORIZED=0
+          export NODE_TLS_REJECT_UNAUTHORIZED=0  
+          export NODE_OPTIONS="--trace-warnings --trace-uncaught"
+          export FORCE_COLOR=true
 
-          mtest --package ./ --once ${{ matrix.meteorRelease }}
+          meteor test-packages ./ --raw-logs --exclude-archs="web.browser.legacy,web.cordova" --release=${{ matrix.meteorRelease }}
