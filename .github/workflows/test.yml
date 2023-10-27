@@ -33,4 +33,4 @@ jobs:
           export NODE_OPTIONS="--trace-warnings --trace-uncaught"
           export FORCE_COLOR=true
 
-          meteor test-packages ./ --raw-logs --exclude-archs="web.browser.legacy,web.cordova" --release=${{ matrix.meteorRelease }}
+          meteor test-packages ./ --raw-logs --exclude-archs="web.browser.legacy,web.cordova" --driver-package=test-in-console --release=${{ matrix.meteorRelease }}
