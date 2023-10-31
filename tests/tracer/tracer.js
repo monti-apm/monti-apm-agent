@@ -583,7 +583,7 @@ addAsyncTest.only('Tracer - Build Trace - the correct number of async events are
 
     info = getInfo();
 
-    return sleep(300);
+    return await sleep(300);
   });
 
   await callAsync(methodId);
