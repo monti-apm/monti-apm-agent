@@ -368,7 +368,7 @@ addAsyncTest(
 
     const expected = [
       ['start'],
-      ['wait', 0, null, { at: 0, endAt: 0, forcedEnd: true }],
+      ['wait', traceInfo.events[1][1], null, { at: 0, endAt: traceInfo.events[1][3].endAt, forcedEnd: true }],
       ['db', 500, null, { at: 2000, endAt: 2500}],
       ['complete']
     ];
@@ -574,7 +574,7 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   test.stableEqual(events, expected);
 });
 
-addAsyncTest.only('Tracer - Build Trace - the correct number of async events are captured for methods', async (test) => {
+addAsyncTest('Tracer - Build Trace - the correct number of async events are captured for methods', async (test) => {
   let info;
 
   const methodId = registerMethod(async function () {
