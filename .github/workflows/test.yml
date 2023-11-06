@@ -12,7 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         meteorRelease:
-          - 3.0-alpha.16
+          # Meteor 3 Alpha
+          - '--release 3.0-alpha.16'
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -25,12 +26,11 @@ jobs:
       - name: Install Dependencies
         run: |
           curl https://install.meteor.com | /bin/sh
+          npm i -g @zodern/mtest
 
       - name: Run Tests
         run: |
           # Fix using old versions of Meteor
-          export NODE_TLS_REJECT_UNAUTHORIZED=0  
-          export NODE_OPTIONS="--trace-warnings --trace-uncaught"
-          export FORCE_COLOR=true
+          export NODE_TLS_REJECT_UNAUTHORIZED=0
 
-          meteor test-packages ./ --raw-logs --exclude-archs="web.browser.legacy,web.cordova" --driver-package=test-in-console --release=${{ matrix.meteorRelease }}
+          mtest --package ./ --once ${{ matrix.meteorRelease }}
