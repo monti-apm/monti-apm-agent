@@ -8,7 +8,6 @@ import {
   RegisterMethod
 } from '../_helpers/helpers';
 import assert from 'assert';
-import { diffObjects } from '../_helpers/pretty-log';
 
 addAsyncTest(
   'Database - insert',
@@ -25,8 +24,6 @@ addAsyncTest(
     dumpEvents(events);
 
     let expected = [['start',{userId: null,params: '[]'}],['wait',{waitOn: []},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],['complete']];
-
-    diffObjects(events, expected);
 
     test.stableEqual(events, expected);
   }

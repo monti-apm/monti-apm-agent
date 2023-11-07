@@ -12,7 +12,6 @@ import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
 import { getInfo } from '../../lib/async/als';
 import { mergeIntervals, subtractIntervals } from '../../lib/utils/time';
-import { diffObjects, prettyLog } from '../_helpers/pretty-log';
 import { EventType } from '../../lib/constants';
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
@@ -50,8 +49,6 @@ addAsyncTest(
         {type: 'end', data: {abc: 200}}
       ]
     };
-
-    diffObjects(traceInfo, expected);
 
     test.equal(traceInfo, expected);
   }
@@ -590,8 +587,6 @@ addAsyncTest('Tracer - Build Trace - the correct number of async events are capt
 
   const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 100);
 
-  prettyLog(info.trace.events);
-
   test.equal(asyncEvents.length, 3);
 });
 
@@ -609,8 +604,6 @@ addAsyncTest('Tracer - Build Trace - the correct number of async events are capt
   });
 
   await subscribeAndWait(client, subName);
-
-  prettyLog(info.trace.events);
 
   const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 100);
 
