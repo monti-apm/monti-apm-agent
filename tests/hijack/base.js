@@ -13,7 +13,12 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2, 3]);
 
-    let expected = [['start',{userId: null,params: '[10,"abc"]'}],['wait',{waitOn: []},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],['complete']];
+    let expected = [
+      ['start',{userId: null,params: '[10,"abc"]'}],
+      ['wait',{waitOn: []},{at: 1,endAt: 1}],
+      ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
+      ['complete']
+    ];
 
     test.stableEqual(events, expected);
   }
