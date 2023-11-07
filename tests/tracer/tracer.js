@@ -569,7 +569,7 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
         ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
         ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
         ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
-        ['email',{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com'},{at: 1,endAt: 1}],
+        ['email',{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com', func: 'emailAsync'},{at: 1,endAt: 1}],
         ['db',{coll: 'tinytest-data',selector: '{"_id":"a"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
         ['db',{coll: 'tinytest-data',selector: '{"_id":"b"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
         ['db',{coll: 'tinytest-data',selector: '{"_id":"c"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
