@@ -87,9 +87,7 @@ Package.onTest(function (api) {
     'tests/event_loop_monitor.js',
   ], 'server');
 
-  if (canRunTestsWithFetch()) {
-    api.addFiles(['tests/hijack/http_fetch.js'], 'server');
-  }
+  api.addFiles(['tests/hijack/http_fetch.js'], 'server');
 
   // common client
   api.addFiles([
@@ -110,21 +108,6 @@ Package.onTest(function (api) {
   ], ['client', 'server']);
 });
 
-// use meteor/fetch in tests only for NodeJS 8.11+ (Meteor 1.7+)
-function canRunTestsWithFetch () {
-  const nums = process.versions.node.split('.').map(Number);
-
-  const major = nums[0];
-  const minor = nums[1];
-
-  if (major < 8) return false;
-
-  if (major > 8) return true;
-
-  // major === 8 and ...
-  return minor >= 11;
-}
-
 function configurePackage (api, isTesting) {
   api.versionsFrom('METEOR@2.0');
   api.use('montiapm:meteorx@2.3.1', ['server']);
@@ -143,7 +126,7 @@ function configurePackage (api, isTesting) {
   api.use(['http', 'email'], 'server', { weak: !isTesting });
 
   api.use('fetch', 'server', {
-    weak: !(isTesting && canRunTestsWithFetch()),
+    weak: !isTesting,
   });
 
   api.use(['random', 'ecmascript', 'tracker'], ['client']);
