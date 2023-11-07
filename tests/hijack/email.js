@@ -20,7 +20,7 @@ addAsyncTest(
     const expected = [
       ['start'],
       ['wait'],
-      ['emailAsync'],
+      ['email'],
       ['complete']
     ];
 
