@@ -566,7 +566,26 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
 
   const events = getLastMethodEvents([0, 2, 3]);
 
-  const expected = [['start',{userId: null,params: '[]'}],['wait',{waitOn: []},{at: 1,endAt: 1}],['custom',null,{name: 'test',at: 1,endAt: 1,nested: [['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],['emailAsync',{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com'},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',selector: '{"_id":"a"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',selector: '{"_id":"b"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',selector: '{"_id":"c"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',selector: '{"_id":"a1"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0},{at: 1,endAt: 1}],['db',{coll: 'tinytest-data',selector: '{"_id":"a2"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0},{at: 1,endAt: 1}]]}],['complete']];
+  const expected = [
+    ['start',{userId: null,params: '[]'}],
+    ['wait',{waitOn: []},{at: 1,endAt: 1}],
+    ['custom',null,{name: 'test',
+      at: 1,
+      endAt: 1,
+      nested: [
+        ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
+        ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
+        ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
+        ['email',{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com', func: 'emailAsync'},{at: 1,endAt: 1}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"a"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"b"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"c"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"a1"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0},{at: 1,endAt: 1}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"a2"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0},{at: 1,endAt: 1}]
+      ]}
+    ],
+    ['complete']
+  ];
 
   test.stableEqual(events, expected);
 });
