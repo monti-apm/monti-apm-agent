@@ -213,8 +213,7 @@ export const closeClient = function (client) {
   return new Promise((resolve) => {
     let sessionId = client._lastSessionId;
 
-    Object.entries(client._subscriptions).forEach(([subId, sub]) => {
-      console.log('closing sub', subId);
+    Object.entries(client._subscriptions).forEach(([, sub]) => {
       sub?.stop();
     });
 
