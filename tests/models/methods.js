@@ -1,8 +1,8 @@
-import { EJSON } from 'meteor/ejson';
 import { MethodsModel } from '../../lib/models/methods';
 import { TestData } from '../_helpers/globals';
 import { addAsyncTest, callAsync, clientCallAsync, registerMethod, withDocCacheGetSize } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
+import { Ntp } from '../../lib/ntp';
 
 addAsyncTest(
   'Models - Method - buildPayload simple',
@@ -48,11 +48,9 @@ addAsyncTest(
       methodRequests: []
     };
 
-    let startTime = expected.methodMetrics[0].startTime;
-    expected.methodMetrics[0].startTime = Kadira.syncedDate.syncTime(startTime);
+    expected.methodMetrics[0].startTime = payload.methodMetrics[0].startTime;
 
-    // TODO comparing without parsing and stringifing fails
-    test.equal(EJSON.parse(EJSON.stringify(payload)), EJSON.parse(EJSON.stringify(expected)));
+    test.stableEqual(payload, expected);
   }
 );
 
@@ -91,9 +89,8 @@ addAsyncTest(
         }
       }
     }];
-    // TODO comparing without stringify fails
-    expected[0].startTime = Kadira.syncedDate.syncTime(expected[0].startTime);
-    test.equal(EJSON.parse(EJSON.stringify(payload.methodMetrics)), EJSON.parse(EJSON.stringify(expected)));
+    expected[0].startTime = payload.methodMetrics[0].startTime;
+    test.stableEqual(payload.methodMetrics,expected);
   }
 );
 
@@ -191,8 +188,8 @@ export const model = new MethodsModel();
 function createMethodCompleted (sessionName, methodName, methodId, startTime, methodDelay) {
   methodDelay = methodDelay || 5;
   let method = {session: sessionName, name: methodName, id: methodId, events: []};
-  method.events.push({type: 'start', at: startTime});
-  method.events.push({type: 'complete', at: startTime + methodDelay});
+  method.events.push({type: 'start', at: Ntp._now() - startTime});
+  method.events.push({type: 'complete', at: Ntp._now() - startTime + methodDelay});
   method = Kadira.tracer.buildTrace(method);
   model.processMethod(method);
 }
@@ -200,8 +197,11 @@ function createMethodCompleted (sessionName, methodName, methodId, startTime, me
 function createMethodErrored (sessionName, methodName, methodId, errorMessage, startTime, methodDelay) {
   methodDelay = methodDelay || 5;
   let method = {session: sessionName, name: methodName, id: methodId, events: []};
-  method.events.push({type: 'start', at: startTime});
-  method.events.push({type: 'error', at: startTime + methodDelay, data: {error: errorMessage}});
+  method.events.push({type: 'start', at: Ntp._now() - startTime});
+  method.events.push({type: 'error',
+    at: Ntp._now() - startTime + methodDelay,
+    endAt: Ntp._now() - startTime + methodDelay,
+    data: {error: errorMessage}});
   method = Kadira.tracer.buildTrace(method);
   model.processMethod(method);
 }

@@ -11,10 +11,10 @@ import {
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
 import { getInfo } from '../../lib/async/als';
-import { mergeIntervals, subtractIntervals } from '../../lib/utils/time';
 import { EventType } from '../../lib/constants';
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
+import { Ntp } from '../../lib/ntp';
 
 let eventDefaults = {
   endAt: 0,
@@ -260,7 +260,7 @@ addAsyncTest(
 addAsyncTest(
   'Tracer - Build Trace - simple',
   async function (test) {
-    let now = new Date().getTime();
+    let now = Ntp._now();
 
     let traceInfo = {
       events: [
@@ -627,90 +627,6 @@ addAsyncTest('Tracer - Build Trace - the correct number of async events are capt
   const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 100);
 
   test.equal(asyncEvents.length,1);
-});
-
-addAsyncTest('Tracer - Time - Subtract Intervals', async function (test) {
-  function testSubtractIntervals (arr1, arr2, expected) {
-    const result = subtractIntervals(arr1, arr2);
-    test.stableEqual(result, expected);
-  }
-
-  testSubtractIntervals([
-    [0, 10],
-    [20, 30],
-    [40, 50],
-  ],[
-    [5, 15],
-    [25, 35],
-    [35, 45],
-  ],[
-    [0, 5],
-    [20, 25],
-    [45, 50],
-  ]);
-
-  testSubtractIntervals(
-    [
-      [0, 10],
-      [20, 30],
-      [40, 50],
-    ],
-    [[0, 50]],
-    []
-  );
-
-  testSubtractIntervals(
-    [
-      [0, 100],
-    ],
-    [
-      [0, 50],
-    ],
-    [
-      [50, 100],
-    ]
-  );
-});
-
-addAsyncTest('Tracer- Time - Merge Parallel Intervals', async function (test) {
-  function testMergeParallelIntervals (arr, expected) {
-    const result = mergeIntervals(arr);
-    test.stableEqual(result, expected);
-  }
-
-  testMergeParallelIntervals([
-    [0, 10],
-    [20, 30],
-    [40, 50],
-  ],[
-    [0, 10],
-    [20, 30],
-    [40, 50],
-  ]);
-
-  testMergeParallelIntervals([
-    [0, 10],
-    [5, 15],
-    [20, 30],
-    [25, 35],
-    [40, 50],
-    [35, 45],
-  ],[
-    [0, 15],
-    [20, 50],
-  ]);
-
-  testMergeParallelIntervals([
-    [0, 10],
-    [5, 15],
-    [20, 30],
-    [25, 35],
-    [40, 50],
-    [35, 45],
-    [0, 50],
-  ],[
-    [0, 50],
-  ]);
 });
 
 function startTrace () {
