@@ -42,7 +42,6 @@ Package.onTest(function (api) {
   configurePackage(api, true);
   api.use([
     'tinytest',
-    'test-helpers',
     'accounts-base',
   ], ['client', 'server']);
 
