@@ -199,7 +199,7 @@ Tinytest.add(
     let info = getBrowserInfo();
     test.equal('string', typeof info.browser);
     test.equal('string', typeof info.url);
-    test.equal(null, info.userId);
+    test.equal(undefined, info.userId);
   }
 );
 
