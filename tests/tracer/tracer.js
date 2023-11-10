@@ -366,6 +366,7 @@ addAsyncTest(
     const expected = [
       ['start'],
       ['wait', traceInfo.events[1][1], null, { at: 0, endAt: traceInfo.events[1][3].endAt, forcedEnd: true }],
+      ['compute', 2000],
       ['db', 500, null, { at: 2000, endAt: 2500}],
       ['complete']
     ];
