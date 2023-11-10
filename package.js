@@ -14,12 +14,6 @@ let npmModules = {
   'json-stringify-safe': '5.0.1',
   'monti-apm-sketches-js': '0.0.3',
 
-  // Used for pretty logs
-  yaml: '2.3.2',
-  diff: '5.1.0',
-  'cli-highlight': '2.1.11',
-  chalk: '4.1.2',
-
   'lodash.get': '4.4.2',
   'lodash.set': '4.3.2',
 
