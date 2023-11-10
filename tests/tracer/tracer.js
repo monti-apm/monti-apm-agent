@@ -537,8 +537,6 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
       await TestData.insertAsync({ _id: 'b', n: 2 });
       await TestData.insertAsync({ _id: 'c', n: 3 });
 
-      await Meteor.userAsync();
-
       backgroundPromise = Promise.resolve().then(async () => {
         // Email
         Email.sendAsync({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });

@@ -42,7 +42,6 @@ Package.onTest(function (api) {
   configurePackage(api, true);
   api.use([
     'tinytest',
-    'accounts-base',
   ], ['client', 'server']);
 
   // common before
