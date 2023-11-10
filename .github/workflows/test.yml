@@ -23,12 +23,12 @@ jobs:
         with:
           cache: 'npm'
           node-version: 18
-        run: npm ci
 
       - name: Install Dependencies
         run: |
           curl https://install.meteor.com | /bin/sh
           npm i -g @zodern/mtest
+          npm ci
 
       - name: Run Tests
         run: |
