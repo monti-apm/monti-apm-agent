@@ -129,7 +129,7 @@ addAsyncTest(
 
     test.equal(result, {_id: 'aa', dd: 10});
 
-    const expected = [['start',null,{userId: null,params: '[]'}],['wait',0,{waitOn: []},{at: 1,endAt: 1}],['db',0,{coll: 'tinytest-data',selector: '{"_id":"aa"}',func: 'fetch',cursor: true,projection: '{"dd":1}',sort: '{"dd":-1}',limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],['complete']];
+    const expected = [['start',0,{userId: null,params: '[]'}],['wait',0,{waitOn: []},{at: 1,endAt: 1}],['db',0,{coll: 'tinytest-data',selector: '{"_id":"aa"}',func: 'fetch',cursor: true,projection: '{"dd":1}',sort: '{"dd":-1}',limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],['complete']];
 
     test.stableEqual(events, expected);
   }

@@ -366,9 +366,9 @@ addAsyncTest(
 
     const expected = [
       ['start'],
-      ['wait', traceInfo.events[1][1], null, { at: 0, endAt: traceInfo.events[1][3].endAt, forcedEnd: true }],
+      ['wait', traceInfo.events[1][1], {}, { at: 0, endAt: traceInfo.events[1][3].endAt, forcedEnd: true }],
       ['compute', 2000],
-      ['db', 500, null, { at: 2000, endAt: 2500}],
+      ['db', 500, {}, { at: 2000, endAt: 2500}],
       ['complete']
     ];
 
@@ -604,7 +604,7 @@ addAsyncTest('Tracer - Build Trace - should end custom event', async (test) => {
   await callAsync(methodId);
 
   const expected = [
-    [ 'start', null, { userId: null, params: '[]' } ],
+    [ 'start', 0, { userId: null, params: '[]' } ],
     [ 'wait', 0, { waitOn: []}, {} ],
     [ 'custom', 0, { async: false }, {
       name: 'test',
@@ -632,7 +632,7 @@ addAsyncTest('Tracer - Build Trace - should end async events', async (test) => {
   await callAsync(methodId);
 
   const expected = [
-    [ 'start', null, { userId: null, params: '[]' } ],
+    [ 'start', 0, { userId: null, params: '[]' } ],
     [ 'wait', 0, { 'waitOn': [] }, {} ],
     [ 'async', 20 ],
     [ 'complete' ]
