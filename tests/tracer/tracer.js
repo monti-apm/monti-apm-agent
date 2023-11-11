@@ -3,6 +3,7 @@ import { Tracer } from '../../lib/tracer/tracer';
 import {
   addAsyncTest,
   callAsync,
+  cleanBuiltEvents,
   cleanTrace,
   getLastMethodEvents,
   registerMethod,
@@ -587,6 +588,37 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   ];
 
   test.stableEqual(events, expected);
+});
+
+addAsyncTest.only('Tracer - Build Trace - should end event', async (test) => {
+  let info;
+
+  const methodId = registerMethod(async function () {
+    Kadira.event('test', () => {
+      Kadira.event('test2', () => {}, { value: true });
+    }, { async: false });
+    Kadira.event('test3', () => {});
+
+    info = getInfo();
+  });
+
+  await callAsync(methodId);
+
+  const expected = [
+    [ 'start', null, { userId: null, params: '[]' } ],
+    [ 'wait', 0, { waitOn: []}, {} ],
+    [ 'custom', 0, { async: false }, {
+      name: 'test',
+      nested: [
+        [ 'custom', 0, { value: true }, { name: 'test2' } ],
+      ]
+    } ],
+    [ 'custom', 0, {}, { name: 'test3' } ],
+    [ 'complete' ]
+  ];
+  let actual = cleanBuiltEvents(info.trace.events);
+
+  test.equal(actual, expected);
 });
 
 addAsyncTest('Tracer - Build Trace - the correct number of async events are captured for methods', async (test) => {
