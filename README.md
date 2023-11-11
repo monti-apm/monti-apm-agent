@@ -127,13 +127,26 @@ The agent records up to one level of nested events.
 You can add custom events to the traces to time specific code or events, or to provide more details to the trace.
 
 ```js
+Monti.event('event name', {
+  // This object can have any details you want to store
+  // The object is optional
+  userId: userId
+}, async () => {
+  // do the work inside the event
+  // the event will automatically end when this function returns
+});
+
+// Older api. Not recommended since it doesn't nest child events in Meteor 3
 const event = Monti.startEvent('event name', {
-  details: true
+  // This object can have any details you want
+  organization: organizationId
 });
 
 // After code runs or event happens
 Monti.endEvent(event, {
-  additionalDetails: true
+  // This object can have any details you want
+  // It is merged with the object created when starting the event
+  organizationMembers: 10
 });
 ```
 
