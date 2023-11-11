@@ -11,7 +11,7 @@ import {
 } from '../_helpers/helpers';
 import { defer, sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
-import { getInfo } from '../../lib/async/als';
+import { MontiAsyncStorage, getInfo } from '../../lib/async/als';
 import { EventType } from '../../lib/constants';
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
@@ -257,6 +257,17 @@ addAsyncTest(
     test.stableEqual(traceInfo, expected);
   }
 );
+
+addAsyncTest(
+  'Tracer - Monti.event - run function outside of trace',
+  async function (test) {
+    MontiAsyncStorage.run(undefined, () => {
+      test.equal(getInfo(), undefined);
+      let result = Monti.event('test', () => 'result');
+      test.equal(result, 'result');
+    });
+  }
+)
 
 addAsyncTest(
   'Tracer - Build Trace - simple',
