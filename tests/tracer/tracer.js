@@ -267,7 +267,38 @@ addAsyncTest(
       test.equal(result, 'result');
     });
   }
-)
+);
+
+addAsyncTest(
+  'Tracer - Monti.event - provide data',
+  async function (test) {
+    let info;
+    let data = { value: 5 };
+    let ran = false;
+
+    const methodId = registerMethod(async function () {
+      Monti.event('test', data, () => {
+        ran = true;
+      });
+
+      info = getInfo();
+    });
+
+    await callAsync(methodId);
+
+    const expected = [
+      'custom',
+      0,
+      data,
+      { name: 'test' }
+    ];
+    let actualEvent = cleanBuiltEvents(info.trace.events)
+    .find(event => event[0] === 'custom');
+
+    test.equal(actualEvent, expected);
+    test.equal(ran, true);
+  }
+);
 
 addAsyncTest(
   'Tracer - Build Trace - simple',
@@ -604,9 +635,9 @@ addAsyncTest('Tracer - Build Trace - should end custom event', async (test) => {
   let info;
 
   const methodId = registerMethod(async function () {
-    Kadira.event('test', () => {
-      Kadira.event('test2', () => {}, { value: true });
-    }, { async: false });
+    Kadira.event('test', { async: false }, () => {
+      Kadira.event('test2', { value: true }, () => {});
+    });
     Kadira.event('test3', () => {});
 
     info = getInfo();
