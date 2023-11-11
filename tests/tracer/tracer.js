@@ -9,7 +9,7 @@ import {
   registerMethod,
   subscribeAndWait
 } from '../_helpers/helpers';
-import { sleep } from '../../lib/utils';
+import { defer, sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
 import { getInfo } from '../../lib/async/als';
 import { EventType } from '../../lib/constants';
@@ -529,7 +529,6 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
 
   let methodId = registerMethod(async function () {
     let backgroundPromise;
-
     // Compute
     await sleep(30);
 
@@ -569,7 +568,7 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   const expected = [
     ['start',{userId: null,params: '[]'}],
     ['wait',{waitOn: []},{at: 1,endAt: 1}],
-    ['custom',null,{name: 'test',
+    ['custom', {}, {name: 'test',
       at: 1,
       endAt: 1,
       nested: [
@@ -590,7 +589,7 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   test.stableEqual(events, expected);
 });
 
-addAsyncTest.only('Tracer - Build Trace - should end event', async (test) => {
+addAsyncTest('Tracer - Build Trace - should end custom event', async (test) => {
   let info;
 
   const methodId = registerMethod(async function () {
@@ -614,6 +613,28 @@ addAsyncTest.only('Tracer - Build Trace - should end event', async (test) => {
       ]
     } ],
     [ 'custom', 0, {}, { name: 'test3' } ],
+    [ 'complete' ]
+  ];
+  let actual = cleanBuiltEvents(info.trace.events);
+
+  test.equal(actual, expected);
+});
+
+addAsyncTest('Tracer - Build Trace - should end async events', async (test) => {
+  let info;
+
+  const methodId = registerMethod(async function () {
+    await sleep(20);
+
+    info = getInfo();
+  });
+
+  await callAsync(methodId);
+
+  const expected = [
+    [ 'start', null, { userId: null, params: '[]' } ],
+    [ 'wait', 0, { 'waitOn': [] }, {} ],
+    [ 'async', 20 ],
     [ 'complete' ]
   ];
   let actual = cleanBuiltEvents(info.trace.events);
