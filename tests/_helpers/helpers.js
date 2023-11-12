@@ -86,10 +86,7 @@ export function getLastMethodEvents (indices = [0], keysToPreserve = []) {
     const data = cloneDeep(_data);
 
     const rejectedKeys = [
-      'asyncId',
-      'stack',
-      'executionAsyncId',
-      'triggerAsyncId',
+      'stack'
     ];
 
     for ( const [key, value] of Object.entries(data)) {
