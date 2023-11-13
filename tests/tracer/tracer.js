@@ -331,6 +331,42 @@ addAsyncTest(
 );
 
 addAsyncTest(
+  'Tracer - Build Trace - compute time with force end events',
+  async function (test) {
+    let now = Ntp._now();
+
+    // TODO: work around needed since optimizeEvent sets missing endAt as
+    // the current time
+    let oldNow = Ntp._now;
+    Ntp._now = () => now + 4500;
+
+    let traceInfo = {
+      events: [
+        {...eventDefaults, type: 'start', at: now, endAt: now},
+        {...eventDefaults, type: 'wait', at: now, endAt: now + 1000},
+        {...eventDefaults, type: 'db', at: now + 2000, endAt: undefined},
+        {type: EventType.Complete, at: now + 4500}
+      ]
+    };
+
+    Kadira.tracer.buildTrace(traceInfo);
+
+    Ntp._now = oldNow;
+
+    const expected = {
+      total: 4500,
+      wait: 1000,
+      db: 2500,
+      compute: 1000,
+      async: 0,
+    };
+
+    test.stableEqual(traceInfo.metrics, expected);
+    test.stableEqual(traceInfo.errored, false);
+  }
+);
+
+addAsyncTest(
   'Tracer - Build Trace - errored',
   function (test) {
     let now = new Date().getTime();
@@ -410,7 +446,6 @@ addAsyncTest(
     const expected = [
       ['start'],
       ['wait', traceInfo.events[1][1], {}, { at: 0, endAt: traceInfo.events[1][3].endAt, forcedEnd: true }],
-      ['compute', 2000],
       ['db', 500, {}, { at: 2000, endAt: 2500}],
       ['complete']
     ];
