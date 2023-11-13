@@ -435,12 +435,7 @@ addAsyncTest(
   }
 );
 
-/**
- * @issue found in Meteor's codebase
- * TypeError: Cannot read property 'then' of undefined
- * packages/minimongo/local_collection.js:1655:30
- */
-addAsyncTest.skip(
+addAsyncTest(
   'Database - Cursor - observe',
   async function (test) {
     await TestData.insertAsync({_id: 'aa'});
@@ -460,18 +455,18 @@ addAsyncTest.skip(
     let result = await callAsync(methodId);
     let events = getLastMethodEvents([0, 2]);
 
-    events[3][2].oplog = false;
+    events[2][1].oplog = false;
 
     let expected = [
-      ['start',undefined,{userId: null, params: '[]'}],
-      ['wait',undefined,{waitOn: []}],
-      ['db',undefined,{coll: 'tinytest-data', func: 'observe', cursor: true, selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2 }],
+      ['start',{userId: null, params: '[]'}],
+      ['wait',{waitOn: []}],
+      ['db',{coll: 'tinytest-data', func: 'observe', cursor: true, selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2 }],
       ['complete']
     ];
 
     test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
-    clearAdditionalObserverInfo(events[3][2]);
-    test.equal(events, expected);
+    clearAdditionalObserverInfo(events[2][1]);
+    test.stableEqual(events, expected);
   }
 );
 
