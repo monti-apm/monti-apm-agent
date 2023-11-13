@@ -453,7 +453,7 @@ addAsyncTest(
     });
 
     let result = await callAsync(methodId);
-    let events = getLastMethodEvents([0, 2]);
+    let events = getLastMethodEvents([0, 2], ['noOfCachedDocs']);
 
     events[2][1].oplog = false;
 
