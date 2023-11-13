@@ -3,6 +3,7 @@ import { Tracer } from '../../lib/tracer/tracer';
 import {
   addAsyncTest,
   callAsync,
+  cleanBuiltEvents,
   cleanTrace,
   getLastMethodEvents,
   registerMethod,
@@ -10,7 +11,7 @@ import {
 } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
-import { getInfo } from '../../lib/async/als';
+import { MontiAsyncStorage, getInfo } from '../../lib/async/als';
 import { EventType } from '../../lib/constants';
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
@@ -258,6 +259,48 @@ addAsyncTest(
 );
 
 addAsyncTest(
+  'Tracer - Monti.event - run function outside of trace',
+  async function (test) {
+    MontiAsyncStorage.run(undefined, () => {
+      test.equal(getInfo(), undefined);
+      let result = Monti.event('test', () => 'result');
+      test.equal(result, 'result');
+    });
+  }
+);
+
+addAsyncTest(
+  'Tracer - Monti.event - provide data',
+  async function (test) {
+    let info;
+    let data = { value: 5 };
+    let ran = false;
+
+    const methodId = registerMethod(async function () {
+      Monti.event('test', data, () => {
+        ran = true;
+      });
+
+      info = getInfo();
+    });
+
+    await callAsync(methodId);
+
+    const expected = [
+      'custom',
+      0,
+      data,
+      { name: 'test' }
+    ];
+    let actualEvent = cleanBuiltEvents(info.trace.events)
+      .find(event => event[0] === 'custom');
+
+    test.equal(actualEvent, expected);
+    test.equal(ran, true);
+  }
+);
+
+addAsyncTest(
   'Tracer - Build Trace - simple',
   async function (test) {
     let now = Ntp._now();
@@ -365,9 +408,9 @@ addAsyncTest(
 
     const expected = [
       ['start'],
-      ['wait', traceInfo.events[1][1], null, { at: 0, endAt: traceInfo.events[1][3].endAt, forcedEnd: true }],
+      ['wait', traceInfo.events[1][1], {}, { at: 0, endAt: traceInfo.events[1][3].endAt, forcedEnd: true }],
       ['compute', 2000],
-      ['db', 500, null, { at: 2000, endAt: 2500}],
+      ['db', 500, {}, { at: 2000, endAt: 2500}],
       ['complete']
     ];
 
@@ -528,7 +571,6 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
 
   let methodId = registerMethod(async function () {
     let backgroundPromise;
-
     // Compute
     await sleep(30);
 
@@ -568,7 +610,7 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   const expected = [
     ['start',{userId: null,params: '[]'}],
     ['wait',{waitOn: []},{at: 1,endAt: 1}],
-    ['custom',null,{name: 'test',
+    ['custom', {}, {name: 'test',
       at: 1,
       endAt: 1,
       nested: [
@@ -587,6 +629,59 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   ];
 
   test.stableEqual(events, expected);
+});
+
+addAsyncTest('Tracer - Build Trace - should end custom event', async (test) => {
+  let info;
+
+  const methodId = registerMethod(async function () {
+    Kadira.event('test', { async: false }, () => {
+      Kadira.event('test2', { value: true }, () => {});
+    });
+    Kadira.event('test3', () => {});
+
+    info = getInfo();
+  });
+
+  await callAsync(methodId);
+
+  const expected = [
+    ['start', 0, { userId: null, params: '[]' }],
+    ['wait', 0, { waitOn: []}, {}],
+    ['custom', 0, { async: false }, {
+      name: 'test',
+      nested: [
+        ['custom', 0, { value: true }, { name: 'test2' }],
+      ]
+    }],
+    ['custom', 0, {}, { name: 'test3' }],
+    ['complete']
+  ];
+  let actual = cleanBuiltEvents(info.trace.events);
+
+  test.equal(actual, expected);
+});
+
+addAsyncTest('Tracer - Build Trace - should end async events', async (test) => {
+  let info;
+
+  const methodId = registerMethod(async function () {
+    await sleep(20);
+
+    info = getInfo();
+  });
+
+  await callAsync(methodId);
+
+  const expected = [
+    ['start', 0, { userId: null, params: '[]' }],
+    ['wait', 0, { waitOn: [] }, {}],
+    ['async', 20],
+    ['complete']
+  ];
+  let actual = cleanBuiltEvents(info.trace.events);
+
+  test.equal(actual, expected);
 });
 
 addAsyncTest('Tracer - Build Trace - the correct number of async events are captured for methods', async (test) => {
