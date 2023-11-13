@@ -9,7 +9,7 @@ import {
   registerMethod,
   subscribeAndWait
 } from '../_helpers/helpers';
-import { defer, sleep } from '../../lib/utils';
+import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
 import { MontiAsyncStorage, getInfo } from '../../lib/async/als';
 import { EventType } from '../../lib/constants';
@@ -293,7 +293,7 @@ addAsyncTest(
       { name: 'test' }
     ];
     let actualEvent = cleanBuiltEvents(info.trace.events)
-    .find(event => event[0] === 'custom');
+      .find(event => event[0] === 'custom');
 
     test.equal(actualEvent, expected);
     test.equal(ran, true);
@@ -646,16 +646,16 @@ addAsyncTest('Tracer - Build Trace - should end custom event', async (test) => {
   await callAsync(methodId);
 
   const expected = [
-    [ 'start', 0, { userId: null, params: '[]' } ],
-    [ 'wait', 0, { waitOn: []}, {} ],
-    [ 'custom', 0, { async: false }, {
+    ['start', 0, { userId: null, params: '[]' }],
+    ['wait', 0, { waitOn: []}, {}],
+    ['custom', 0, { async: false }, {
       name: 'test',
       nested: [
-        [ 'custom', 0, { value: true }, { name: 'test2' } ],
+        ['custom', 0, { value: true }, { name: 'test2' }],
       ]
-    } ],
-    [ 'custom', 0, {}, { name: 'test3' } ],
-    [ 'complete' ]
+    }],
+    ['custom', 0, {}, { name: 'test3' }],
+    ['complete']
   ];
   let actual = cleanBuiltEvents(info.trace.events);
 
@@ -674,10 +674,10 @@ addAsyncTest('Tracer - Build Trace - should end async events', async (test) => {
   await callAsync(methodId);
 
   const expected = [
-    [ 'start', 0, { userId: null, params: '[]' } ],
-    [ 'wait', 0, { 'waitOn': [] }, {} ],
-    [ 'async', 20 ],
-    [ 'complete' ]
+    ['start', 0, { userId: null, params: '[]' }],
+    ['wait', 0, { waitOn: [] }, {}],
+    ['async', 20],
+    ['complete']
   ];
   let actual = cleanBuiltEvents(info.trace.events);
 

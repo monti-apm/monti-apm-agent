@@ -356,26 +356,26 @@ export function cleanBuiltEvents (events) {
   return events
     .filter(event => event[0] !== 'compute' || event[1] > 5)
     .map(event => {
-    let [ type, duration, data, details ] = event;
-    if (typeof duration === 'number') {
-      // round down to nearest 10
-      event[1] = Math.floor(duration / 10) * 10;
-    }
-    
-    if (details) {
-      delete details.at;
-      delete details.endAt;
-      if (details.nested) {
-        details.nested = cleanBuiltEvents(details.nested);
+      let [, duration, , details] = event;
+      if (typeof duration === 'number') {
+        // round down to nearest 10
+        event[1] = Math.floor(duration / 10) * 10;
       }
 
-      // We only care about the properties that survive being stringified
-      // (are not undefined)
-      event[3] = JSON.parse(JSON.stringify(details));
-    }
+      if (details) {
+        delete details.at;
+        delete details.endAt;
+        if (details.nested) {
+          details.nested = cleanBuiltEvents(details.nested);
+        }
 
-    return event;
-  })
+        // We only care about the properties that survive being stringified
+        // (are not undefined)
+        event[3] = JSON.parse(JSON.stringify(details));
+      }
+
+      return event;
+    });
 }
 
 export const dumpEvents = (events) => {
