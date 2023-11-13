@@ -5,6 +5,7 @@ import {
   callAsync,
   cleanBuiltEvents,
   cleanTrace,
+  deepFreeze,
   getLastMethodEvents,
   registerMethod,
   subscribeAndWait
@@ -721,6 +722,32 @@ addAsyncTest('Tracer - Build Trace - the correct number of async events are capt
   const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 100);
 
   test.equal(asyncEvents.length,1);
+});
+
+addAsyncTest('Tracer - Optimize Events - no mutation', async (test) => {
+  let partialEvents;
+
+  const methodId = registerMethod(async function () {
+    const Email = Package['email'].Email;
+
+    await TestData.insertAsync({ _id: 'a', n: 1 });
+    await sleep(20);
+
+    await Email.sendAsync({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
+
+    let info = getInfo();
+    let events = info.trace.events.slice();
+    deepFreeze(events);
+
+    // testing this doesn't throw
+    partialEvents = Kadira.tracer.optimizeEvents(events);
+
+    info.trace.events = [Kadira.tracer.event(info.trace, 'start')];
+  });
+
+  await callAsync(methodId);
+
+  test.equal(Array.isArray(partialEvents), true);
 });
 
 function startTrace () {

@@ -382,6 +382,24 @@ export const dumpEvents = (events) => {
   console.log(JSON.stringify(events));
 };
 
+export function deepFreeze (obj) {
+  if (Array.isArray(obj)) {
+    obj.forEach(val => {
+      if (!Object.isFrozen(val)) {
+        deepFreeze(val);
+      }
+    });
+  } else {
+    Object.values(obj).forEach(val => {
+      if (!Object.isFrozen(val)) {
+        deepFreeze(val);
+      }
+    });
+  }
+
+  Object.freeze(obj);
+}
+
 export const TestHelpers = {
   methodStore: MethodStore,
   getLatestEventsFromMethodStore: () => MethodStore[MethodStore.length - 1].events,
