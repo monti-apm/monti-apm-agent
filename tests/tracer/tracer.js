@@ -445,8 +445,8 @@ addAsyncTest(
 
     const expected = [
       ['start'],
-      ['wait', traceInfo.events[1][1], {}, { at: 0, endAt: traceInfo.events[1][3].endAt, forcedEnd: true }],
-      ['db', 500, {}, { at: 2000, endAt: 2500}],
+      ['wait', traceInfo.events[1][1], {}, { forcedEnd: true }],
+      ['db', 500, {}, { offset: traceInfo.events[2][3].offset }],
       ['complete']
     ];
 
@@ -647,16 +647,14 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
     ['start',{userId: null,params: '[]'}],
     ['wait',{waitOn: []}],
     ['custom', {}, {name: 'test',
-      at: 1,
-      endAt: 1,
       nested: [
         ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
         ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
         ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
-        ['email',{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com', func: 'emailAsync'}],
+        ['email',{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com', func: 'emailAsync'}, { offset: 1 }],
         ['db',{coll: 'tinytest-data',selector: '{"_id":"a"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"b"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"c"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"b"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}, { offset: 1 }],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"c"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}, { offset: 1 }],
         ['db',{coll: 'tinytest-data',selector: '{"_id":"a1"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0}],
         ['db',{coll: 'tinytest-data',selector: '{"_id":"a2"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0}]
       ]}
@@ -683,7 +681,7 @@ addAsyncTest('Tracer - Build Trace - should end custom event', async (test) => {
 
   const expected = [
     ['start', 0, { userId: null, params: '[]' }],
-    ['wait', 0, { waitOn: []}, {}],
+    ['wait', 0, { waitOn: []}],
     ['custom', 0, { async: false }, {
       name: 'test',
       nested: [
@@ -695,7 +693,7 @@ addAsyncTest('Tracer - Build Trace - should end custom event', async (test) => {
   ];
   let actual = cleanBuiltEvents(info.trace.events);
 
-  test.equal(actual, expected);
+  test.stableEqual(actual, expected);
 });
 
 addAsyncTest('Tracer - Build Trace - should end async events', async (test) => {
@@ -711,13 +709,13 @@ addAsyncTest('Tracer - Build Trace - should end async events', async (test) => {
 
   const expected = [
     ['start', 0, { userId: null, params: '[]' }],
-    ['wait', 0, { waitOn: [] }, {}],
+    ['wait', 0, { waitOn: [] }],
     ['async', 20],
     ['complete']
   ];
   let actual = cleanBuiltEvents(info.trace.events);
 
-  test.equal(actual, expected);
+  test.stableEqual(actual, expected);
 });
 
 addAsyncTest('Tracer - Build Trace - the correct number of async events are captured for methods', async (test) => {
