@@ -706,6 +706,97 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   test.stableEqual(events, expected);
 });
 
+addAsyncTest('Tracer - Build Trace - offset is reversible', async function (test) {
+  const Email = Package['email'].Email;
+
+  let origEvents;
+  let info;
+  let methodId = registerMethod(async function () {
+    let backgroundPromise;
+    // Compute
+    await sleep(30);
+
+    await Kadira.event('test', async (event) => {
+      await TestData.insertAsync({ _id: 'a', n: 1 });
+      await TestData.insertAsync({ _id: 'b', n: 2 });
+      await TestData.insertAsync({ _id: 'c', n: 3 });
+
+      backgroundPromise = Promise.resolve().then(async () => {
+        // Email
+        Email.sendAsync({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
+      });
+
+      // Compute
+      await sleep(30);
+
+      const ids = ['a', 'b', 'c'];
+
+      // DB
+      await Promise.all(ids.map(_id => TestData.findOneAsync({ _id })));
+
+      await TestData.findOneAsync({ _id: 'a1' }).then(() =>
+        // Is this nested under the previous findOneAsync or is it a sibling?
+        TestData.findOneAsync({ _id: 'a2' })
+      );
+
+      Kadira.endEvent(event);
+    });
+
+    origEvents = getInfo().trace.events;
+    info = getInfo();
+
+    return backgroundPromise;
+  });
+
+  await callAsync(methodId);
+
+  let origTimestamps = origEvents.reduce((timestamps, event) => {
+    if (event.type !== 'async') {
+      timestamps.push(event.at);
+    }
+    if (event.nested && event.type === 'custom') {
+      event.nested.forEach(nestedEvent => {
+        if (nestedEvent.type !== 'async') {
+          timestamps.push(nestedEvent.at);
+        }
+      });
+    }
+
+    return timestamps;
+  }, []);
+
+  let calculatedTimestamps = [];
+  let total = info.trace.at;
+  info.trace.events.forEach((event) => {
+    let [type, duration = 0, , details = {}] = event;
+    let offset = details.offset || 0;
+
+    total -= offset;
+    if (type !== 'async' && type !== 'compute') {
+      calculatedTimestamps.push(total);
+    }
+
+    if (details.nested && type === 'custom') {
+      let nestedTotal = total;
+      details.nested.forEach(nestedEvent => {
+        if (nestedEvent[3] && nestedEvent[3].offset) {
+          nestedTotal -= nestedEvent[3].offset;
+        }
+
+        if (nestedEvent[0] !== 'async' && nestedEvent[0] !== 'compute') {
+          calculatedTimestamps.push(nestedTotal);
+        }
+
+        nestedTotal += nestedEvent[1] || 0;
+      });
+    }
+
+    total += duration;
+  });
+
+  test.stableEqual(calculatedTimestamps, origTimestamps);
+});
+
 addAsyncTest('Tracer - Build Trace - should end custom event', async (test) => {
   let info;
 
@@ -860,7 +951,7 @@ function startTrace () {
   return Kadira.tracer.start(info, ddpMessage);
 }
 
-function doCompute(ms) {
+function doCompute (ms) {
   let start = Date.now();
   while (Date.now() - start < ms) {
     // do work...
