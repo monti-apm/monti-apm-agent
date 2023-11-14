@@ -121,12 +121,7 @@ export function getLastMethodEvents (indices = [0], keysToPreserve = []) {
   }
 
   function filterFields (event) {
-    let filteredEvent = [];
-
-    indices.forEach((index) => {
-      filteredEvent.push(clean(event[index]));
-    });
-
+    let filteredEvent = indices.map((index) => clean(event[index]));
     cleanTrailingNilValues(filteredEvent);
 
     return filteredEvent;
@@ -372,6 +367,10 @@ export function cleanBuiltEvents (events) {
         // We only care about the properties that survive being stringified
         // (are not undefined)
         event[3] = JSON.parse(JSON.stringify(details));
+        if (event[3].offset) {
+          // round down to nearest 10
+          event[3].offset = Math.floor(event[3].offset / 10) * 10;
+        }
       }
 
       return event;

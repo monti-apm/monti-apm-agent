@@ -367,6 +367,47 @@ addAsyncTest(
 );
 
 addAsyncTest(
+  'Tracer - Build Trace - compute time at beginning of nested events',
+  async function (test) {
+    let info;
+
+    const methodId = registerMethod(async function () {
+      doCompute(20);
+      await Kadira.event('test', async () => {
+        doCompute(50);
+        await TestData.insertAsync({});
+      });
+      doCompute(10);
+      info = getInfo();
+    });
+
+    await callAsync(methodId);
+
+    const expected = [
+      ['start', 0, { userId: null, params: '[]' }],
+      ['wait', 0, { waitOn: [] }],
+      ['compute', 20],
+      ['custom', 50, {}, {
+        name: 'test',
+        nested: [
+          ['compute', 50],
+          ['db', 0, { coll: 'tinytest-data', func: 'insertAsync' }],
+          ['async', 0, {}, { offset: 0 }],
+          ['async', 0, {}, { offset: 0 }]
+        ]
+      }],
+      ['async', 0, {}, { offset: 0 }],
+      ['async', 0, {}, { offset: 0 }],
+      ['compute', 10],
+      ['complete']
+    ];
+    let actual = cleanBuiltEvents(info.trace.events);
+
+    test.stableEqual(actual, expected);
+  }
+);
+
+addAsyncTest(
   'Tracer - Build Trace - errored',
   function (test) {
     let now = new Date().getTime();
@@ -817,4 +858,11 @@ function startTrace () {
   const info = {id: 'session-id', userId: 'uid'};
 
   return Kadira.tracer.start(info, ddpMessage);
+}
+
+function doCompute(ms) {
+  let start = Date.now();
+  while (Date.now() - start < ms) {
+    // do work...
+  }
 }
