@@ -408,6 +408,101 @@ addAsyncTest(
 );
 
 addAsyncTest(
+  'Tracer - Build Trace - compute time at end of nested events',
+  async function (test) {
+    let info;
+
+    const methodId = registerMethod(async function () {
+      doCompute(20);
+      await Kadira.event('test', async () => {
+        await TestData.insertAsync({});
+        await TestData.insertAsync({});
+        doCompute(41);
+      });
+      doCompute(20);
+      info = getInfo();
+    });
+
+    await callAsync(methodId);
+
+    const expected = [
+      ['start', 0, { userId: null, params: '[]' }],
+      ['wait', 0, { waitOn: [] }],
+      ['compute', 20],
+      ['custom', 40, {}, {
+        name: 'test',
+        nested: [
+          ['db', 0, { coll: 'tinytest-data', func: 'insertAsync' }],
+          ['async', 0, {}, { offset: 0 }],
+          ['async', 0, {}, { offset: 0 }],
+          ['db', 0, { coll: 'tinytest-data', func: 'insertAsync' }],
+          ['async', 0, {}, { offset: 0 }],
+          ['async', 0, {}, { offset: 0 }],
+          ['compute', 40],
+        ]
+      }],
+      ['async', 40, {}, { offset: 40 }],
+      ['async', 40, {}, { offset: 40 }],
+      ['compute', 20],
+      ['complete']
+    ];
+
+    let actual = cleanBuiltEvents(info.trace.events, 20);
+
+    test.stableEqual(actual, expected);
+
+    console.log('metrics -- 2', info.trace.metrics);
+
+    test.equal(info.trace.metrics.compute >= 70, true);
+    test.equal(info.trace.metrics.db > 0, true);
+    test.equal(info.trace.metrics.async < 5, true);
+    test.equal(info.trace.metrics.custom, undefined);
+  }
+);
+
+addAsyncTest(
+  'Tracer - Build Trace - use events nested under custom for metrics',
+  async function (test) {
+    let info;
+
+    const methodId = registerMethod(async function () {
+      await Kadira.event('test', async () => {
+        doCompute(50);
+        await TestData.insertAsync({});
+        await TestData.insertAsync({});
+        await sleep(11);
+      });
+      info = getInfo();
+    });
+
+    await callAsync(methodId);
+    console.log('metrics --', info.trace.metrics);
+    test.equal(info.trace.metrics.compute >= 50, true);
+    test.equal(info.trace.metrics.db > 0, true);
+    test.equal(info.trace.metrics.async > 10, true);
+    test.equal(info.trace.metrics.custom, undefined);
+  }
+);
+
+addAsyncTest(
+  'Tracer - Build Trace - compute time for custom event without nested events',
+  async function (test) {
+    let info;
+
+    const methodId = registerMethod(async function () {
+      Kadira.event('test', async () => {
+        doCompute(50);
+      });
+      info = getInfo();
+    });
+
+    await callAsync(methodId);
+    test.equal(info.trace.metrics.compute > 40, true);
+    test.equal(info.trace.metrics.custom, undefined);
+  }
+);
+
+addAsyncTest(
   'Tracer - Build Trace - errored',
   function (test) {
     let now = new Date().getTime();
