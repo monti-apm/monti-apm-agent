@@ -2,7 +2,7 @@ import { getMongoDriverStats, resetMongoDriverStats } from '../../lib/hijack/mon
 import { addAsyncTest } from '../_helpers/helpers';
 import { TestData } from '../_helpers/globals';
 
-function checkRange (value, disabledValue, min, max) {
+function checkRange (value, min, max) {
   if (typeof value !== 'number') {
     throw new Error(`${value} is not a number`);
   }
@@ -33,15 +33,15 @@ addAsyncTest(
 
     const stats = getMongoDriverStats();
 
-    checkRange(stats.poolSize, 0, 10, 100);
+    checkRange(stats.poolSize, 10, 100);
     test.equal(stats.primaryCheckouts, 200);
     test.equal(stats.otherCheckouts, 0);
     // TODO: these maximum numbers seem too high
-    checkRange(stats.checkoutTime, 0, 100, 40000);
-    checkRange(stats.maxCheckoutTime, 0, 10, 300);
-    checkRange(stats.pending, 0, 0, 200);
-    checkRange(stats.checkedOut, 0, 0, 15);
-    checkRange(stats.created, 0, 1, 100);
+    checkRange(stats.checkoutTime, 100, 40000);
+    checkRange(stats.maxCheckoutTime, 10, 300);
+    checkRange(stats.pending, 0, 200);
+    checkRange(stats.checkedOut, 0, 20);
+    checkRange(stats.created, 1, 100);
   }
 );
 

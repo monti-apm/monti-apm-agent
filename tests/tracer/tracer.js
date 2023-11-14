@@ -741,7 +741,7 @@ addAsyncTest('Tracer - Build Trace - should end async events', async (test) => {
   let info;
 
   const methodId = registerMethod(async function () {
-    await sleep(20);
+    await sleep(21);
 
     info = getInfo();
   });
