@@ -470,6 +470,40 @@ addAsyncTest(
   }
 );
 
+addAsyncTest('Database - AsynchronousCursor - _nextObjectPromise', async function (test) {
+  await TestData.insertAsync({_id: 'aa'});
+  await TestData.insertAsync({_id: 'bb'});
+
+  let methodId = registerMethod(async function () {
+    let data = [];
+    let cursor = TestData.find({});
+
+    cursor.forEachAsync(function (doc) {
+      data.push(doc);
+    });
+
+    await cursor._synchronousCursor._nextObjectPromise();
+
+    return data;
+  });
+
+  let result = await callAsync(methodId);
+
+  let events = getLastMethodEvents([0, 2], ['noOfCachedDocs']);
+
+  let expected = [
+    ['start',{userId: null, params: '[]'}],
+    ['wait',{waitOn: []}],
+    ['db', { coll: 'tinytest-data', func: 'forEachAsync', cursor: true, selector: JSON.stringify({}) }],
+    ['db',{coll: 'tinytest-data', func: '_nextObjectPromise' }],
+    ['complete']
+  ];
+
+  test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
+  clearAdditionalObserverInfo(events[2][1]);
+  test.stableEqual(events, expected);
+});
+
 function clearAdditionalObserverInfo (info) {
   delete info.queueLength;
   delete info.initialPollingTime;
