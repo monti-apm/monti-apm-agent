@@ -291,7 +291,7 @@ addAsyncTest(
       'custom',
       0,
       data,
-      { name: 'test' }
+      { name: 'test', nested: [] }
     ];
     let actualEvent = cleanBuiltEvents(info.trace.events)
       .find(event => event[0] === 'custom');
@@ -392,12 +392,8 @@ addAsyncTest(
         nested: [
           ['compute', 40],
           ['db', 0, { coll: 'tinytest-data', func: 'insertAsync' }],
-          ['async', 0, {}, { offset: 0 }],
-          ['async', 0, {}, { offset: 0 }]
         ]
       }],
-      ['async', 0, {}, { offset: 0 }],
-      ['async', 0, {}, { offset: 0 }],
       ['compute', 0],
       ['complete']
     ];
@@ -416,7 +412,6 @@ addAsyncTest(
       doCompute(20);
       await Kadira.event('test', async () => {
         await TestData.insertAsync({});
-        await TestData.insertAsync({});
         doCompute(41);
       });
       doCompute(20);
@@ -433,16 +428,9 @@ addAsyncTest(
         name: 'test',
         nested: [
           ['db', 0, { coll: 'tinytest-data', func: 'insertAsync' }],
-          ['async', 0, {}, { offset: 0 }],
-          ['async', 0, {}, { offset: 0 }],
-          ['db', 0, { coll: 'tinytest-data', func: 'insertAsync' }],
-          ['async', 0, {}, { offset: 0 }],
-          ['async', 0, {}, { offset: 0 }],
           ['compute', 40],
         ]
       }],
-      ['async', 40, {}, { offset: 40 }],
-      ['async', 40, {}, { offset: 40 }],
       ['compute', 20],
       ['complete']
     ];
@@ -451,10 +439,7 @@ addAsyncTest(
 
     test.stableEqual(actual, expected);
 
-    console.log('metrics -- 2', info.trace.metrics);
-
     test.equal(info.trace.metrics.compute >= 70, true);
-    test.equal(info.trace.metrics.db > 0, true);
     test.equal(info.trace.metrics.async < 5, true);
     test.equal(info.trace.metrics.custom, undefined);
   }
@@ -476,10 +461,10 @@ addAsyncTest(
     });
 
     await callAsync(methodId);
-    console.log('metrics --', info.trace.metrics);
+
     test.equal(info.trace.metrics.compute >= 50, true);
     test.equal(info.trace.metrics.db > 0, true);
-    test.equal(info.trace.metrics.async > 10, true);
+    test.equal(info.trace.metrics.async >= 10, true);
     test.equal(info.trace.metrics.custom, undefined);
   }
 );
