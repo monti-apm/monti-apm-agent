@@ -645,20 +645,20 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
 
   const expected = [
     ['start',{userId: null,params: '[]'}],
-    ['wait',{waitOn: []},{at: 1,endAt: 1}],
+    ['wait',{waitOn: []}],
     ['custom', {}, {name: 'test',
       at: 1,
       endAt: 1,
       nested: [
-        ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
-        ['email',{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com', func: 'emailAsync'},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"a"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"b"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"c"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"a1"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"a2"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0},{at: 1,endAt: 1}]
+        ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
+        ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
+        ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
+        ['email',{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com', func: 'emailAsync'}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"a"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"b"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"c"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"a1"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"a2"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0}]
       ]}
     ],
     ['complete']
@@ -783,6 +783,30 @@ addAsyncTest('Tracer - Optimize Events - no mutation', async (test) => {
   await callAsync(methodId);
 
   test.equal(Array.isArray(partialEvents), true);
+});
+
+addAsyncTest('Tracer - Optimize Events - without metrics', async (test) => {
+  let now = Ntp._now();
+
+  let events = [
+    { ...eventDefaults, type: 'start', at: now, endAt: now },
+    { ...eventDefaults, type: 'wait', at: now, endAt: now + 1000 },
+    { ...eventDefaults, type: 'db', at: now + 2000, endAt: now + 2500 },
+    { type: EventType.Complete, at: now + 4500 }
+  ];
+
+  let expected = [
+    ['start'],
+    ['wait', 1000],
+    ['compute', 1000],
+    ['db', 500],
+    ['compute', 2000],
+    ['complete']
+  ];
+
+  let optimized = Kadira.tracer.optimizeEvents(events);
+
+  test.stableEqual(optimized, expected);
 });
 
 function startTrace () {
