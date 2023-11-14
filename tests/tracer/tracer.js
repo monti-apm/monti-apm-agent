@@ -387,10 +387,10 @@ addAsyncTest(
       ['start', 0, { userId: null, params: '[]' }],
       ['wait', 0, { waitOn: [] }],
       ['compute', 20],
-      ['custom', 50, {}, {
+      ['custom', 40, {}, {
         name: 'test',
         nested: [
-          ['compute', 50],
+          ['compute', 40],
           ['db', 0, { coll: 'tinytest-data', func: 'insertAsync' }],
           ['async', 0, {}, { offset: 0 }],
           ['async', 0, {}, { offset: 0 }]
@@ -398,10 +398,10 @@ addAsyncTest(
       }],
       ['async', 0, {}, { offset: 0 }],
       ['async', 0, {}, { offset: 0 }],
-      ['compute', 10],
+      ['compute', 0],
       ['complete']
     ];
-    let actual = cleanBuiltEvents(info.trace.events);
+    let actual = cleanBuiltEvents(info.trace.events, 20);
 
     test.stableEqual(actual, expected);
   }
@@ -962,10 +962,10 @@ addAsyncTest('Tracer - Build Trace - should end custom event', async (test) => {
     ['custom', 0, { async: false }, {
       name: 'test',
       nested: [
-        ['custom', 0, { value: true }, { name: 'test2' }],
+        ['custom', 0, { value: true }, { name: 'test2', nested: []}],
       ]
     }],
-    ['custom', 0, {}, { name: 'test3' }],
+    ['custom', 0, {}, { name: 'test3', nested: [] }],
     ['complete']
   ];
   let actual = cleanBuiltEvents(info.trace.events);
