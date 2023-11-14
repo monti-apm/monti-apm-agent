@@ -643,6 +643,56 @@ Tinytest.add(
   }
 );
 
+addAsyncTest('Tracer - Build Trace - each ms counted once with parallel events', async function (test) {
+  const Email = Package['email'].Email;
+  let info;
+
+  let methodId = registerMethod(async function () {
+    let backgroundPromise;
+    // Compute
+    await sleep(30);
+
+    await TestData.insertAsync({ _id: 'a', n: 1 });
+    await TestData.insertAsync({ _id: 'b', n: 2 });
+    await TestData.insertAsync({ _id: 'c', n: 3 });
+
+    backgroundPromise = Promise.resolve().then(async () => {
+      // Email
+      Email.sendAsync({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
+    });
+
+    // Compute
+    await sleep(30);
+
+    const ids = ['a', 'b', 'c'];
+
+    // DB
+    await Promise.all(ids.map(_id => TestData.findOneAsync({ _id })));
+
+    await TestData.findOneAsync({ _id: 'a1' }).then(() =>
+      // Is this nested under the previous findOneAsync or is it a sibling?
+      TestData.findOneAsync({ _id: 'a2' })
+    );
+
+    info = getInfo();
+
+    return backgroundPromise;
+  });
+
+  await callAsync(methodId);
+
+  let metrics = info.trace.metrics;
+  let total = metrics.total;
+  let sum = 0;
+  Object.keys(metrics).forEach(key => {
+    if (key !== 'total') {
+      sum += metrics[key];
+    }
+  });
+
+  test.equal(sum, total);
+});
+
 addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async function (test) {
   const Email = Package['email'].Email;
 
