@@ -478,29 +478,33 @@ addAsyncTest('Database - AsynchronousCursor - _nextObjectPromise', async functio
     let data = [];
     let cursor = TestData.find({});
 
-    cursor.forEachAsync(function (doc) {
+    await cursor.forEach(function (doc) {
       data.push(doc);
     });
-
-    await cursor._synchronousCursor._nextObjectPromise();
 
     return data;
   });
 
   let result = await callAsync(methodId);
 
-  let events = getLastMethodEvents([0, 2], ['noOfCachedDocs']);
+  let events = getLastMethodEvents([0, 2, 3], ['noOfCachedDocs']);
 
   let expected = [
     ['start',{userId: null, params: '[]'}],
-    ['wait',{waitOn: []}],
-    ['db', { coll: 'tinytest-data', func: 'forEachAsync', cursor: true, selector: JSON.stringify({}) }],
-    ['db',{coll: 'tinytest-data', func: '_nextObjectPromise' }],
+    ['wait',{waitOn: []}, { at: 1, endAt: 1 }],
+    ['db', { coll: 'tinytest-data', func: 'forEach', cursor: true, selector: JSON.stringify({}) }, {
+      at: 1,
+      endAt: 1,
+      nested: [
+        ['db', { coll: 'tinytest-data', func: '_nextObjectPromise'},{ at: 1, endAt: 1 }],
+        ['db', { coll: 'tinytest-data', func: '_nextObjectPromise'},{ at: 1, endAt: 1 }],
+        ['db', { coll: 'tinytest-data', func: '_nextObjectPromise'},{ at: 1, endAt: 1 }],
+      ]
+    }],
     ['complete']
   ];
 
-  test.equal(result, [{_id: 'aa'}, {_id: 'bb'}]);
-  clearAdditionalObserverInfo(events[2][1]);
+  test.stableEqual(result, [{_id: 'aa'}, {_id: 'bb'}]);
   test.stableEqual(events, expected);
 });
 
