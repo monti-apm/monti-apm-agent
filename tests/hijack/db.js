@@ -263,7 +263,7 @@ addAsyncTest(
     let expected = [
       ['start',{userId: null, params: '[]'}],
       ['wait',{waitOn: []}],
-      ['db',{coll: 'tinytest-data', cursor: true, func: 'mapAsync', selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2}],
+      ['db',{coll: 'tinytest-data', cursor: true, func: 'map', selector: JSON.stringify({_id: {$exists: true}}), docsFetched: 2}],
       ['complete']
     ];
 
@@ -295,7 +295,7 @@ addAsyncTest(
     let expected = [
       ['start',{userId: null, params: '[]'}],
       ['wait',{waitOn: []}],
-      ['db',{coll: 'tinytest-data', cursor: true, func: 'forEachAsync', selector: JSON.stringify({_id: {$exists: true}})}],
+      ['db',{coll: 'tinytest-data', cursor: true, func: 'forEach', selector: JSON.stringify({_id: {$exists: true}})}],
       ['complete']
     ];
 
@@ -328,7 +328,7 @@ addAsyncTest(
     let expected = [
       ['start',{userId: null, params: '[]'}],
       ['wait',{waitOn: []}],
-      ['db',{coll: 'tinytest-data', cursor: true, func: 'forEachAsync', selector: JSON.stringify({_id: {$exists: true}})}],
+      ['db',{coll: 'tinytest-data', cursor: true, func: 'forEach', selector: JSON.stringify({_id: {$exists: true}})}],
       ['complete']
     ];
 
