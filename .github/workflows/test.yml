@@ -32,6 +32,7 @@ jobs:
 
       - name: Run Tests
         run: |
+          echo "Env: $NODE_ENV"
           export FORCE_COLOR=true
           export NODE_ENV=test
           mtest --package ./ --once ${{ matrix.meteorRelease }}
