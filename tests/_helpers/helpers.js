@@ -121,12 +121,7 @@ export function getLastMethodEvents (indices = [0], keysToPreserve = []) {
   }
 
   function filterFields (event) {
-    let filteredEvent = [];
-
-    indices.forEach((index) => {
-      filteredEvent.push(clean(event[index]));
-    });
-
+    let filteredEvent = indices.map((index) => clean(event[index]));
     cleanTrailingNilValues(filteredEvent);
 
     return filteredEvent;
@@ -352,26 +347,30 @@ export function cleanEvents (events) {
   });
 }
 
-export function cleanBuiltEvents (events) {
+export function cleanBuiltEvents (events, roundTo = 10) {
   return events
     .filter(event => event[0] !== 'compute' || event[1] > 5)
     .map(event => {
       let [, duration, , details] = event;
       if (typeof duration === 'number') {
         // round down to nearest 10
-        event[1] = Math.floor(duration / 10) * 10;
+        event[1] = Math.floor(duration / roundTo) * roundTo;
       }
 
       if (details) {
         delete details.at;
         delete details.endAt;
         if (details.nested) {
-          details.nested = cleanBuiltEvents(details.nested);
+          details.nested = cleanBuiltEvents(details.nested, roundTo);
         }
 
         // We only care about the properties that survive being stringified
         // (are not undefined)
         event[3] = JSON.parse(JSON.stringify(details));
+        if (event[3].offset) {
+          // round down to nearest 10
+          event[3].offset = Math.floor(event[3].offset / roundTo) * roundTo;
+        }
       }
 
       return event;
@@ -381,6 +380,24 @@ export function cleanBuiltEvents (events) {
 export const dumpEvents = (events) => {
   console.log(JSON.stringify(events));
 };
+
+export function deepFreeze (obj) {
+  if (Array.isArray(obj)) {
+    obj.forEach(val => {
+      if (!Object.isFrozen(val)) {
+        deepFreeze(val);
+      }
+    });
+  } else {
+    Object.values(obj).forEach(val => {
+      if (!Object.isFrozen(val)) {
+        deepFreeze(val);
+      }
+    });
+  }
+
+  Object.freeze(obj);
+}
 
 export const TestHelpers = {
   methodStore: MethodStore,

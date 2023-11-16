@@ -16,8 +16,8 @@ addAsyncTest(
 
     let expected = [
       ['start',{userId: null,params: '[]'}],
-      ['wait',{waitOn: []},{at: 1,endAt: 1}],
-      ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
+      ['wait',{waitOn: []}],
+      ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
       ['complete']
     ];
 

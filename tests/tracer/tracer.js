@@ -5,6 +5,7 @@ import {
   callAsync,
   cleanBuiltEvents,
   cleanTrace,
+  deepFreeze,
   getLastMethodEvents,
   registerMethod,
   subscribeAndWait
@@ -290,7 +291,7 @@ addAsyncTest(
       'custom',
       0,
       data,
-      { name: 'test' }
+      { name: 'test', nested: [] }
     ];
     let actualEvent = cleanBuiltEvents(info.trace.events)
       .find(event => event[0] === 'custom');
@@ -326,6 +327,163 @@ addAsyncTest(
 
     test.stableEqual(traceInfo.metrics, expected);
     test.stableEqual(traceInfo.errored, false);
+  }
+);
+
+addAsyncTest(
+  'Tracer - Build Trace - compute time with force end events',
+  async function (test) {
+    let now = Ntp._now();
+
+    // TODO: work around needed since optimizeEvent sets missing endAt as
+    // the current time
+    let oldNow = Ntp._now;
+    Ntp._now = () => now + 4500;
+
+    let traceInfo = {
+      events: [
+        {...eventDefaults, type: 'start', at: now, endAt: now},
+        {...eventDefaults, type: 'wait', at: now, endAt: now + 1000},
+        {...eventDefaults, type: 'db', at: now + 2000, endAt: undefined},
+        {type: EventType.Complete, at: now + 4500}
+      ]
+    };
+
+    Kadira.tracer.buildTrace(traceInfo);
+
+    Ntp._now = oldNow;
+
+    const expected = {
+      total: 4500,
+      wait: 1000,
+      db: 2500,
+      compute: 1000,
+      async: 0,
+    };
+
+    test.stableEqual(traceInfo.metrics, expected);
+    test.stableEqual(traceInfo.errored, false);
+  }
+);
+
+addAsyncTest(
+  'Tracer - Build Trace - compute time at beginning of nested events',
+  async function (test) {
+    let info;
+
+    const methodId = registerMethod(async function () {
+      doCompute(20);
+      await Kadira.event('test', async () => {
+        doCompute(50);
+        await TestData.insertAsync({});
+      });
+      doCompute(10);
+      info = getInfo();
+    });
+
+    await callAsync(methodId);
+
+    const expected = [
+      ['start', 0, { userId: null, params: '[]' }],
+      ['wait', 0, { waitOn: [] }],
+      ['compute', 20],
+      ['custom', 40, {}, {
+        name: 'test',
+        nested: [
+          ['compute', 40],
+          ['db', 0, { coll: 'tinytest-data', func: 'insertAsync' }],
+        ]
+      }],
+      ['compute', 0],
+      ['complete']
+    ];
+    let actual = cleanBuiltEvents(info.trace.events, 20);
+
+    test.stableEqual(actual, expected);
+  }
+);
+
+addAsyncTest(
+  'Tracer - Build Trace - compute time at end of nested events',
+  async function (test) {
+    let info;
+
+    const methodId = registerMethod(async function () {
+      doCompute(20);
+      await Kadira.event('test', async () => {
+        await TestData.insertAsync({});
+        doCompute(41);
+      });
+      doCompute(20);
+      info = getInfo();
+    });
+
+    await callAsync(methodId);
+
+    const expected = [
+      ['start', 0, { userId: null, params: '[]' }],
+      ['wait', 0, { waitOn: [] }],
+      ['compute', 20],
+      ['custom', 40, {}, {
+        name: 'test',
+        nested: [
+          ['db', 0, { coll: 'tinytest-data', func: 'insertAsync' }],
+          ['compute', 40],
+        ]
+      }],
+      ['compute', 20],
+      ['complete']
+    ];
+
+    let actual = cleanBuiltEvents(info.trace.events, 20);
+
+    test.stableEqual(actual, expected);
+
+    test.equal(info.trace.metrics.compute >= 70, true);
+    test.equal(info.trace.metrics.async < 5, true);
+    test.equal(info.trace.metrics.custom, undefined);
+  }
+);
+
+addAsyncTest(
+  'Tracer - Build Trace - use events nested under custom for metrics',
+  async function (test) {
+    let info;
+
+    const methodId = registerMethod(async function () {
+      await Kadira.event('test', async () => {
+        doCompute(50);
+        await TestData.insertAsync({});
+        await TestData.insertAsync({});
+        await sleep(11);
+      });
+      info = getInfo();
+    });
+
+    await callAsync(methodId);
+
+    test.equal(info.trace.metrics.compute >= 50, true);
+    test.equal(info.trace.metrics.db > 0, true);
+    test.equal(info.trace.metrics.async >= 10, true);
+    test.equal(info.trace.metrics.custom, undefined);
+  }
+);
+
+addAsyncTest(
+  'Tracer - Build Trace - compute time for custom event without nested events',
+  async function (test) {
+    let info;
+
+    const methodId = registerMethod(async function () {
+      Kadira.event('test', async () => {
+        doCompute(50);
+      });
+      info = getInfo();
+    });
+
+    await callAsync(methodId);
+    test.equal(info.trace.metrics.compute > 40, true);
+    test.equal(info.trace.metrics.custom, undefined);
   }
 );
 
@@ -408,9 +566,8 @@ addAsyncTest(
 
     const expected = [
       ['start'],
-      ['wait', traceInfo.events[1][1], {}, { at: 0, endAt: traceInfo.events[1][3].endAt, forcedEnd: true }],
-      ['compute', 2000],
-      ['db', 500, {}, { at: 2000, endAt: 2500}],
+      ['wait', traceInfo.events[1][1], {}, { forcedEnd: true }],
+      ['db', 500, {}, { offset: traceInfo.events[2][3].offset }],
       ['complete']
     ];
 
@@ -566,6 +723,56 @@ Tinytest.add(
   }
 );
 
+addAsyncTest('Tracer - Build Trace - each ms counted once with parallel events', async function (test) {
+  const Email = Package['email'].Email;
+  let info;
+
+  let methodId = registerMethod(async function () {
+    let backgroundPromise;
+    // Compute
+    await sleep(30);
+
+    await TestData.insertAsync({ _id: 'a', n: 1 });
+    await TestData.insertAsync({ _id: 'b', n: 2 });
+    await TestData.insertAsync({ _id: 'c', n: 3 });
+
+    backgroundPromise = Promise.resolve().then(async () => {
+      // Email
+      Email.sendAsync({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
+    });
+
+    // Compute
+    await sleep(30);
+
+    const ids = ['a', 'b', 'c'];
+
+    // DB
+    await Promise.all(ids.map(_id => TestData.findOneAsync({ _id })));
+
+    await TestData.findOneAsync({ _id: 'a1' }).then(() =>
+      // Is this nested under the previous findOneAsync or is it a sibling?
+      TestData.findOneAsync({ _id: 'a2' })
+    );
+
+    info = getInfo();
+
+    return backgroundPromise;
+  });
+
+  await callAsync(methodId);
+
+  let metrics = info.trace.metrics;
+  let total = metrics.total;
+  let sum = 0;
+  Object.keys(metrics).forEach(key => {
+    if (key !== 'total') {
+      sum += metrics[key];
+    }
+  });
+
+  test.equal(sum, total);
+});
+
 addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async function (test) {
   const Email = Package['email'].Email;
 
@@ -609,26 +816,115 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
 
   const expected = [
     ['start',{userId: null,params: '[]'}],
-    ['wait',{waitOn: []},{at: 1,endAt: 1}],
+    ['wait',{waitOn: []}],
     ['custom', {}, {name: 'test',
-      at: 1,
-      endAt: 1,
       nested: [
-        ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',func: 'insertAsync'},{at: 1,endAt: 1}],
-        ['email',{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com', func: 'emailAsync'},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"a"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"b"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"c"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"a1"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0},{at: 1,endAt: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"a2"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0},{at: 1,endAt: 1}]
+        ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
+        ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
+        ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
+        ['email',{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com', func: 'emailAsync'}, { offset: 1 }],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"a"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"b"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}, { offset: 1 }],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"c"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}, { offset: 1 }],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"a1"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"a2"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0}]
       ]}
     ],
     ['complete']
   ];
 
   test.stableEqual(events, expected);
+});
+
+addAsyncTest('Tracer - Build Trace - offset is reversible', async function (test) {
+  const Email = Package['email'].Email;
+
+  let origEvents;
+  let info;
+  let methodId = registerMethod(async function () {
+    let backgroundPromise;
+    // Compute
+    await sleep(30);
+
+    await Kadira.event('test', async (event) => {
+      await TestData.insertAsync({ _id: 'a', n: 1 });
+      await TestData.insertAsync({ _id: 'b', n: 2 });
+      await TestData.insertAsync({ _id: 'c', n: 3 });
+
+      backgroundPromise = Promise.resolve().then(async () => {
+        // Email
+        Email.sendAsync({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
+      });
+
+      // Compute
+      await sleep(30);
+
+      const ids = ['a', 'b', 'c'];
+
+      // DB
+      await Promise.all(ids.map(_id => TestData.findOneAsync({ _id })));
+
+      await TestData.findOneAsync({ _id: 'a1' }).then(() =>
+        // Is this nested under the previous findOneAsync or is it a sibling?
+        TestData.findOneAsync({ _id: 'a2' })
+      );
+
+      Kadira.endEvent(event);
+    });
+
+    origEvents = getInfo().trace.events;
+    info = getInfo();
+
+    return backgroundPromise;
+  });
+
+  await callAsync(methodId);
+
+  let origTimestamps = origEvents.reduce((timestamps, event) => {
+    if (event.type !== 'async') {
+      timestamps.push(event.at);
+    }
+    if (event.nested && event.type === 'custom') {
+      event.nested.forEach(nestedEvent => {
+        if (nestedEvent.type !== 'async') {
+          timestamps.push(nestedEvent.at);
+        }
+      });
+    }
+
+    return timestamps;
+  }, []);
+
+  let calculatedTimestamps = [];
+  let total = info.trace.at;
+  info.trace.events.forEach((event) => {
+    let [type, duration = 0, , details = {}] = event;
+    let offset = details.offset || 0;
+
+    total -= offset;
+    if (type !== 'async' && type !== 'compute') {
+      calculatedTimestamps.push(total);
+    }
+
+    if (details.nested && type === 'custom') {
+      let nestedTotal = total;
+      details.nested.forEach(nestedEvent => {
+        if (nestedEvent[3] && nestedEvent[3].offset) {
+          nestedTotal -= nestedEvent[3].offset;
+        }
+
+        if (nestedEvent[0] !== 'async' && nestedEvent[0] !== 'compute') {
+          calculatedTimestamps.push(nestedTotal);
+        }
+
+        nestedTotal += nestedEvent[1] || 0;
+      });
+    }
+
+    total += duration;
+  });
+
+  test.stableEqual(calculatedTimestamps, origTimestamps);
 });
 
 addAsyncTest('Tracer - Build Trace - should end custom event', async (test) => {
@@ -647,26 +943,26 @@ addAsyncTest('Tracer - Build Trace - should end custom event', async (test) => {
 
   const expected = [
     ['start', 0, { userId: null, params: '[]' }],
-    ['wait', 0, { waitOn: []}, {}],
+    ['wait', 0, { waitOn: []}],
     ['custom', 0, { async: false }, {
       name: 'test',
       nested: [
-        ['custom', 0, { value: true }, { name: 'test2' }],
+        ['custom', 0, { value: true }, { name: 'test2', nested: []}],
       ]
     }],
-    ['custom', 0, {}, { name: 'test3' }],
+    ['custom', 0, {}, { name: 'test3', nested: [] }],
     ['complete']
   ];
   let actual = cleanBuiltEvents(info.trace.events);
 
-  test.equal(actual, expected);
+  test.stableEqual(actual, expected);
 });
 
 addAsyncTest('Tracer - Build Trace - should end async events', async (test) => {
   let info;
 
   const methodId = registerMethod(async function () {
-    await sleep(20);
+    await sleep(21);
 
     info = getInfo();
   });
@@ -675,30 +971,30 @@ addAsyncTest('Tracer - Build Trace - should end async events', async (test) => {
 
   const expected = [
     ['start', 0, { userId: null, params: '[]' }],
-    ['wait', 0, { waitOn: [] }, {}],
+    ['wait', 0, { waitOn: [] }],
     ['async', 20],
     ['complete']
   ];
   let actual = cleanBuiltEvents(info.trace.events);
 
-  test.equal(actual, expected);
+  test.stableEqual(actual, expected);
 });
 
 addAsyncTest('Tracer - Build Trace - the correct number of async events are captured for methods', async (test) => {
   let info;
 
   const methodId = registerMethod(async function () {
-    await sleep(100);
-    await sleep(200);
+    await sleep(60);
+    await sleep(70);
 
     info = getInfo();
 
-    return await sleep(300);
+    return await sleep(80);
   });
 
   await callAsync(methodId);
 
-  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 100);
+  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 50);
 
   test.equal(asyncEvents.length, 3);
 });
@@ -723,6 +1019,56 @@ addAsyncTest('Tracer - Build Trace - the correct number of async events are capt
   test.equal(asyncEvents.length,1);
 });
 
+addAsyncTest('Tracer - Optimize Events - no mutation', async (test) => {
+  let partialEvents;
+
+  const methodId = registerMethod(async function () {
+    const Email = Package['email'].Email;
+
+    await TestData.insertAsync({ _id: 'a', n: 1 });
+    await sleep(20);
+
+    await Email.sendAsync({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
+
+    let info = getInfo();
+    let events = info.trace.events.slice();
+    deepFreeze(events);
+
+    // testing this doesn't throw
+    partialEvents = Kadira.tracer.optimizeEvents(events);
+
+    info.trace.events = [Kadira.tracer.event(info.trace, 'start')];
+  });
+
+  await callAsync(methodId);
+
+  test.equal(Array.isArray(partialEvents), true);
+});
+
+addAsyncTest('Tracer - Optimize Events - without metrics', async (test) => {
+  let now = Ntp._now();
+
+  let events = [
+    { ...eventDefaults, type: 'start', at: now, endAt: now },
+    { ...eventDefaults, type: 'wait', at: now, endAt: now + 1000 },
+    { ...eventDefaults, type: 'db', at: now + 2000, endAt: now + 2500 },
+    { type: EventType.Complete, at: now + 4500 }
+  ];
+
+  let expected = [
+    ['start'],
+    ['wait', 1000],
+    ['compute', 1000],
+    ['db', 500],
+    ['compute', 2000],
+    ['complete']
+  ];
+
+  let optimized = Kadira.tracer.optimizeEvents(events);
+
+  test.stableEqual(optimized, expected);
+});
+
 function startTrace () {
   const ddpMessage = {
     id: 'the-id',
@@ -733,4 +1079,11 @@ function startTrace () {
   const info = {id: 'session-id', userId: 'uid'};
 
   return Kadira.tracer.start(info, ddpMessage);
+}
+
+function doCompute (ms) {
+  let start = Date.now();
+  while (Date.now() - start < ms) {
+    // do work...
+  }
 }
