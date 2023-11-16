@@ -491,14 +491,12 @@ addAsyncTest('Database - AsynchronousCursor - _nextObjectPromise', async functio
 
   let expected = [
     ['start',{userId: null, params: '[]'}],
-    ['wait',{waitOn: []}, { at: 1, endAt: 1 }],
+    ['wait',{waitOn: []}],
     ['db', { coll: 'tinytest-data', func: 'forEach', cursor: true, selector: JSON.stringify({}) }, {
-      at: 1,
-      endAt: 1,
       nested: [
-        ['db', { coll: 'tinytest-data', func: '_nextObjectPromise'},{ at: 1, endAt: 1 }],
-        ['db', { coll: 'tinytest-data', func: '_nextObjectPromise'},{ at: 1, endAt: 1 }],
-        ['db', { coll: 'tinytest-data', func: '_nextObjectPromise'},{ at: 1, endAt: 1 }],
+        ['db', { coll: 'tinytest-data', func: '_nextObjectPromise'}],
+        ['db', { coll: 'tinytest-data', func: '_nextObjectPromise'}],
+        ['db', { coll: 'tinytest-data', func: '_nextObjectPromise'}],
       ]
     }],
     ['complete']

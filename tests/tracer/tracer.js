@@ -12,7 +12,7 @@ import {
 } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
-import { MontiAsyncStorage, getInfo } from '../../lib/async/als';
+import { getInfo, MontiAsyncStorage } from '../../lib/async/als';
 import { EventType } from '../../lib/constants';
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
