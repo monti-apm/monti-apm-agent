@@ -33,4 +33,5 @@ jobs:
       - name: Run Tests
         run: |
           export FORCE_COLOR=true
+          export MAIL_URL=''
           mtest --package ./ --once ${{ matrix.meteorRelease }}
