@@ -101,7 +101,7 @@ Package.onTest(function (api) {
 });
 
 function configurePackage (api, isTesting) {
-  api.versionsFrom('METEOR@3.0-alpha.17');
+  api.versionsFrom('METEOR@3.0-alpha.18');
   api.use('montiapm:meteorx@2.3.1', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
@@ -115,7 +115,9 @@ function configurePackage (api, isTesting) {
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-  api.use(['http', 'email'], 'server', { weak: !isTesting });
+
+  // http package constraints is currently broken in alpha 18
+  // api.use(['http@3.0.0', 'email'], 'server', { weak: !isTesting });
 
   api.use('fetch', 'server', {
     weak: !isTesting,
