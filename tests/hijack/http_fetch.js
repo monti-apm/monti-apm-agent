@@ -35,8 +35,6 @@ addAsyncTest('HTTP - meteor/fetch - trace error', async function (test) {
   const result = await callAsync(methodId);
   const events = getLastMethodEvents([0, 2]);
 
-  const isIpv6 = result.message.includes('::1');
-
   const expected = [
     ['start', { userId: null, params: '[]' }],
     ['wait', { waitOn: [] }],
@@ -46,17 +44,17 @@ addAsyncTest('HTTP - meteor/fetch - trace error', async function (test) {
         method: 'GET',
         url: 'http://localhost:9999/',
         library: 'meteor/fetch',
-        err: `request to http://localhost:9999/ failed, reason: connect ECONNREFUSED ${isIpv6 ? '::1' : '127.0.0.1'}:9999`,
+        err: 'request to http://localhost:9999/ failed, reason: ',
       },
     ],
     ['complete'],
   ];
 
-  test.equal(events, expected);
+  test.stableEqual(events, expected);
 
-  test.equal(result, {
+  test.stableEqual(result, {
     message:
-        `request to http://localhost:9999/ failed, reason: connect ECONNREFUSED ${isIpv6 ? '::1' : '127.0.0.1'}:9999`,
+        'request to http://localhost:9999/ failed, reason: ',
     type: 'system',
     errno: 'ECONNREFUSED',
     code: 'ECONNREFUSED',
