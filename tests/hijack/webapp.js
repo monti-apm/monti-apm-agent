@@ -5,11 +5,11 @@ import { addAsyncTest } from '../_helpers/helpers';
 addAsyncTest(
   'Webapp - return connect app from .use',
   async function (test) {
-    const result = WebApp.expressHandlers.use((req, res, next) => {
+    const result = WebApp.handlers.use((req, res, next) => {
       next();
     });
 
-    test.equal(result, WebApp.expressHandlers);
+    test.equal(result, WebApp.handlers);
   }
 );
 
@@ -28,7 +28,7 @@ addAsyncTest(
       }
     };
 
-    const firstMiddleware = WebApp.rawExpressHandlers.parent._router.stack[0].handle;
+    const firstMiddleware = WebApp.rawHandlers.parent._router.stack[0].handle;
 
     await new Promise((resolve) => {
       firstMiddleware(
