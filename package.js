@@ -100,11 +100,12 @@ Package.onTest(function (api) {
   ], ['client', 'server']);
 });
 
-function configurePackage(api, isTesting) {
+function configurePackage (api, isTesting) {
   api.versionsFrom('METEOR@3.0-alpha.18');
   api.use('montiapm:meteorx@2.3.1', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
+  api.use('zodern:meteor-package-versions@0.2.0');
 
   /**
    * Uncomment once fibers is removed from the package.
@@ -116,8 +117,7 @@ function configurePackage(api, isTesting) {
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
 
-  // http package constraints is currently broken in alpha 18
-  // api.use(['http@3.0.0', 'email'], 'server', { weak: !isTesting });
+  api.use(['http', 'email'], 'server', { weak: !isTesting });
 
   api.use('fetch', 'server', {
     weak: !isTesting,
