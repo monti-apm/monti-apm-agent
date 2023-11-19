@@ -23,7 +23,12 @@ addAsyncTest(
 
     dumpEvents(events);
 
-    let expected = [['start',{userId: null,params: '[]'}],['wait',{waitOn: []}],['db',{coll: 'tinytest-data',func: 'insertAsync'}],['complete']];
+    let expected = [
+      ['start',{userId: null,params: '[]'}],
+      ['wait',{waitOn: []}],
+      ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
+      ['complete']
+    ];
 
     test.stableEqual(events, expected);
   }
@@ -44,7 +49,12 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2, 3]);
 
-    let expected = [['start',{userId: null,params: '[]'}],['wait',{waitOn: []}],['db',{coll: 'tinytest-data',func: 'insertAsync'}],['db',{coll: 'tinytest-data',func: 'insertAsync',err: 'E11000'}],['complete']];
+    let expected = [
+      ['start',{userId: null,params: '[]'}],
+      ['wait',{waitOn: []}],['db',{coll: 'tinytest-data',func: 'insertAsync'}],
+      ['db',{coll: 'tinytest-data',func: 'insertAsync',err: 'E11000'}],
+      ['complete']
+    ];
 
     test.stableEqual(events, expected);
   }
@@ -64,7 +74,11 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2, 3]);
 
-    let expected = [['start',{userId: null,params: '[]'}],['wait',{waitOn: []}],['db',{coll: 'tinytest-data',func: 'updateAsync',selector: '{"_id":"aa"}',updatedDocs: 1}],['complete']];
+    let expected = [
+      ['start',{userId: null,params: '[]'}],
+      ['wait',{waitOn: []}],['db',{coll: 'tinytest-data',func: 'updateAsync',selector: '{"_id":"aa"}',updatedDocs: 1}],
+      ['complete']
+    ];
 
     test.stableEqual(events, expected);
   }
@@ -84,7 +98,12 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2, 3]);
 
-    let expected = [['start',{userId: null,params: '[]'}],['wait',{waitOn: []}],['db',{coll: 'tinytest-data',func: 'removeAsync',selector: '{"_id":"aa"}',removedDocs: 1}],['complete']];
+    let expected = [
+      ['start',{userId: null,params: '[]'}],
+      ['wait',{waitOn: []}],
+      ['db',{coll: 'tinytest-data',func: 'removeAsync',selector: '{"_id":"aa"}',removedDocs: 1}],
+      ['complete']
+    ];
 
     test.stableEqual(events, expected);
   }
@@ -103,7 +122,12 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2, 3]);
 
-    let expected = [['start',{userId: null,params: '[]'}],['wait',{waitOn: []}],['db',{coll: 'tinytest-data',selector: '{"_id":"aa"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}],['complete']];
+    let expected = [
+      ['start',{userId: null,params: '[]'}],
+      ['wait',{waitOn: []}],
+      ['db',{coll: 'tinytest-data',selector: '{"_id":"aa"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}],
+      ['complete']
+    ];
 
     test.equal(result, {_id: 'aa', dd: 10});
 
@@ -129,7 +153,12 @@ addAsyncTest(
 
     test.equal(result, {_id: 'aa', dd: 10});
 
-    const expected = [['start',0,{userId: null,params: '[]'}],['wait',0,{waitOn: []}],['db',0,{coll: 'tinytest-data',selector: '{"_id":"aa"}',func: 'fetch',cursor: true,projection: '{"dd":1}',sort: '{"dd":-1}',limit: 1,docsFetched: 1,docSize: 1}],['complete']];
+    const expected = [
+      ['start',0,{userId: null,params: '[]'}],
+      ['wait',0,{waitOn: []}],
+      ['db',0,{coll: 'tinytest-data',selector: '{"_id":"aa"}',func: 'fetch',cursor: true,projection: '{"dd":1}',sort: '{"dd":-1}',limit: 1,docsFetched: 1,docSize: 1}],
+      ['complete']
+    ];
 
     test.stableEqual(events, expected);
   }
@@ -148,7 +177,12 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2, 3]);
 
-    let expected = [['start',{userId: null,params: '[]'}],['wait',{waitOn: []}],['db',{coll: 'tinytest-data',func: 'upsert',selector: '{"_id":"aa"}',updatedDocs: 1,insertedId: 'aa'}],['db',{coll: 'tinytest-data',func: 'upsert',selector: '{"_id":"aa"}',updatedDocs: 1}],['complete']];
+    let expected = [
+      ['start',{userId: null,params: '[]'}],
+      ['wait',{waitOn: []}],['db',{coll: 'tinytest-data',func: 'upsert',selector: '{"_id":"aa"}',updatedDocs: 1,insertedId: 'aa'}],
+      ['db',{coll: 'tinytest-data',func: 'upsert',selector: '{"_id":"aa"}',updatedDocs: 1}],
+      ['complete']
+    ];
 
     test.stableEqual(events, expected);
   }
@@ -167,7 +201,13 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2]);
 
-    let expected = [['start',{userId: null,params: '[]'}],['wait',{waitOn: []}],['db',{coll: 'tinytest-data',func: 'upsert',selector: '{"_id":"aa"}',updatedDocs: 1}],['db',{coll: 'tinytest-data',func: 'upsert',selector: '{"_id":"aa"}',updatedDocs: 1}],['complete']];
+    let expected = [
+      ['start',{userId: null,params: '[]'}],
+      ['wait',{waitOn: []}],
+      ['db',{coll: 'tinytest-data',func: 'upsert',selector: '{"_id":"aa"}',updatedDocs: 1}],
+      ['db',{coll: 'tinytest-data',func: 'upsert',selector: '{"_id":"aa"}',updatedDocs: 1}],
+      ['complete']
+    ];
 
     test.stableEqual(events, expected);
   }
@@ -186,7 +226,13 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2]);
 
-    let expected = [['start',{userId: null,params: '[]'}],['wait',{waitOn: []}],['db',{coll: 'tinytest-data',func: 'createIndexAsync',index: '{"aa":1,"bb":1}'}],['db',{coll: 'tinytest-data',func: 'dropIndexAsync',index: '{"aa":1,"bb":1}'}],['complete']];
+    let expected = [
+      ['start',{userId: null,params: '[]'}],
+      ['wait',{waitOn: []}],
+      ['db',{coll: 'tinytest-data',func: 'createIndexAsync',index: '{"aa":1,"bb":1}'}],
+      ['db',{coll: 'tinytest-data',func: 'dropIndexAsync',index: '{"aa":1,"bb":1}'}],
+      ['complete']
+    ];
 
     test.stableEqual(events, expected);
   }
