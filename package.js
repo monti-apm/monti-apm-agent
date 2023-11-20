@@ -2,7 +2,7 @@
 
 Package.describe({
   summary: 'Performance Monitoring for Meteor',
-  version: '3.0.0-beta.2',
+  version: '3.0.0-beta.3',
   git: 'https://github.com/monti-apm/monti-apm-agent.git',
   name: 'montiapm:agent'
 });
@@ -113,7 +113,7 @@ function configurePackage (api, isTesting) {
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
 
-  api.use(['http', 'email'], 'server', { weak: !isTesting });
+  // api.use(['http@3.0.0', 'email'], 'server', { weak: !isTesting });
 
   api.use('fetch', 'server', {
     weak: !isTesting,
