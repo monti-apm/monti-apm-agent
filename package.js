@@ -14,9 +14,6 @@ let npmModules = {
   'json-stringify-safe': '5.0.1',
   'monti-apm-sketches-js': '0.0.3',
 
-  'lodash.get': '4.4.2',
-  'lodash.set': '4.3.2',
-
   // parseurl is also used by WebApp.
   // Since it caches the parsed url on
   // `req`, we should make sure we use a
