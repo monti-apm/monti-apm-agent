@@ -2,14 +2,14 @@
 
 Package.describe({
   summary: 'Performance Monitoring for Meteor',
-  version: '3.0.0-beta.2',
+  version: '3.0.0-beta.4',
   git: 'https://github.com/monti-apm/monti-apm-agent.git',
   name: 'montiapm:agent'
 });
 
 let npmModules = {
   debug: '0.8.1',
-  '@monti-apm/core': '2.0.0-beta.2',
+  '@monti-apm/core': '2.0.0-beta.3',
   'lru-cache': '5.1.1',
   'json-stringify-safe': '5.0.1',
   'monti-apm-sketches-js': '0.0.3',
@@ -113,7 +113,7 @@ function configurePackage (api, isTesting) {
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
 
-  api.use(['http', 'email'], 'server', { weak: !isTesting });
+  // api.use(['http', 'email'], 'server', { weak: !isTesting });
 
   api.use('fetch', 'server', {
     weak: !isTesting,
