@@ -2,7 +2,7 @@ import { TestHelpers } from '../_helpers/helpers';
 
 const Email = Package['email'].Email;
 
-function sendTestEmailThroughMethod(func) {
+function sendTestEmailThroughMethod (func) {
   const methodId = TestHelpers.registerMethod(function () {
     return Email[func]({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
   });
