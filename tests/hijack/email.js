@@ -1,10 +1,10 @@
 import { TestHelpers } from '../_helpers/helpers';
 
-function sendTestEmailThroughMethod () {
-  const Email = Package['email'].Email;
+const Email = Package['email'].Email;
 
+function sendTestEmailThroughMethod(func) {
   const methodId = TestHelpers.registerMethod(function () {
-    Email.send({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
+    return Email[func]({ from: 'arunoda@meteorhacks.com', to: 'hello@meteor.com' });
   });
 
   const client = TestHelpers.getMeteorClient();
@@ -17,7 +17,7 @@ Tinytest.add(
   function (test) {
     TestHelpers.enableTrackingMethods();
 
-    sendTestEmailThroughMethod();
+    sendTestEmailThroughMethod('send');
 
     const events = TestHelpers.getLastMethodEvents([0]);
 
@@ -33,3 +33,28 @@ Tinytest.add(
     TestHelpers.cleanTestData();
   }
 );
+
+if (Email.sendAsync) {
+  Tinytest.add(
+    'Email - sendAsync',
+    function (test) {
+      TestHelpers.enableTrackingMethods();
+
+      sendTestEmailThroughMethod('sendAsync');
+
+      const events = TestHelpers.getLastMethodEvents([0]);
+
+      const expected = [
+        ['start'],
+        ['wait'],
+        ['email'],
+        ['async'],
+        ['complete']
+      ];
+
+      test.equal(events, expected);
+
+      TestHelpers.cleanTestData();
+    }
+  );
+}
