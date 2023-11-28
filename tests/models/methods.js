@@ -2,6 +2,8 @@ import { EJSON } from 'meteor/ejson';
 import { MethodsModel } from '../../lib/models/methods';
 import { TestData } from '../_helpers/globals';
 import { CleanTestData, GetMeteorClient, RegisterMethod, Wait, WithDocCacheGetSize } from '../_helpers/helpers';
+import { Meteor } from 'meteor/meteor';
+import { Ntp } from '../../lib/ntp';
 
 Tinytest.add(
   'Models - Method - buildPayload simple',
@@ -185,6 +187,27 @@ Tinytest.add(
     CleanTestData();
   }
 );
+
+Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messages', async (test, done) => {
+  let methodId = RegisterMethod( function (id) {
+    Meteor._sleepForMs(25);
+    return id;
+  });
+
+  let client = GetMeteorClient();
+
+  for (let i = 0; i < 10; i++) {
+    client.call(methodId, i, () => {});
+  }
+
+  Meteor._sleepForMs(1000);
+
+  const metrics = Kadira.models.methods._getMetrics(Ntp._now(), methodId);
+
+  test.isTrue(metrics.waitedOn > 1000, 'waitedOn should be greater than 1000');
+
+  done();
+});
 
 export const model = new MethodsModel();
 
