@@ -3,11 +3,15 @@ import {
   addTestWithRoundedTime,
   CleanTestData,
   CloseClient,
-  GetMeteorClient, GetPubSubPayload,
+  GetMeteorClient,
+  GetPubSubPayload,
   SubscribeAndWait,
-  Wait, WithDocCacheGetSize
+  Wait,
+  WithDocCacheGetSize
 } from '../_helpers/helpers';
-import {TestData} from '../_helpers/globals';
+import { TestData } from '../_helpers/globals';
+import { Meteor } from 'meteor/meteor';
+import { Ntp } from '../../lib/ntp';
 
 addTestWithRoundedTime(
   'Models - PubSub - Metrics - same date',
@@ -718,3 +722,26 @@ addTestWithRoundedTime(
     CloseClient(client);
   }
 );
+
+Tinytest.addAsync('Models - PubSub - Waited On - track wait time of queued messages', async (test, done) => {
+  CleanTestData();
+
+  TestData.insert({aa: 10});
+  TestData.insert({aa: 20});
+
+  let client = GetMeteorClient();
+
+  const pubName = 'tinytest-waited-on';
+
+  for (let i = 0; i < 10; i++) {
+    client.subscribe(pubName);
+  }
+
+  Meteor._sleepForMs(1000);
+
+  const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), pubName);
+
+  test.isTrue(metrics.waitedOn > 1000, 'waitedOn should be greater than 1000');
+
+  done();
+});
