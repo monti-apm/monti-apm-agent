@@ -66,7 +66,13 @@ Meteor.publish('tinytest-data-random', function () {
 
 Meteor.publish('tinytest-waited-on', function () {
   Meteor._sleepForMs(25);
+  return TestData.find();
+});
 
+Meteor.publish('tinytest-waited-on2', function () {
+  Meteor._sleepForMs(10);
+  this.unblock();
+  Meteor._sleepForMs(40);
   return TestData.find();
 });
 

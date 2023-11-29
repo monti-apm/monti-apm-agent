@@ -7,7 +7,21 @@ const Future = Npm.require('fibers/future');
 
 export const GetMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
-  return DDP.connect(url, {retry: false});
+  return DDP.connect(url, {retry: false, });
+};
+
+export const waitForConnection = function (client) {
+  let timeout = Date.now() + 1000;
+  while (Date.now() < timeout) {
+    let status = client.status();
+    if (status.connected) {
+      return;
+    }
+
+    Meteor._sleepForMs(50);
+  }
+
+  throw new Error('timed out waiting for connection');
 };
 
 export const RegisterMethod = function (F) {

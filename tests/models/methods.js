@@ -211,6 +211,26 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messa
   done();
 });
 
+Tinytest.addAsync('Models - Method - Waited On - track wait time of next message', async (test, done) => {
+  let slowMethod = RegisterMethod( function () {
+    Meteor._sleepForMs(25);
+  });
+  let fastMethod = RegisterMethod( function () {});
+
+  let client = GetMeteorClient();
+
+  client.call(slowMethod, () => {});
+  client.call(fastMethod, () => {});
+
+  Meteor._sleepForMs(200);
+
+  const metrics = Kadira.models.methods._getMetrics(Ntp._now(), slowMethod);
+
+  test.isTrue(metrics.waitedOn > 24, 'waitedOn should be greater than 24');
+
+  done();
+});
+
 export const model = new MethodsModel();
 
 function CreateMethodCompleted (sessionName, methodName, methodId, startTime, methodDelay) {
