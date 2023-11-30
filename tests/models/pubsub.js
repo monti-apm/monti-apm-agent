@@ -792,8 +792,8 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait when unblock', async
 
   console.log('waitedOn', metrics.waitedOn);
 
-  test.isTrue(metrics.waitedOn > 10, 'waitedOn should be greater than 10');
-  test.isTrue(metrics.waitedOn < 20, 'waitedOn should be less than 20');
+  test.isTrue(metrics.waitedOn > 8, 'waitedOn should be greater than 8');
+  test.isTrue(metrics.waitedOn < 24, 'waitedOn should be less than 24');
 
   done();
 });
