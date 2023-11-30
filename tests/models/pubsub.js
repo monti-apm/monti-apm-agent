@@ -790,6 +790,8 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait when unblock', async
 
   const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), 'tinytest-waited-on2');
 
+  console.log('waitedOn', metrics.waitedOn);
+
   test.isTrue(metrics.waitedOn > 10, 'waitedOn should be greater than 10');
   test.isTrue(metrics.waitedOn < 20, 'waitedOn should be less than 20');
 
