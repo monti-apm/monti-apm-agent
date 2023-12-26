@@ -36,6 +36,44 @@ Tinytest.add('Database - Redis Oplog - Added', function (test) {
   Meteor._sleepForMs(100);
 });
 
+Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
+  const pub = RegisterPublication(() => TestData.find({name: 'test'}, {limit: 2, skip: 0}));
+
+  TestData.remove({});
+
+  TestData.insert({ name: 'test' });
+
+  const client = GetMeteorClient();
+  const sub = SubscribeAndWait(client, pub);
+  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+
+  test.equal(metrics.polledDocuments, 1);
+
+  TestData.insert({ name: 'test' });
+  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  test.equal(metrics.polledDocuments, 1);
+
+  TestData.insert({ name: 'doesnt-match-cursor' });
+  // as the selector is not matched, redis-oplog triggers a requery
+
+  Meteor._sleepForMs(100);
+
+  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+
+  test.equal(metrics.initiallyAddedDocuments, 1);
+  test.equal(metrics.totalObservers, 1);
+  test.equal(metrics.oplogInsertedDocuments, 2);
+  test.equal(metrics.liveAddedDocuments, 1);
+  // 1 from initial poll + 3 from last requery
+  test.equal(metrics.polledDocuments, 4);
+
+
+  sub.stop();
+  TestData.remove({});
+
+  Meteor._sleepForMs(100);
+});
+
 Tinytest.add('Database - Redis Oplog - Removed', function (test) {
   const pub = RegisterPublication(() => TestData.find({}));
 
