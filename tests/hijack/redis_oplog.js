@@ -1,4 +1,4 @@
-import { TestData } from '../_helpers/globals';
+import { TestData, TestDataRedis, TestDataRedisNoRaceProtection } from '../_helpers/globals';
 import { GetMeteorClient, RegisterPublication, SubscribeAndWait } from '../_helpers/helpers';
 
 /**
@@ -50,11 +50,14 @@ Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
   test.equal(metrics.polledDocuments, 1);
 
   TestData.insert({ name: 'test' });
+  Meteor._sleepForMs(100);
+  // as the selector IS matched, redis-oplog triggers a requery
   metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
-  test.equal(metrics.polledDocuments, 1);
+  // 1 from initial subscription, 1 findOne + requery(2)
+  test.equal(metrics.polledDocuments, 4);
 
   TestData.insert({ name: 'doesnt-match-cursor' });
-  // as the selector is not matched, redis-oplog triggers a requery
+  // as the selector IS NOT matched, redis-oplog does not trigger a requery
 
   Meteor._sleepForMs(100);
 
@@ -64,12 +67,91 @@ Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.oplogInsertedDocuments, 2);
   test.equal(metrics.liveAddedDocuments, 1);
-  // 1 from initial poll + 3 from last requery
-  test.equal(metrics.polledDocuments, 4);
+  // 4 from before + 1 findOne from the unmatched document
+  test.equal(metrics.polledDocuments, 5);
 
 
   sub.stop();
   TestData.remove({});
+
+  Meteor._sleepForMs(100);
+});
+
+Tinytest.add('Database - Redis Oplog - With protect against race condition', function (test) {
+  // in this case, every subscriber will refetch the doc once when receiving it
+  const pub = RegisterPublication(() => TestDataRedis.find({name: 'test'}));
+
+  TestDataRedis.remove({});
+
+  TestDataRedis.insert({ name: 'test' });
+
+  const client = GetMeteorClient();
+  const client2 = GetMeteorClient();
+  const sub = SubscribeAndWait(client, pub);
+  const sub2 = SubscribeAndWait(client2, pub);
+  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+
+  test.equal(metrics.polledDocuments, 1);
+
+  TestDataRedis.insert({ name: 'test' });
+  Meteor._sleepForMs(100);
+
+  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  test.equal(metrics.polledDocuments, 2);
+
+  Meteor._sleepForMs(100);
+
+  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+
+  test.equal(metrics.initiallyAddedDocuments, 1);
+  test.equal(metrics.totalObservers, 2);
+  test.equal(metrics.oplogInsertedDocuments, 1);
+  test.equal(metrics.liveAddedDocuments, 1);
+  test.equal(metrics.polledDocuments, 2);
+
+
+  sub.stop();
+  sub2.stop();
+  TestDataRedis.remove({});
+
+  Meteor._sleepForMs(100);
+});
+
+Tinytest.add('Database - Redis Oplog - Without protect against race condition', function (test) {
+  // in this case, no subscriber will refetch the doc when receiving it
+  const pub = RegisterPublication(() => TestDataRedisNoRaceProtection.find({}));
+
+  TestDataRedisNoRaceProtection.remove({});
+
+  TestDataRedisNoRaceProtection.insert({ name: 'test' });
+
+  const client = GetMeteorClient();
+  const sub = SubscribeAndWait(client, pub);
+  const sub2 = SubscribeAndWait(client, pub);
+  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+
+  test.equal(metrics.polledDocuments, 1);
+
+  TestDataRedisNoRaceProtection.insert({ name: 'test' });
+  Meteor._sleepForMs(100);
+
+  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  test.equal(metrics.polledDocuments, 1);
+
+  Meteor._sleepForMs(100);
+
+  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+
+  test.equal(metrics.initiallyAddedDocuments, 1);
+  test.equal(metrics.totalObservers, 2);
+  test.equal(metrics.oplogInsertedDocuments, 1);
+  test.equal(metrics.liveAddedDocuments, 1);
+  test.equal(metrics.polledDocuments, 1);
+
+
+  sub.stop();
+  sub2.stop();
+  TestDataRedisNoRaceProtection.remove({});
 
   Meteor._sleepForMs(100);
 });
