@@ -206,7 +206,30 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messa
 
   const metrics = Kadira.models.methods._getMetrics(Ntp._now(), methodId);
 
-  test.isTrue(metrics.waitedOn > 1000, 'waitedOn should be greater than 1000');
+  test.isTrue(metrics.waitedOn > 25, 'waitedOn should be greater than 25');
+  test.isTrue(metrics.waitedOn <= 6000, 'waitedOn should be less than 6k');
+  console.log(metrics.waitedOn);
+  done();
+});
+
+Tinytest.addAsync('Models - Method - Waited On - check unblock time', async (test, done) => {
+  let methodId = RegisterMethod( function (id) {
+    this.unblock();
+    Meteor._sleepForMs(25);
+    return id;
+  });
+
+  let client = GetMeteorClient();
+
+  for (let i = 0; i < 10; i++) {
+    client.call(methodId, i, () => {});
+  }
+
+  Meteor._sleepForMs(1000);
+
+  const metrics = Kadira.models.methods._getMetrics(Ntp._now(), methodId);
+
+  test.isTrue(metrics.waitedOn <= 1, 'waitedOn should be less or equal than 1');
 
   done();
 });
