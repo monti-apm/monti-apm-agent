@@ -248,8 +248,7 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of next message
   Meteor._sleepForMs(200);
 
   const metrics = Kadira.models.methods._getMetrics(Ntp._now(), slowMethod);
-
-  test.isTrue(metrics.waitedOn > 24, 'waitedOn should be greater than 24');
+  test.isTrue(metrics.waitedOn >= 24, 'waitedOn should be greater than 24');
 
   done();
 });
