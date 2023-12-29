@@ -793,8 +793,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait when unblock', async
   console.log('waitedOn', metrics.waitedOn);
 
   test.isTrue(metrics.waitedOn > 8, 'waitedOn should be greater than 8');
-  // this should always be around 10, but older meteor versions dont have unblock so they yeld an exception causing delays
-  test.isTrue(metrics.waitedOn < 24, 'waitedOn should be less or equal than 24');
+  test.isTrue(metrics.waitedOn <= 12, 'waitedOn should be less or equal than 12');
 
   done();
 });

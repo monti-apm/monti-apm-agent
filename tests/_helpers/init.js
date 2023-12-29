@@ -71,7 +71,7 @@ Meteor.publish('tinytest-waited-on', function () {
 
 Meteor.publish('tinytest-waited-on2', function () {
   Meteor._sleepForMs(10);
-  this.unblock();
+  this.unblock?.();
   Meteor._sleepForMs(40);
   return TestData.find();
 });
