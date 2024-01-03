@@ -8,7 +8,7 @@ import {
   RegisterMethod,
   registerPublication
 } from '../_helpers/helpers';
-const HTTP = Package['http'].HTTP;
+const HTTP = Package['http']?.HTTP;
 
 Tinytest.add(
   'Errors - Meteor._debug - track with Meteor._debug',

@@ -10,7 +10,10 @@ addAsyncTest(
 
     await sleep(500);
 
-    let payload = model.buildPayload().systemMetrics[0];
+    let payload = model.buildPayload()
+    await sleep(500);
+
+    payload = payload.systemMetrics[0];
 
     test.isTrue(payload.memory > 0);
     test.isTrue(payload.pcpu >= 0);

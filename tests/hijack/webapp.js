@@ -6,12 +6,12 @@ import { getInfo } from '../../lib/async/als';
 let trace = null;
 
 async function middleware (req, res, next) {
-  await TestData.find().fetch();
+  await TestData.find().fetchAsync();
 
   next();
 }
 
-WebApp.connectHandlers.use('/test-middleware', middleware, (req, res) => {
+WebApp.handlers.use('/test-middleware', middleware, (req, res) => {
   trace = getInfo().trace;
 
   res.writeHead(200);
@@ -66,6 +66,7 @@ addAsyncTest(
   'Webapp - find in middleware',
   async function (test) {
     const result = await fetch(`${Meteor.absoluteUrl()}/test-middleware`);
+    test.equal(trace.events[0][2].url, '/test-middleware');
 
     const event = trace.events.find(([type]) => type === 'db');
 

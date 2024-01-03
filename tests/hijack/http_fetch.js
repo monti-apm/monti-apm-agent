@@ -44,7 +44,7 @@ addAsyncTest('HTTP - meteor/fetch - trace error', async function (test) {
         method: 'GET',
         url: 'http://localhost:9999/',
         library: 'meteor/fetch',
-        err: 'request to http://localhost:9999/ failed, reason: ',
+        err: 'request to http://localhost:9999/ failed, reason: connect ECONNREFUSED 127.0.0.1:9999',
       },
     ],
     ['complete'],
@@ -54,7 +54,7 @@ addAsyncTest('HTTP - meteor/fetch - trace error', async function (test) {
 
   test.stableEqual(result, {
     message:
-        'request to http://localhost:9999/ failed, reason: ',
+        'request to http://localhost:9999/ failed, reason: connect ECONNREFUSED 127.0.0.1:9999',
     type: 'system',
     errno: 'ECONNREFUSED',
     code: 'ECONNREFUSED',

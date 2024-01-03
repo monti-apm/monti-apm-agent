@@ -111,9 +111,10 @@ addAsyncTest(
       await callAsync(methodId);
     }, 30);
 
-    await sleep(100);
+    await sleep(1000);
 
     let payload = Kadira.models.methods.buildPayload();
+    await sleep(1000);
 
     let index = payload.methodMetrics.findIndex(methodMetrics => methodId in methodMetrics.methods);
 
@@ -139,12 +140,12 @@ addAsyncTest(
 
     // Needs to call a client isolated from other tests for reliability
     await clientCallAsync(client, methodId);
+    await sleep(100);
 
     let payload = Kadira.models.methods.buildPayload();
 
     let expected = (JSON.stringify({ msg: 'updated', methods: ['1'] }) +
         JSON.stringify({ msg: 'result', id: '1', result: returnValue })).length;
-
     test.equal(payload.methodMetrics[0].methods[methodId].sentMsgSize, expected);
   }
 );

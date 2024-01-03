@@ -110,7 +110,7 @@ function configurePackage (api, isTesting) {
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
 
-  // api.use(['http', 'email'], 'server', { weak: !isTesting });
+  api.use(['http', 'email'], 'server', { weak: !isTesting });
 
   api.use('fetch', 'server', {
     weak: !isTesting,
