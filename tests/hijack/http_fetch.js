@@ -3,7 +3,7 @@ import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod, } from '.
 
 addAsyncTest('HTTP - meteor/fetch - async call', async function (test) {
   const methodId = registerMethod(async function () {
-    const result = await fetch('http://localhost:3301/');
+    const result = await fetch('http://127.0.0.1:3301/');
 
     return result.status;
   });
@@ -15,7 +15,7 @@ addAsyncTest('HTTP - meteor/fetch - async call', async function (test) {
   const expected = [
     ['start', { userId: null, params: '[]' }],
     ['wait', { waitOn: [] }],
-    ['http', { method: 'GET', url: 'http://localhost:3301/', library: 'meteor/fetch' }],
+    ['http', { method: 'GET', url: 'http://127.0.0.1:3301/', library: 'meteor/fetch' }],
     ['complete']
   ];
 
@@ -26,7 +26,7 @@ addAsyncTest('HTTP - meteor/fetch - async call', async function (test) {
 addAsyncTest('HTTP - meteor/fetch - trace error', async function (test) {
   const methodId = registerMethod(async function () {
     try {
-      await fetch('http://localhost:9999/');
+      await fetch('http://127.0.0.1:9999/');
     } catch (error) {
       return error;
     }
@@ -42,9 +42,9 @@ addAsyncTest('HTTP - meteor/fetch - trace error', async function (test) {
       'http',
       {
         method: 'GET',
-        url: 'http://localhost:9999/',
+        url: 'http://127.0.0.1:9999/',
         library: 'meteor/fetch',
-        err: 'request to http://localhost:9999/ failed, reason: connect ECONNREFUSED 127.0.0.1:9999',
+        err: 'request to http://127.0.0.1:9999/ failed, reason: connect ECONNREFUSED 127.0.0.1:9999',
       },
     ],
     ['complete'],
@@ -54,7 +54,7 @@ addAsyncTest('HTTP - meteor/fetch - trace error', async function (test) {
 
   test.stableEqual(result, {
     message:
-        'request to http://localhost:9999/ failed, reason: connect ECONNREFUSED 127.0.0.1:9999',
+        'request to http://127.0.0.1:9999/ failed, reason: connect ECONNREFUSED 127.0.0.1:9999',
     type: 'system',
     errno: 'ECONNREFUSED',
     code: 'ECONNREFUSED',

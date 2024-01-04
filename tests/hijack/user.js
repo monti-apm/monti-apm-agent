@@ -23,7 +23,7 @@ addAsyncTest(
       ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
       ['complete']
     ];
-console.error(events);
+    console.error(events);
     test.stableEqual(events, expected);
   }
 );
