@@ -5,6 +5,11 @@
 * Support Meteor 3
 * Add `Monti.event`
 * Tracer supports parallel events
+## 2.47.4
+Nov 24, 2023
+
+* Fix handling uncaught exceptions when `null` or `undefined` are thrown
+* Fix event type for Email.sendAsync
 
 ## 2.47.3
 August 10, 2023
