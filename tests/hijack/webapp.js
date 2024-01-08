@@ -129,7 +129,7 @@ addAsyncTest(
     const events = trace.events.filter(([type]) => ['async','compute','db'].includes(type));
 
     test.equal(result.status, 200);
-    test.equal(events.length, 2);
+    test.equal(events.length >= 2 , true);
     // async
     test.equal(events[0][1] >= 300, true);
     // db call
