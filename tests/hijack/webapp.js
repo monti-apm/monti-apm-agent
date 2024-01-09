@@ -25,6 +25,33 @@ WebApp.handlers.use('/test-middleware', middleware, (req, res) => {
   res.writeHead(200);
   res.end(`Hello world from: ${Meteor.release}`);
 });
+WebApp.handlers.use('/test-middleware-2',
+  (req, res, next) => {
+    setTimeout(() => {
+      next();
+    }, 1000);
+  }, (req, res) => {
+    trace = getInfo().trace;
+
+    res.writeHead(200);
+    res.end(`Hello world from: ${Meteor.release}`);
+  });
+WebApp.handlers.use('/test-middleware-3',
+// uses async/await, but the async function resolves
+// before next is called
+  async (req, res, next) => {
+    await 0;
+
+    // not awaited, so the parent async function resolves before next is called
+    TestData.findOneAsync().then(() => {
+      next();
+    });
+  }, (req, res) => {
+    trace = getInfo().trace;
+
+    res.writeHead(200);
+    res.end(`Hello world from: ${Meteor.release}`);
+  });
 
 WebApp.handlers.use('/async-test', async (req, res) => {
   trace = getInfo().trace;
@@ -35,7 +62,7 @@ WebApp.handlers.use('/async-test', async (req, res) => {
 });
 WebApp.handlers.use('/async-test-2', async (req, res) => {
   trace = getInfo().trace;
-  // !!! should this be counted as async time?
+  // !!! should this be counted as async time? !!!
   syncWait(300);
   await TestData.find().fetchAsync();
 
@@ -132,6 +159,40 @@ addAsyncTest(
     test.equal(events.length >= 2 , true);
     // async
     test.equal(events[0][1] >= 300, true);
+    // db call
+    test.equal(events[1][1] <= 5, true);
+  }
+);
+addAsyncTest(
+  'Webapp - async event when middleware resolves before next is called',
+  async function (test) {
+    const result = await fetch(`${Meteor.absoluteUrl()}/test-middleware-2`);
+
+    test.equal(trace.events[0][2].url, '/test-middleware-2');
+
+    const events = trace.events.filter(([type]) => ['async','compute','db'].includes(type));
+
+    console.error(trace);
+    test.equal(result.status, 200);
+    test.equal(events.length <= 4 , true);
+    // async
+    test.equal(events[0][1] <= 1010 && events[0][1] >= 900, true);
+  }
+);
+
+addAsyncTest(
+  'Webapp - async event when middleware resolves before next is called 2',
+  async function (test) {
+    const result = await fetch(`${Meteor.absoluteUrl()}/test-middleware-3`);
+
+    test.equal(trace.events[0][2].url, '/test-middleware-3');
+
+    const events = trace.events.filter(([type]) => ['async','compute','db'].includes(type));
+
+    test.equal(result.status, 200);
+    test.equal(events.length >= 2 , true);
+    // async
+    test.equal(events[0][1] <= 2, true);
     // db call
     test.equal(events[1][1] <= 5, true);
   }
