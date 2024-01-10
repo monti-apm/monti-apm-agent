@@ -138,7 +138,7 @@ Tinytest.add(
     });
     let client = GetMeteorClient();
     let result = client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+    let events = GetLastMethodEvents([0, 2], ['async']);
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
@@ -174,7 +174,7 @@ Tinytest.add(
     });
     let client = GetMeteorClient();
     let result = client.call(methodId);
-    let events = GetLastMethodEvents([0, 2]);
+    let events = GetLastMethodEvents([0, 2], ['async']);
     let expected = [
       ['start',undefined,{userId: null, params: '[]'}],
       ['wait',undefined,{waitOn: []}],
