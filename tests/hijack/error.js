@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { ErrorModel } from '../../lib/models/errors';
 import { GetMeteorClient, RegisterMethod, RegisterPublication } from '../_helpers/helpers';
+
 const HTTP = Package['http'].HTTP;
 
 Tinytest.add(
@@ -213,6 +214,30 @@ Tinytest.addAsync(
       let error = payload.errors[0];
 
       test.equal(1, payload.errors.length);
+      test.equal(error.type, 'server-internal');
+      test.equal(error.subType, 'unhandledRejection');
+
+      _resetErrorTracking(originalErrorTrackingStatus);
+      done();
+    });
+  }
+);
+
+Tinytest.addAsync(
+  'Errors - unhandledRejection - undefined reason',
+  function (test, done) {
+    let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+    Promise.reject(undefined);
+
+    Meteor.defer(function () {
+      let payload = Kadira.models.error.buildPayload();
+      // eslint-disable-next-line no-shadow
+      let error = payload.errors[0];
+
+      test.equal(1, payload.errors.length);
+      test.equal(error.name, 'unhandledRejection: undefined');
       test.equal(error.type, 'server-internal');
       test.equal(error.subType, 'unhandledRejection');
 

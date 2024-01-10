@@ -64,6 +64,18 @@ Meteor.publish('tinytest-data-random', function () {
   return TestData.find({aa: {$ne: Random.id()}});
 });
 
+Meteor.publish('tinytest-waited-on', function () {
+  Meteor._sleepForMs(25);
+  return TestData.find();
+});
+
+Meteor.publish('tinytest-waited-on2', function () {
+  Meteor._sleepForMs(10);
+  if (this.unblock) this.unblock();
+  Meteor._sleepForMs(40);
+  return TestData.find();
+});
+
 Meteor.publish('tinytest-data-cursor-fetch', function () {
   TestData.find({}).fetch();
   this.ready();

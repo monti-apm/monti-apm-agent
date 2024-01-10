@@ -1,12 +1,27 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { DDP } from 'meteor/ddp';
-const Future = Npm.require('fibers/future');
 import { MethodStore, TestData } from './globals';
+
+const Future = Npm.require('fibers/future');
 
 export const GetMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
-  return DDP.connect(url, {retry: false});
+  return DDP.connect(url, {retry: false, });
+};
+
+export const waitForConnection = function (client) {
+  let timeout = Date.now() + 1000;
+  while (Date.now() < timeout) {
+    let status = client.status();
+    if (status.connected) {
+      return;
+    }
+
+    Meteor._sleepForMs(50);
+  }
+
+  throw new Error('timed out waiting for connection');
 };
 
 export const RegisterMethod = function (F) {
@@ -31,7 +46,7 @@ export const EnableTrackingMethods = function () {
   // };
 };
 
-export const GetLastMethodEvents = function (_indices) {
+export const GetLastMethodEvents = function (_indices, ignore = []) {
   if (MethodStore.length < 1) {
     return [];
   }
@@ -43,7 +58,7 @@ export const GetLastMethodEvents = function (_indices) {
   return events;
 
   function isNotCompute (event) {
-    return event[0] !== 'compute';
+    return event[0] !== 'compute' && !ignore.includes(event[0]);
   }
 
   function filterFields (event) {
