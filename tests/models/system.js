@@ -14,10 +14,10 @@ Tinytest.add(
     })();
     let payload = model.buildPayload().systemMetrics[0];
 
-    test.isTrue(payload.memory > 0);
-    test.isTrue(payload.pcpu >= 0);
-    test.isTrue(payload.sessions >= 0);
-    test.isTrue(payload.endTime >= payload.startTime + 500);
+    test.isTrue(payload.memory > 0, `memory: ${payload.memory}`);
+    test.isTrue(payload.pcpu >= 0, `pcpu: ${payload.pcpu}`);
+    test.isTrue(payload.sessions >= 0, `sessions: ${payload.sessions}`);
+    test.isTrue(payload.endTime >= payload.startTime + 500, `time: ${payload.endTime} - ${payload.startTime}`);
     test.isTrue(payload.pctEvloopBlock >= 0);
   }
 );

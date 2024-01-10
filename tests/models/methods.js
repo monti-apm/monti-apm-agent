@@ -206,8 +206,8 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messa
 
   const metrics = Kadira.models.methods._getMetrics(Ntp._now(), methodId);
 
-  test.isTrue(metrics.waitedOn > 25, 'waitedOn should be greater than 25');
-  test.isTrue(metrics.waitedOn <= 6000, 'waitedOn should be less than 6k');
+  test.isTrue(metrics.waitedOn > 25, `${metrics.waitedOn} should be greater than 25`);
+  test.isTrue(metrics.waitedOn <= 6000, `${metrics.waitedOn} should be less than 6k`);
   console.log(metrics.waitedOn);
   done();
 });
