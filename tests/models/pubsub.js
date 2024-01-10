@@ -762,9 +762,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait time of next message
   waitForConnection(client);
 
   client.subscribe('tinytest-waited-on');
-  client.call(fastMethod, () => { });
-
-  Meteor._sleepForMs(200);
+  client.call(fastMethod);
 
   const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), 'tinytest-waited-on');
   test.isTrue(metrics.waitedOn > 10, `${metrics.waitedOn} should be greater than 10`);
