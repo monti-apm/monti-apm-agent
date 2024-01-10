@@ -1,4 +1,6 @@
 import { _ } from 'meteor/underscore';
+import { cloneDeep } from '../../lib/utils';
+import { EventType } from '../../lib/constants';
 import { Tracer } from '../../lib/tracer/tracer';
 import { Wait } from '../_helpers/helpers';
 
@@ -295,7 +297,8 @@ Tinytest.add(
       ]
     };
     Kadira.tracer.buildTrace(traceInfo);
-    test.equal(traceInfo.metrics, undefined);
+    // Wait event is not ended, so it will be ignored but will not affect the metrics
+    test.equal(traceInfo.metrics, { total: 2500, db: 500, compute: 2000 });
   }
 );
 
@@ -444,6 +447,81 @@ Tinytest.add(
 
     let expected = {coll: 'posts'};
     test.equal(traceInfo.events[0].data, expected);
+  }
+);
+
+Tinytest.add(
+  'Tracer - should keep nested events',
+  function (test) {
+    let now = new Date().getTime();
+
+    const oldOptions = cloneDeep(Kadira.options);
+
+    Kadira.options.eventStackTrace = true;
+
+    let traceInfo = {
+      events: [
+        {...eventDefaults, type: EventType.START, at: now, endAt: now},
+        {...eventDefaults, type: EventType.WAIT, at: now, endAt: now + 1000, nested: [{ type: EventType.DB, endAt: null }]},
+        {...eventDefaults, type: EventType.ASYNC, at: now + 1000, endAt: now + 2500, nested: [{ type: EventType.ASYNC, endAt: null }]},
+        {...eventDefaults, type: EventType.DB, at: now + 2500, endAt: now + 3500, nested: [{ type: EventType.ASYNC, endAt: null }]},
+        {type: EventType.COMPLETE, at: now + 3500}
+      ]
+    };
+
+    Kadira.tracer.buildTrace(traceInfo);
+
+    test.equal(traceInfo.events[2][3].nested.length, 1);
+    test.equal(traceInfo.events[3][3], undefined);
+
+    test.equal(traceInfo.metrics, {
+      total: 3500,
+      wait: 1000,
+      async: 1500,
+      db: 1000,
+      compute: 0,
+    });
+
+    test.equal(traceInfo.errored, false);
+
+    Kadira.options = oldOptions;
+  }
+);
+
+
+Tinytest.add(
+  'Tracer - should account nested custom events as if they were in the root level',
+  function (test) {
+    let now = new Date().getTime();
+
+    const oldOptions = cloneDeep(Kadira.options);
+
+    Kadira.options.eventStackTrace = true;
+
+    let traceInfo = {
+      events: [
+        {...eventDefaults, type: EventType.START, at: now, endAt: now},
+        {...eventDefaults, type: EventType.CUSTOM, at: now + 1000, endAt: now + 2500, nested: [{ type: 'async', at: now + 200, endAt: now + 300 }, { type: 'db', at: now + 200, endAt: now + 300 }]},
+        {type: EventType.COMPLETE, at: now + 2500}
+      ]
+    };
+
+    Kadira.tracer.buildTrace(traceInfo);
+
+    test.equal(traceInfo.events.length, 4);
+    test.equal(traceInfo.events[2][3].nested.length, 2);
+    test.equal(traceInfo.events[3][3], undefined);
+
+    test.equal(traceInfo.metrics, {
+      total: 2500,
+      compute: 1000,
+      async: 100,
+      db: 100,
+    });
+
+    test.equal(traceInfo.errored, false);
+
+    Kadira.options = oldOptions;
   }
 );
 
