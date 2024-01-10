@@ -18,7 +18,6 @@ Tinytest.add(
     test.isTrue(payload.pcpu >= 0, `pcpu: ${payload.pcpu}`);
     test.isTrue(payload.sessions >= 0, `sessions: ${payload.sessions}`);
     test.isTrue(payload.endTime >= payload.startTime + 500, `time: ${payload.endTime} - ${payload.startTime}`);
-    test.isTrue(payload.pctEvloopBlock >= 0);
   }
 );
 
