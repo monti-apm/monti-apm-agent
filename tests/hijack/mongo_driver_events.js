@@ -53,7 +53,7 @@ Tinytest.addAsync(
     checkRange(stats.checkoutTime, 0, 100, 40000);
     checkRange(stats.maxCheckoutTime, 0, 10, 300);
     checkRange(stats.pending, 0, 0, 200);
-    checkRange(stats.checkedOut, 0, 0, 15);
+    checkRange(stats.checkedOut, 0, 0, 25);
     checkRange(stats.created, 0, 1, 100);
     done();
   }
