@@ -75,7 +75,6 @@ WebApp.handlers.use('/async-test', async (req, res) => {
 });
 WebApp.handlers.use('/async-test-2', async (req, res) => {
   trace = getInfo().trace;
-  // !!! should this be counted as async time? !!!
   syncWait(300);
   await TestData.find().fetchAsync();
 
@@ -175,16 +174,17 @@ addAsyncTest(
 
     test.equal(trace.events[0][2].url, '/async-test-2');
 
-    const events = trace.events.filter(([type]) =>
-      ['async', 'compute', 'db'].includes(type)
-    );
+    const events = trace.events;
 
     test.equal(result.status, 200);
     test.equal(events.length >= 2, true);
-    // async
-    test.equal(events[0][1] >= 300, true);
+    // compute time
+    test.equal(events[1][1] >= 300, true);
+    test.equal(events[1][0], 'compute');
+
     // db call
-    test.equal(events[1][1] <= 5, true);
+    test.equal(events[2][1] > 0, true);
+    test.equal(events[2][0], 'db');
   }
 );
 addAsyncTest(
