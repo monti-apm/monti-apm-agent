@@ -21,7 +21,8 @@ addAsyncTest.skip('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', a
 
       const info = Kadira._getInfo();
 
-      const event = _.last(info.trace.events);
+      const event = _.last(info.trace.events.filter(e => e.type !== 'async'));
+
       observeChangesEvent = _.first(event.nested);
 
       return TestData.find({});

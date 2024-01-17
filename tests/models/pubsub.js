@@ -5,9 +5,16 @@ import {
   getPubSubPayload,
   subscribeAndWait,
   withDocCacheGetSize,
+  releaseParts,
+  waitForConnection,
+  getMeteorClient,
+  registerMethod,
+  CleanTestData,
+  closeClient,
 } from '../_helpers/helpers';
 import { TestData } from '../_helpers/globals';
 import { sleep } from '../../lib/utils';
+import { Ntp } from '../../lib/ntp';
 
 addTestWithRoundedTime(
   'Models - PubSub - Metrics - same date',
@@ -691,12 +698,10 @@ addTestWithRoundedTime(
   async function (test, client) {
     await TestData.insertAsync({aa: 10});
     await TestData.insertAsync({aa: 20});
-
     await withDocCacheGetSize(async function () {
       await subscribeAndWait(client, 'tinytest-data-cursor-fetch');
       await sleep(200);
     }, 30);
-
     let payload = getPubSubPayload();
     test.equal(payload[0].pubs['tinytest-data-cursor-fetch'].fetchedDocSize, 60);
   }
@@ -720,5 +725,84 @@ addTestWithRoundedTime(
     let payload = getPubSubPayload();
 
     test.equal(payload[0].pubs['tinytest-data-with-no-oplog'].polledDocSize, 60);
+    closeClient(client);
   }
 );
+
+Tinytest.addAsync('Models - PubSub - Waited On - track wait time of queued messages', async (test, done) => {
+  CleanTestData();
+
+  await TestData.insertAsync({aa: 10});
+  await TestData.insertAsync({aa: 20});
+
+  let client = getMeteorClient();
+
+  const pubName = 'tinytest-waited-on';
+
+  for (let i = 0; i < 10; i++) {
+    client.subscribe(pubName);
+  }
+
+  await sleep(1000);
+
+  const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), pubName);
+  console.log('metrics.waitedOn', metrics.waitedOn);
+  test.isTrue(metrics.waitedOn > 1000, `${metrics.waitedOn} should be greater than 1000`);
+
+  done();
+});
+
+Tinytest.addAsync('Models - PubSub - Waited On - track wait time of next message', async (test, done) => {
+  CleanTestData();
+  let fastMethod = registerMethod(function () {
+    console.log('fastMethod');
+  });
+
+  let client = getMeteorClient();
+
+  // If we subscribe and call before connected
+  // Meteor sends the messages in the wrong order
+  await waitForConnection(client);
+
+  client.subscribe('tinytest-waited-on');
+  client.call(fastMethod);
+
+  const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), 'tinytest-waited-on');
+  test.isTrue(metrics.waitedOn > 10, `${metrics.waitedOn} should be greater than 10`);
+
+  done();
+});
+
+Tinytest.addAsync('Models - PubSub - Waited On - track wait when unblock', async (test, done) => {
+  CleanTestData();
+  let fastMethod = registerMethod(function () {
+    console.log('fastMethod');
+  });
+
+  let client = getMeteorClient();
+
+  // If we subscribe and call before connected
+  // Meteor sends the messages in the wrong order
+  await waitForConnection(client);
+
+  client.subscribe('tinytest-waited-on2');
+  client.call(fastMethod, () => { });
+
+  await sleep(200);
+
+  const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), 'tinytest-waited-on2');
+
+  console.log('waitedOn', metrics.waitedOn);
+
+  test.isTrue(metrics.waitedOn > 8, 'waitedOn should be greater than 8');
+  // this.unblock is provided on Meteor >= 2.3, so we expect bigger delays below this version
+
+  if (releaseParts[0] >= 2 && releaseParts[1] >= 3) {
+    test.isTrue(metrics.waitedOn <= 12, 'waitedOn should be less or equal than 12');
+  } else {
+    test.isTrue(metrics.waitedOn <= 150, 'waitedOn should be less or equal than 150');
+  }
+
+
+  done();
+});

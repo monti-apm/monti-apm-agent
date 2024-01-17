@@ -4,7 +4,7 @@ import { DDP } from 'meteor/ddp';
 import { MethodStore, TestData } from './globals';
 import { EJSON } from 'meteor/ejson';
 import { EventType } from '../../lib/constants';
-import { cleanTrailingNilValues, cloneDeep, isPlainObject, last } from '../../lib/utils';
+import { cleanTrailingNilValues, cloneDeep, isPlainObject, last, sleep } from '../../lib/utils';
 import { isNumber } from '../../lib/common/utils';
 import { diffObjects } from './pretty-log';
 import util from 'util';
@@ -16,7 +16,21 @@ export const clientCallAsync = async (client, method, ...args) => client.call(me
 
 export const getMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
-  return DDP.connect(url, {retry: false});
+  return DDP.connect(url, {retry: false, });
+};
+
+export const waitForConnection = async function (client) {
+  let timeout = Date.now() + 1000;
+  while (Date.now() < timeout) {
+    let status = client.status();
+    if (status.connected) {
+      return;
+    }
+
+    await sleep(50);
+  }
+
+  throw new Error('timed out waiting for connection');
 };
 
 export const RegisterMethod = function (F) {

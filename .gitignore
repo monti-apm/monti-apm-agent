@@ -7,3 +7,4 @@ versions.json
 .eslintcache
 packages/
 .envrc
+/packages/*

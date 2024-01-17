@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { MethodStore, TestData } from './globals';
+import { sleep } from '../../lib/utils';
 
 Kadira.connect('foo', 'bar', {enableErrorTracking: true});
 
@@ -62,6 +63,19 @@ Meteor.publish('tinytest-data-cursor-fetch', async function () {
   await TestData.find({}).fetchAsync();
   this.ready();
 });
+
+Meteor.publish('tinytest-waited-on', async function () {
+  await sleep(1000);
+  return TestData.find();
+});
+
+Meteor.publish('tinytest-waited-on2', async function () {
+  await sleep(10);
+  if (this.unblock) this.unblock();
+  await sleep(40);
+  return TestData.find();
+});
+
 
 Meteor.publish('tinytest-data-2', function () {
   return TestData.find();

@@ -1,7 +1,8 @@
 import { MethodsModel } from '../../lib/models/methods';
 import { TestData } from '../_helpers/globals';
-import { addAsyncTest, callAsync, clientCallAsync, registerMethod, withDocCacheGetSize } from '../_helpers/helpers';
+import { CleanTestData, getMeteorClient, addAsyncTest, callAsync, clientCallAsync, registerMethod, withDocCacheGetSize } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
+import { Meteor } from 'meteor/meteor';
 import { Ntp } from '../../lib/ntp';
 
 addAsyncTest(
@@ -22,6 +23,7 @@ addAsyncTest(
               count: 2,
               errors: 0,
               wait: 0,
+              waitedOn: 0,
               db: 0,
               http: 0,
               email: 0,
@@ -67,6 +69,7 @@ addAsyncTest(
           count: 2,
           errors: 1,
           wait: 0,
+          waitedOn: 0,
           db: 0,
           http: 0,
           email: 0,
@@ -104,17 +107,15 @@ addAsyncTest(
     }
 
     let methodId = registerMethod(async function () {
-      TestData.find({}).fetchAsync();
+      return TestData.find({}).fetchAsync();
     });
 
     await withDocCacheGetSize(async function () {
       await callAsync(methodId);
     }, 30);
 
-    await sleep(1000);
 
     let payload = Kadira.models.methods.buildPayload();
-    await sleep(1000);
 
     let index = payload.methodMetrics.findIndex(methodMetrics => methodId in methodMetrics.methods);
 
@@ -181,8 +182,72 @@ addAsyncTest(
     let expected = JSON.stringify([{ __test1: 'Monti: redacted', abc: true }, null, { xyz: false, __test1: 'Monti: redacted' }]);
 
     test.equal(trace.events[0][2].params, expected);
+    CleanTestData();
   }
 );
+
+Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messages', async (test, done) => {
+  let methodId = registerMethod( async function (id) {
+    await sleep(25);
+    return id;
+  });
+
+  let client = getMeteorClient();
+
+  for (let i = 0; i < 10; i++) {
+    client.call(methodId, i, () => {});
+  }
+
+  await sleep(1000);
+
+  const metrics = Kadira.models.methods._getMetrics(Ntp._now(), methodId);
+
+  test.isTrue(metrics.waitedOn > 25, `${metrics.waitedOn} should be greater than 25`);
+  test.isTrue(metrics.waitedOn <= 6000, `${metrics.waitedOn} should be less than 6k`);
+  console.log(metrics.waitedOn);
+  done();
+});
+
+Tinytest.addAsync('Models - Method - Waited On - check unblock time', async (test, done) => {
+  let methodId = registerMethod( async function (id) {
+    this.unblock();
+    await sleep(25);
+    return id;
+  });
+
+  let client = getMeteorClient();
+
+  for (let i = 0; i < 10; i++) {
+    client.call(methodId, i, () => {});
+  }
+
+  await sleep(1000);
+
+  const metrics = Kadira.models.methods._getMetrics(Ntp._now(), methodId);
+
+  test.isTrue(metrics.waitedOn <= 1, 'waitedOn should be less or equal than 1');
+
+  done();
+});
+
+Tinytest.addAsync('Models - Method - Waited On - track wait time of next message', async (test, done) => {
+  let slowMethod = registerMethod( async function () {
+    await sleep(25);
+  });
+  let fastMethod = registerMethod( function () {});
+
+  let client = getMeteorClient();
+
+  client.call(slowMethod, () => {});
+  client.call(fastMethod, () => {});
+
+  await sleep(200);
+
+  const metrics = Kadira.models.methods._getMetrics(Ntp._now(), slowMethod);
+  test.isTrue(metrics.waitedOn >= 20, `${metrics.waitedOn} should be greater than 20`);
+
+  done();
+});
 
 export const model = new MethodsModel();
 
