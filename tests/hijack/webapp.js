@@ -1,4 +1,4 @@
-import { WebApp } from 'meteor/webapp';
+import { WebApp, WebAppInternals } from 'meteor/webapp';
 import { checkHandlersInFiber, wrapWebApp } from '../../lib/hijack/wrap_webapp';
 import { releaseParts } from '../_helpers/helpers';
 
@@ -57,5 +57,35 @@ if (httpMonitoringEnabled) {
           test.equal(req.__kadiraInfo.trace.events[0].data.headers, expected);
           done();
         });
+    });
+
+   Tinytest.add(
+    'Webapp - use latest staticFilesByArch',
+    function (test) {
+      let origStaticFiles = WebAppInternals.staticFilesByArch;
+      let staticFiles = {
+        'web.browser': {
+          '/test.txt': {
+            content: '5'
+          }
+        }
+      };
+
+      WebAppInternals.staticFilesByArch = staticFiles;
+      const result = HTTP.get(Meteor.absoluteUrl('test.txt'));
+      test.equal(result.content, '5');
+
+      WebAppInternals.staticFilesByArch = origStaticFiles;
+    });
+
+    Tinytest.add(
+    'Webapp - static middleware',
+    function (test) {
+      const result = HTTP.get(Meteor.absoluteUrl('global-imports.js'));
+      test.isTrue(result.content.includes('Package['));
+      let payload = Kadira.models.http.buildPayload();
+
+      let staticMetrics = payload.httpMetrics[0].routes['GET-<static file>'];
+      test.isTrue(staticMetrics.count > 0);
     });
 }
