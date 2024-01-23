@@ -788,7 +788,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait when unblock', async
   const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), 'tinytest-waited-on2');
 
   test.isTrue(metrics.waitedOn > 8, `${metrics.waitedOn} should be greater than 8`);
-  
+
   // this.unblock is provided on Meteor >= 2.3, so we expect bigger delays below this version
   if (releaseParts[0] > 2 || (releaseParts[0] === 2 && releaseParts[1] >= 3)) {
     test.isTrue(metrics.waitedOn <= 12, 'waitedOn should be less or equal than 12');

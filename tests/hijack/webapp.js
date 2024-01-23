@@ -1,6 +1,7 @@
 import { WebApp, WebAppInternals } from 'meteor/webapp';
 import { checkHandlersInFiber, wrapWebApp } from '../../lib/hijack/wrap_webapp';
 import { releaseParts } from '../_helpers/helpers';
+import { HTTP } from 'meteor/http';
 
 // Check if Meteor 1.7 or newer, which are the
 // versions that wrap connect handlers in a fiber and are easy
@@ -59,7 +60,7 @@ if (httpMonitoringEnabled) {
         });
     });
 
-    Tinytest.add(
+  Tinytest.add(
     'Webapp - filter body',
     function (test) {
       Kadira.tracer.redactField('httpSecret');
@@ -78,7 +79,7 @@ if (httpMonitoringEnabled) {
 
       WebApp.rawConnectHandlers.stack[0].handle(
         req,
-        {on (event, _listener) { listener = _listener }},
+        {on (event, _listener) { listener = _listener; }},
         () => {}
       );
 
@@ -89,10 +90,10 @@ if (httpMonitoringEnabled) {
         otherData: 5
       });
 
-      test.equal(req.__kadiraInfo.trace.events[0][2].body, expected)
+      test.equal(req.__kadiraInfo.trace.events[0][2].body, expected);
     });
 
-   Tinytest.add(
+  Tinytest.add(
     'Webapp - use latest staticFilesByArch',
     function (test) {
       let origStaticFiles = WebAppInternals.staticFilesByArch;
@@ -111,7 +112,7 @@ if (httpMonitoringEnabled) {
       WebAppInternals.staticFilesByArch = origStaticFiles;
     });
 
-    Tinytest.add(
+  Tinytest.add(
     'Webapp - static middleware',
     function (test) {
       const result = HTTP.get(Meteor.absoluteUrl('global-imports.js'));
