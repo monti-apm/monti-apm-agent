@@ -59,6 +59,39 @@ if (httpMonitoringEnabled) {
         });
     });
 
+    Tinytest.add(
+    'Webapp - filter body',
+    function (test) {
+      Kadira.tracer.redactField('httpSecret');
+
+      let req = {
+        url: '/test',
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'content-length': '1000'
+        },
+        body: { httpSecret: 'secret', otherData: 5 }
+      };
+
+      let listener;
+
+      WebApp.rawConnectHandlers.stack[0].handle(
+        req,
+        {on (event, _listener) { listener = _listener }},
+        () => {}
+      );
+
+      listener();
+
+      let expected = JSON.stringify({
+        httpSecret: 'Monti: redacted',
+        otherData: 5
+      });
+
+      test.equal(req.__kadiraInfo.trace.events[0][2].body, expected)
+    });
+
    Tinytest.add(
     'Webapp - use latest staticFilesByArch',
     function (test) {
