@@ -94,6 +94,22 @@ if (httpMonitoringEnabled) {
     });
 
   Tinytest.add(
+    'Webapp - static middleware',
+    function (test) {
+      const result = HTTP.get(Meteor.absoluteUrl('global-imports.js'));
+      test.isTrue(result.content.includes('Package['));
+      let payload = Kadira.models.http.buildPayload();
+
+      let staticMetrics = payload.httpMetrics[0].routes['GET-<static file>'];
+      test.isTrue(staticMetrics.count > 0);
+    });
+}
+
+if (releaseParts[0] > 1 ||
+  (releaseParts[0] === 1 && releaseParts[1] > 8)) {
+  // Meteor 1.8.1 and newer started replacing staticFilesByArch instead of
+  // mutating the existing object
+  Tinytest.add(
     'Webapp - use latest staticFilesByArch',
     function (test) {
       let origStaticFiles = WebAppInternals.staticFilesByArch;
@@ -110,16 +126,5 @@ if (httpMonitoringEnabled) {
       test.equal(result.content, '5');
 
       WebAppInternals.staticFilesByArch = origStaticFiles;
-    });
-
-  Tinytest.add(
-    'Webapp - static middleware',
-    function (test) {
-      const result = HTTP.get(Meteor.absoluteUrl('global-imports.js'));
-      test.isTrue(result.content.includes('Package['));
-      let payload = Kadira.models.http.buildPayload();
-
-      let staticMetrics = payload.httpMetrics[0].routes['GET-<static file>'];
-      test.isTrue(staticMetrics.count > 0);
     });
 }
