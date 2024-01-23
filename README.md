@@ -176,6 +176,23 @@ Monti.tracer.addFilter((eventType, data) => {
 });
 ```
 
+Some objects are turned into a JSON string before being stored in the trace. To remove the content of a field from these objects, you can use:
+
+```
+Monti.tracer.redactField('apiKey');
+
+Monti.tracer.redactField('authorization');
+```
+
+The value of the field is changed to `Monti: redacted`.
+
+The fields are redacted from:
+- headers in traces for incoming HTTP requests
+- params sent when calling a method or subscribing to a publication
+- body of incoming http requests, when the body is JSON
+
+By default, the `password` field is redacted.
+
 ### Development
 
 #### Tests:
