@@ -726,7 +726,7 @@ addTestWithRoundedTime(
   }
 );
 
-Tinytest.addAsync('Models - PubSub - Waitd Time - track wait time', async (test, done) => {
+Tinytest.addAsync('Models - PubSub - Wait Time - track wait time', async (test, done) => {
   CleanTestData();
 
   TestData.insert({aa: 10});
