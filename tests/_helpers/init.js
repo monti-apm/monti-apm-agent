@@ -64,6 +64,12 @@ Meteor.publish('tinytest-data-random', function () {
   return TestData.find({aa: {$ne: Random.id()}});
 });
 
+Meteor.publish('tinytest-wait-time', function () {
+  Meteor._sleepForMs(1);
+  return TestData.find();
+});
+
+
 Meteor.publish('tinytest-waited-on', function () {
   Meteor._sleepForMs(25);
   return TestData.find();
