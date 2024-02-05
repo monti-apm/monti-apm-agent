@@ -56,12 +56,12 @@ Tinytest.addAsync(
     Meteor.setTimeout(function () {
       let status = monitor.status();
 
-      test.isTrue(status.pctBlock > 0);
+      test.isTrue(status.pctBlock > 0, `${status.pctBlock} > 0`);
       monitor.stop();
 
       status = monitor.status();
 
-      test.isTrue(status.pctBlock === 0);
+      test.isTrue(status.pctBlock === 0, `${status.pctBlock} === 0`);
       done();
     }, 200);
   }
