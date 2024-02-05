@@ -733,17 +733,20 @@ Tinytest.addAsync('Models - PubSub - Wait Time - track wait time', async (test, 
   TestData.insert({aa: 20});
 
   let client = GetMeteorClient();
+  waitForConnection(client);
 
-  const pubName = 'tinytest-wait-time';
+  let slowMethod = RegisterMethod(function () {
+    Meteor._sleepForMs(50);
+  });
 
-  for (let i = 0; i < 10; i++) {
-    client.subscribe(pubName);
-  }
+  client.call(slowMethod, () => {});
 
-  Meteor._sleepForMs(1000);
+  const pubName = 'tinytest-waited-on';
+  SubscribeAndWait(client, pubName);
+
+  Meteor._sleepForMs(100);
 
   const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), pubName);
-  console.error(metrics.waitedOn, metrics.waitTime);
 
   test.isTrue(metrics.waitTime > 0, `${metrics.waitTime} should be greater than 0`);
 
