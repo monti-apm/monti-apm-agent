@@ -149,6 +149,7 @@ Tinytest.add(
     let st = Date.now();
     let h1 = TestHelpers.subscribeAndWait(client, 'tinytest-data');
     let elapsedTime = Date.now() - st;
+    console.log('elapsed 1', elapsedTime);
 
     TestHelpers.wait(100);
 
@@ -157,6 +158,7 @@ Tinytest.add(
     st = Date.now();
     h1.stop();
     elapsedTime += Date.now() - st;
+    console.log('elapsed 2', Date.now() - st);
 
     TestHelpers.wait(100);
 
