@@ -15,7 +15,6 @@ import {
 } from '../_helpers/helpers';
 import { TestData } from '../_helpers/globals';
 import { Meteor } from 'meteor/meteor';
-import { Ntp } from '../../lib/ntp';
 
 addTestWithRoundedTime(
   'Models - PubSub - Metrics - same date',
