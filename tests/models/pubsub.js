@@ -765,6 +765,11 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait time of next message
   client.call(fastMethod);
 
   const metrics = FindMetricsForPub('tinytest-waited-on');
+
+  if (metrics.waitedOn === 0) {
+    console.dir(metrics);
+  }
+
   test.isTrue(metrics.waitedOn > 10, `${metrics.waitedOn} should be greater than 10`);
 
   done();
