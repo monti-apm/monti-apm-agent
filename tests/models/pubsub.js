@@ -746,7 +746,7 @@ Tinytest.addAsync('Models - PubSub - Wait Time - track wait time', async (test, 
 
   Meteor._sleepForMs(100);
 
-  const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), pubName);
+  const metrics = FindMetricsForPub(pubName);
 
   test.isTrue(metrics.waitTime > 0, `${metrics.waitTime} should be greater than 0`);
 
