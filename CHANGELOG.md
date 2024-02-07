@@ -1,5 +1,15 @@
 # Changelog
 
+## Next
+
+* Track waitedOn time for methods and publications - the amount of time it is blocking other methods and publications
+* Fix using outdated staticFilesByArch in development on some Meteor versions
+* Add `Monti.event` to match v3 of agent
+* Run object filters on HTTP req body
+* Document Monti.tracer.redactField
+* Rounds event loop lag to nearest 500 microseconds
+* Remove unused pctEvloopBlock metric
+
 ## 2.47.4
 Nov 24, 2023
 

@@ -726,6 +726,33 @@ addTestWithRoundedTime(
   }
 );
 
+Tinytest.addAsync('Models - PubSub - Wait Time - track wait time', async (test, done) => {
+  CleanTestData();
+
+  TestData.insert({aa: 10});
+  TestData.insert({aa: 20});
+
+  let client = GetMeteorClient();
+  waitForConnection(client);
+
+  let slowMethod = RegisterMethod(function () {
+    Meteor._sleepForMs(50);
+  });
+
+  client.call(slowMethod, () => {});
+
+  const pubName = 'tinytest-waited-on';
+  SubscribeAndWait(client, pubName);
+
+  Meteor._sleepForMs(100);
+
+  const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), pubName);
+
+  test.isTrue(metrics.waitTime > 0, `${metrics.waitTime} should be greater than 0`);
+
+  done();
+});
+
 Tinytest.addAsync('Models - PubSub - Waited On - track wait time of queued messages', async (test, done) => {
   CleanTestData();
 
@@ -749,7 +776,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait time of queued messa
   done();
 });
 
-Tinytest.addAsync('Models - PubSub - Waited On - track wait time of next message', async (test, done) => {
+Tinytest.addAsync('Models - PubSub - Waited On - track waited on time of next message', async (test, done) => {
   CleanTestData();
   let fastMethod = RegisterMethod(function () {
     console.log('fastMethod');
