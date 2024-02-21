@@ -1,9 +1,8 @@
 import { EJSON } from 'meteor/ejson';
 import { MethodsModel } from '../../lib/models/methods';
 import { TestData } from '../_helpers/globals';
-import { CleanTestData, GetMeteorClient, RegisterMethod, Wait, WithDocCacheGetSize } from '../_helpers/helpers';
+import { CleanTestData, GetMeteorClient, RegisterMethod, Wait, WithDocCacheGetSize, findMetricsForMethod } from '../_helpers/helpers';
 import { Meteor } from 'meteor/meteor';
-import { Ntp } from '../../lib/ntp';
 
 Tinytest.add(
   'Models - Method - buildPayload simple',
@@ -204,7 +203,7 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messa
 
   Meteor._sleepForMs(1000);
 
-  const metrics = Kadira.models.methods._getMetrics(Ntp._now(), methodId);
+  const metrics = findMetricsForMethod(methodId);
 
   test.isTrue(metrics.waitedOn > 25, `${metrics.waitedOn} should be greater than 25`);
   test.isTrue(metrics.waitedOn <= 6000, `${metrics.waitedOn} should be less than 6k`);
@@ -227,7 +226,7 @@ Tinytest.addAsync('Models - Method - Waited On - check unblock time', async (tes
 
   Meteor._sleepForMs(1000);
 
-  const metrics = Kadira.models.methods._getMetrics(Ntp._now(), methodId);
+  const metrics = findMetricsForMethod(methodId);
 
   test.isTrue(metrics.waitedOn <= 1, 'waitedOn should be less or equal than 1');
 
@@ -247,7 +246,7 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of next message
 
   Meteor._sleepForMs(200);
 
-  const metrics = Kadira.models.methods._getMetrics(Ntp._now(), slowMethod);
+  const metrics = findMetricsForMethod(slowMethod);
   test.isTrue(metrics.waitedOn >= 20, `${metrics.waitedOn} should be greater than 20`);
 
   done();

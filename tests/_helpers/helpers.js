@@ -98,6 +98,20 @@ export const GetPubSubPayload = function (detailInfoNeeded) {
   return Kadira.models.pubsub.buildPayload(detailInfoNeeded).pubMetrics;
 };
 
+export function findMetricsForMethod (name) {
+  let metrics = Object.values(Kadira.models.methods.methodMetricsByMinute);
+
+  let candidates = [];
+
+  metrics.forEach(metric => {
+    if (metric.methods[name]) {
+      candidates.push(metric.methods[name]);
+    }
+  });
+
+  return candidates[candidates.length - 1];
+}
+
 export const Wait = function (time) {
   let f = new Future();
   Meteor.setTimeout(function () {
@@ -188,7 +202,9 @@ export const WithDocCacheGetSize = function (fn, patchedSize) {
   }
 };
 
-export const releaseParts = Meteor.release.split('METEOR@')[1].split('.').map(num => parseInt(num, 10));
+// Meteor.release is none when running from checkout
+let release = Meteor.release === 'none' ? 'METEOR@2.5.0' : Meteor.release;
+export const releaseParts = release.split('METEOR@')[1].split('.').map(num => parseInt(num, 10));
 
 export const withRoundedTime = (fn) => (test) => {
   const date = new Date();

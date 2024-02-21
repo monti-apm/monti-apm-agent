@@ -1,5 +1,5 @@
 import { Meteor } from 'meteor/meteor';
-import { SystemModel } from '../../lib/models/system';
+import { MEMORY_ROUNDING_FACTOR, SystemModel } from '../../lib/models/system';
 import { Wait } from '../_helpers/helpers';
 
 /**
@@ -13,8 +13,8 @@ Tinytest.add(
       setTimeout(callback, 500);
     })();
     let payload = model.buildPayload().systemMetrics[0];
-
     test.isTrue(payload.memory > 0, `memory: ${payload.memory}`);
+    test.isTrue((payload.memory * 1024 * 1024 /* in bytes */) % MEMORY_ROUNDING_FACTOR === 0, 'memory is rounded');
     test.isTrue(payload.pcpu >= 0, `pcpu: ${payload.pcpu}`);
     test.isTrue(payload.sessions >= 0, `sessions: ${payload.sessions}`);
     test.isTrue(payload.endTime >= payload.startTime + 500, `time: ${payload.endTime} - ${payload.startTime}`);
