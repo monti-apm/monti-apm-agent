@@ -10,8 +10,7 @@ import {
   GetPubSubPayload,
   RegisterPublication,
   SubscribeAndWait,
-  TestHelpers,
-  Wait
+  TestHelpers, Wait, waitForConnection
 } from '../_helpers/helpers';
 
 Tinytest.add(
@@ -156,9 +155,13 @@ Tinytest.add(
 
     let client = TestHelpers.getMeteorClient();
 
+    waitForConnection(client);
+
+    let start = Date.now();
     let st = Date.now();
     let h1 = TestHelpers.subscribeAndWait(client, 'tinytest-data');
     let elapsedTime = Date.now() - st;
+    console.log('elapsed 1', elapsedTime);
 
     TestHelpers.wait(100);
 
@@ -167,6 +170,8 @@ Tinytest.add(
     st = Date.now();
     h1.stop();
     elapsedTime += Date.now() - st;
+    console.log('elapsed 2', Date.now() - st);
+    console.log('elapsed total', Date.now() - start);
 
     TestHelpers.wait(100);
 

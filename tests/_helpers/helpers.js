@@ -5,9 +5,25 @@ import { MethodStore, TestData } from './globals';
 
 const Future = Npm.require('fibers/future');
 
+const Future = Npm.require('fibers/future');
+
 export const GetMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
-  return DDP.connect(url, {retry: false});
+  return DDP.connect(url, {retry: false, });
+};
+
+export const waitForConnection = function (client) {
+  let timeout = Date.now() + 1000;
+  while (Date.now() < timeout) {
+    let status = client.status();
+    if (status.connected) {
+      return;
+    }
+
+    Meteor._sleepForMs(50);
+  }
+
+  throw new Error('timed out waiting for connection');
 };
 
 export const RegisterMethod = function (F) {
@@ -83,6 +99,20 @@ export const FindMetricsForPub = function (pubname) {
 export const GetPubSubPayload = function (detailInfoNeeded) {
   return Kadira.models.pubsub.buildPayload(detailInfoNeeded).pubMetrics;
 };
+
+export function findMetricsForMethod (name) {
+  let metrics = Object.values(Kadira.models.methods.methodMetricsByMinute);
+
+  let candidates = [];
+
+  metrics.forEach(metric => {
+    if (metric.methods[name]) {
+      candidates.push(metric.methods[name]);
+    }
+  });
+
+  return candidates[candidates.length - 1];
+}
 
 export const Wait = function (time) {
   let f = new Future();
@@ -174,7 +204,9 @@ export const WithDocCacheGetSize = function (fn, patchedSize) {
   }
 };
 
-export const releaseParts = (Meteor.release === 'none' ? 'METEOR@0.0.0' : Meteor.release).split('METEOR@')[1].split('.').map(num => parseInt(num, 10));
+// Meteor.release is none when running from checkout
+let release = Meteor.release === 'none' ? 'METEOR@2.5.0' : Meteor.release;
+export const releaseParts = release.split('METEOR@')[1].split('.').map(num => parseInt(num, 10));
 
 export const withRoundedTime = (fn) => (test) => {
   const date = new Date();
