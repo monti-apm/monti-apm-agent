@@ -5,8 +5,6 @@ import { MethodStore, TestData } from './globals';
 
 const Future = Npm.require('fibers/future');
 
-const Future = Npm.require('fibers/future');
-
 export const GetMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
   return DDP.connect(url, {retry: false, });
