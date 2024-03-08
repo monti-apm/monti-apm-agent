@@ -137,10 +137,20 @@ addAsyncTest(
 
 addAsyncTest(
   'Subscriptions - ObserverLifetime - sub',
-  async function (test, client) {
+  async function (test) {
+    TestHelpers.cleanTestData();
+
+    TestHelpers.enableTrackingMethods();
+
+    let client = TestHelpers.getMeteorClient();
+
+    await waitForConnection(client);
+
+    let start = Date.now();
     let st = Date.now();
     let h1 = await subscribeAndWait(client, 'tinytest-data');
     let elapsedTime = Date.now() - st;
+    console.log('elapsed 1', elapsedTime);
 
     await sleep(100);
 
@@ -149,6 +159,8 @@ addAsyncTest(
     st = Date.now();
     h1.stop();
     elapsedTime += Date.now() - st;
+    console.log('elapsed 2', Date.now() - st);
+    console.log('elapsed total', Date.now() - start);
 
     await sleep(100);
 

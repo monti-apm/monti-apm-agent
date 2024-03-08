@@ -168,6 +168,20 @@ export const getPubSubPayload = function (detailInfoNeeded) {
   return Kadira.models.pubsub.buildPayload(detailInfoNeeded).pubMetrics;
 };
 
+export function findMetricsForMethod (name) {
+  let metrics = Object.values(Kadira.models.methods.methodMetricsByMinute);
+
+  let candidates = [];
+
+  metrics.forEach(metric => {
+    if (metric.methods[name]) {
+      candidates.push(metric.methods[name]);
+    }
+  });
+
+  return candidates[candidates.length - 1];
+}
+
 export const Wait = function (time) {
   return new Promise((resolve) => {
     setTimeout(resolve, time);
@@ -261,9 +275,9 @@ export const withDocCacheGetSize = async function (fn, patchedSize) {
   }
 };
 
-const releaseVer = Meteor.release.split('METEOR@')[1];
-
-export const releaseParts = releaseVer && releaseVer.split('.').map(num => parseInt(num, 10)) || [0, 0, 0];
+// Meteor.release is none when running from checkout
+let release = Meteor.release === 'none' ? 'METEOR@2.5.0' : Meteor.release;
+export const releaseParts = release.split('METEOR@')[1].split('.').map(num => parseInt(num, 10));
 
 
 const asyncTest = fn => async (test, done) => {

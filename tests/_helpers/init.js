@@ -56,13 +56,25 @@ Meteor.publish('tinytest-data-with-no-oplog', function () {
 });
 
 Meteor.publish('tinytest-data-random', function () {
-  return TestData.find({ aa: {$ne: Random.id() }});
+  return TestData.find({ aa: {$ne: Random.id()}});
 });
+
+Meteor.publish('tinytest-wait-time', function () {
+  Meteor._sleepForMs(1);
+  return TestData.find();
+});
+
 
 Meteor.publish('tinytest-data-cursor-fetch', async function () {
   await TestData.find({}).fetchAsync();
   this.ready();
 });
+
+Meteor.publish('tinytest-wait-time', function () {
+  Meteor._sleepForMs(1);
+  return TestData.find();
+});
+
 
 Meteor.publish('tinytest-waited-on', async function () {
   await sleep(1000);
