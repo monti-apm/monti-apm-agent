@@ -103,7 +103,7 @@ You should use the same method that you used to give the agent the app id and se
 | eventStackTrace     | EVENT_STACK_TRACE             | false                       | If true, records a stack trace when an event starts. Slightly decreases server performance.                                                                                                             |
 | disableNtp          | OPTIONS_DISABLE_NTP           | false                       | Disable NTP time synchronization used to get the accurate time in case the server or client's clock is wrong                                                                                            |
 | stalledTimeout      | STALLED_TIMEOUT               | 1800000 (30m)               | Timeout used to detect when methods and subscriptions might be stalled (have been running for a long time and might never return). The value is in milliseconds, and can be disabled by setting it to 0 |
-
+| proxy               | MONTI_OPTIONS_PROXY           | none                        | Allows you to connect to Monti APM using a proxy |
 
 ### Traces
 
@@ -175,6 +175,23 @@ Monti.tracer.addFilter((eventType, data) => {
   return data;
 });
 ```
+
+Some objects are turned into a JSON string before being stored in the trace. To remove the content of a field from these objects, you can use:
+
+```
+Monti.tracer.redactField('apiKey');
+
+Monti.tracer.redactField('authorization');
+```
+
+The value of the field is changed to `Monti: redacted`.
+
+The fields are redacted from:
+- headers in traces for incoming HTTP requests
+- params sent when calling a method or subscribing to a publication
+- body of incoming http requests, when the body is JSON
+
+By default, the `password` field is redacted.
 
 ### Development
 
