@@ -1,6 +1,6 @@
 import { MethodsModel } from '../../lib/models/methods';
 import { TestData } from '../_helpers/globals';
-import { CleanTestData, getMeteorClient, addAsyncTest, callAsync, clientCallAsync, registerMethod, withDocCacheGetSize } from '../_helpers/helpers';
+import { CleanTestData, findMetricsForMethod, getMeteorClient, addAsyncTest, callAsync, clientCallAsync, registerMethod, withDocCacheGetSize } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 import { Ntp } from '../../lib/ntp';
 

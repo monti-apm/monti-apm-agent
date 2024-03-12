@@ -8,7 +8,8 @@ import {
   getPubSubPayload,
   registerPublication,
   subscribeAndWait,
-  TestHelpers
+  TestHelpers,
+  waitForConnection
 } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 

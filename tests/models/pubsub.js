@@ -11,6 +11,7 @@ import {
   registerMethod,
   CleanTestData,
   closeClient,
+  FindMetricsForPub,
 } from '../_helpers/helpers';
 import { TestData } from '../_helpers/globals';
 import { Meteor } from 'meteor/meteor';
@@ -730,32 +731,6 @@ addTestWithRoundedTime(
   }
 );
 
-Tinytest.addAsync('Models - PubSub - Wait Time - track wait time', async (test, done) => {
-  CleanTestData();
-
-  TestData.insert({aa: 10});
-  TestData.insert({aa: 20});
-
-  let client = GetMeteorClient();
-  waitForConnection(client);
-
-  let slowMethod = RegisterMethod(function () {
-    Meteor._sleepForMs(50);
-  });
-
-  client.call(slowMethod, () => {});
-
-  const pubName = 'tinytest-waited-on';
-  SubscribeAndWait(client, pubName);
-
-  Meteor._sleepForMs(100);
-
-  const metrics = FindMetricsForPub(pubName);
-
-  test.isTrue(metrics.waitTime > 0, `${metrics.waitTime} should be greater than 0`);
-
-  done();
-});
 
 Tinytest.addAsync('Models - PubSub - Wait Time - track wait time', async (test, done) => {
   CleanTestData();
@@ -764,6 +739,7 @@ Tinytest.addAsync('Models - PubSub - Wait Time - track wait time', async (test, 
   await TestData.insertAsync({aa: 20});
 
   let client = getMeteorClient();
+  await waitForConnection(client);
 
   const pubName = 'tinytest-waited-on';
 
@@ -822,6 +798,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait when unblock', async
   client.call(fastMethod);
 
   await sleep(200);
+  const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), 'tinytest-waited-on2');
 
   test.isTrue(metrics.waitedOn > 8, `${metrics.waitedOn} should be greater than 8`);
 

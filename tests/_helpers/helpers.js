@@ -11,8 +11,8 @@ import util from 'util';
 
 const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
-export const callAsync = async (method, ...args) => _client.call(method, ...args);
-export const clientCallAsync = async (client, method, ...args) => client.call(method, ...args).stubValuePromise;
+export const callAsync = async (method, ...args) => _client.callAsync(method, ...args);
+export const clientCallAsync = async (client, method, ...args) => client.callAsync(method, ...args).stubValuePromise;
 
 export const getMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
