@@ -3,7 +3,7 @@ import fs from 'fs';
 import { Meteor } from 'meteor/meteor';
 import sinon from 'sinon';
 import { MEMORY_ROUNDING_FACTOR, SystemModel } from '../../lib/models/system';
-import { Wait } from '../_helpers/helpers';
+import { Wait, releaseParts } from '../_helpers/helpers';
 /**
  * @flaky
  */
@@ -26,18 +26,20 @@ Tinytest.add(
   }
 );
 
-Tinytest.addAsync(
-  'Models - System - freeMemory',
-  async function (test) {
-    let model = new SystemModel();
-    /**
+// sinon cant stub fs/cp on older node versions
+if (releaseParts[0] >= 1 && releaseParts[1] > 8 ) {
+  Tinytest.addAsync(
+    'Models - System - freeMemory',
+    async function (test) {
+      let model = new SystemModel();
+      /**
      * MAC OS
      */
-    sinon.stub(process, 'platform').value('darwin');
+      sinon.stub(process, 'platform').value('darwin');
 
-    sinon.replace(child_process, 'exec', (a, callback) => {
-      callback(null,
-        `Mach Virtual Memory Statistics: (page size of 16384 bytes)
+      sinon.replace(child_process, 'exec', (a, callback) => {
+        callback(null,
+          `Mach Virtual Memory Statistics: (page size of 16384 bytes)
           Pages free:                                3293.
           Pages active:                            231224.
           Pages inactive:                          238682.
@@ -60,19 +62,19 @@ Tinytest.addAsync(
           Pageouts:                               2172799.
           Swapins:                                6971267.
           Swapouts:                               8892364.`);
-    });
-    await model.getFreeMemory();
-    test.isTrue(model.freeMemory === 3964518400, 'should use the file format on mac');
-    sinon.restore();
+      });
+      await model.getFreeMemory();
+      test.isTrue(model.freeMemory === 3964518400, 'should use the file format on mac');
+      sinon.restore();
 
-    /**
+      /**
      * LINUX
      */
-    sinon.stub(process, 'platform').value('linux');
-    model = new SystemModel();
-    sinon.replace(fs, 'readFile', (_,callback) => {
-      callback(null,
-        { toString: () => `MemTotal:        2097152 kB
+      sinon.stub(process, 'platform').value('linux');
+      model = new SystemModel();
+      sinon.replace(fs, 'readFile', (_,callback) => {
+        callback(null,
+          { toString: () => `MemTotal:        2097152 kB
         MemFree:         2085696 kB
         MemAvailable:    2085828 kB
         Buffers:               0 kB
@@ -123,15 +125,15 @@ Tinytest.addAsync(
         DirectMap4k:    14918780 kB
         DirectMap2M:    116037632 kB
         DirectMap1G:     5242880 kB`});
-    });
+      });
 
-    await model.getFreeMemory();
-    console.log(model.freeMemory);
-    test.isTrue(model.freeMemory === 2135887872, 'should use the file format on linux');
-    sinon.restore();
-  }
-);
-
+      await model.getFreeMemory();
+      console.log(model.freeMemory);
+      test.isTrue(model.freeMemory === 2135887872, 'should use the file format on linux');
+      sinon.restore();
+    }
+  );
+}
 Tinytest.addAsync(
   'Models - System - freeMemory silent error',
   async function (test) {
