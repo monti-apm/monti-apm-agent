@@ -1,4 +1,4 @@
-import child_process from 'child_process';
+import cp from 'child_process';
 import fs from 'fs';
 import { Meteor } from 'meteor/meteor';
 import sinon from 'sinon';
@@ -37,7 +37,7 @@ if (releaseParts[0] >= 1 && releaseParts[1] > 8 ) {
      */
       sinon.stub(process, 'platform').value('darwin');
 
-      sinon.replace(child_process, 'exec', (a, callback) => {
+      sinon.replace(cp, 'exec', (a, callback) => {
         callback(null,
           `Mach Virtual Memory Statistics: (page size of 16384 bytes)
           Pages free:                                3293.
@@ -142,7 +142,7 @@ Tinytest.addAsync(
      * MAC OS
      */
     sinon.stub(process, 'platform').value('darwin');
-    sinon.replace(child_process, 'exec', (a, callback) => {
+    sinon.replace(cp, 'exec', (a, callback) => {
       callback(/* error */ true,null);
     });
     await model.getFreeMemory();
