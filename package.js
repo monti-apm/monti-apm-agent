@@ -30,7 +30,7 @@ Package.onUse(function (api) {
 });
 
 Package.onTest(function (api) {
-  Npm.depends({...npmModules, sinon: '12.0.1'});
+  Npm.depends(Object.assign({}, npmModules, {sinon: '12.0.1'}));
   configurePackage(api, true);
   api.use([
     'peerlibrary:reactive-publish',
