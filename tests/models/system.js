@@ -133,36 +133,44 @@ if (releaseParts[0] >= 1 && releaseParts[1] > 8 ) {
       sinon.restore();
     }
   );
-}
-Tinytest.addAsync(
-  'Models - System - freeMemory silent error',
-  async function (test) {
-    let model = new SystemModel();
-    /**
+  Tinytest.addAsync(
+    'Models - System - freeMemory silent error',
+    async function (test) {
+      let model = new SystemModel();
+      /**
      * MAC OS
      */
-    sinon.stub(process, 'platform').value('darwin');
-    sinon.replace(cp, 'exec', (a, callback) => {
-      callback(/* error */ true,null);
-    });
-    await model.getFreeMemory();
-    test.isTrue(model.freeMemory > 0, 'should use fallback on mac');
-    sinon.restore();
+      sinon.stub(process, 'platform').value('darwin');
+      sinon.replace(cp, 'exec', (a, callback) => {
+        callback(/* error */ true,null);
+      });
+      await model.getFreeMemory();
+      test.isTrue(model.freeMemory > 0, 'should use fallback on mac');
+      sinon.restore();
 
-    /**
+      /**
      * LINUX
      */
-    sinon.stub(process, 'platform').value('linux');
-    model = new SystemModel();
-    sinon.replace(fs, 'readFile', (_,callback) => {
-      callback(/* error */ true, null);
-    });
+      sinon.stub(process, 'platform').value('linux');
+      model = new SystemModel();
+      sinon.replace(fs, 'readFile', (_,callback) => {
+        callback(/* error */ true, null);
+      });
 
-    await model.getFreeMemory();
-    test.isTrue(model.freeMemory > 0 , 'should use fallback linux');
-    sinon.restore();
-  }
-);
+      await model.getFreeMemory();
+      test.isTrue(model.freeMemory > 0 , 'should use fallback linux');
+      sinon.restore();
+    }
+  );
+} else {
+  Tinytest.addAsync(
+    'Models - System - freeMemory silent error',
+    async function (test) {
+      const model = new SystemModel();
+      await model.getFreeMemory();
+      test.isTrue(model.freeMemory > 0 , 'should use fallback linux');
+    });
+}
 
 Tinytest.add(
   'Models - System - new Sessions - count new session',
