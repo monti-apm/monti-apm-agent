@@ -27,7 +27,7 @@ Tinytest.add(
 );
 
 // sinon cant stub fs/cp on older node versions
-if (releaseParts[0] >= 1 && releaseParts[1] > 8 ) {
+if (releaseParts[0] > 1 || (releaseParts[0] === 1 && releaseParts[1] > 8) ) {
   Tinytest.addAsync(
     'Models - System - freeMemory',
     async function (test) {
@@ -165,11 +165,24 @@ if (releaseParts[0] >= 1 && releaseParts[1] > 8 ) {
 } else {
   Tinytest.addAsync(
     'Models - System - freeMemory silent error',
-    async function (test) {
+    async function (test, done) {
       const model = new SystemModel();
       await model.getFreeMemory();
       test.isTrue(model.freeMemory > 0 , 'should use fallback linux');
+      done();
     });
+}
+
+if (process.platform !== 'win32') {
+  Tinytest.addAsync(
+    'Models - System - freeMemory succeed on osx/linux',
+    async function (test, done) {
+      const model = new SystemModel();
+      let success = await model.getFreeMemory();
+      test.isTrue(success);
+      done();
+    }
+  );
 }
 
 Tinytest.add(
