@@ -22,14 +22,15 @@ let npmModules = {
   parseurl: '1.3.3',
 };
 
-Npm.depends(npmModules);
 
 Package.onUse(function (api) {
+  Npm.depends(npmModules);
   configurePackage(api, false);
   api.export(['Kadira', 'Monti']);
 });
 
 Package.onTest(function (api) {
+  Npm.depends(Object.assign({}, npmModules, {sinon: '6.3.5'}));
   configurePackage(api, true);
   api.use([
     'peerlibrary:reactive-publish',

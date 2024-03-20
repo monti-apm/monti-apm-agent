@@ -1,7 +1,9 @@
+import cp from 'child_process';
+import fs from 'fs';
 import { Meteor } from 'meteor/meteor';
+import sinon from 'sinon';
 import { MEMORY_ROUNDING_FACTOR, SystemModel } from '../../lib/models/system';
-import { Wait } from '../_helpers/helpers';
-
+import { Wait, releaseParts } from '../_helpers/helpers';
 /**
  * @flaky
  */
@@ -15,11 +17,173 @@ Tinytest.add(
     let payload = model.buildPayload().systemMetrics[0];
     test.isTrue(payload.memory > 0, `memory: ${payload.memory}`);
     test.isTrue((payload.memory * 1024 * 1024 /* in bytes */) % MEMORY_ROUNDING_FACTOR === 0, 'memory is rounded');
+    test.isTrue((payload.freeMemory * 1024 * 1024 /* in bytes */) % MEMORY_ROUNDING_FACTOR === 0, 'memory is rounded');
+    test.isTrue(payload.freeMemory > 0, 'free memory is > 0');
+    test.isTrue(payload.freeMemory > 0, 'free memory is > 0');
     test.isTrue(payload.pcpu >= 0, `pcpu: ${payload.pcpu}`);
     test.isTrue(payload.sessions >= 0, `sessions: ${payload.sessions}`);
     test.isTrue(payload.endTime >= payload.startTime + 500, `time: ${payload.endTime} - ${payload.startTime}`);
   }
 );
+
+// sinon cant stub fs/cp on older node versions
+if (releaseParts[0] > 1 || (releaseParts[0] === 1 && releaseParts[1] > 8) ) {
+  Tinytest.addAsync(
+    'Models - System - freeMemory',
+    async function (test) {
+      let model = new SystemModel();
+      /**
+     * MAC OS
+     */
+      sinon.stub(process, 'platform').value('darwin');
+
+      sinon.replace(cp, 'exec', (a, callback) => {
+        callback(null,
+          `Mach Virtual Memory Statistics: (page size of 16384 bytes)
+          Pages free:                                3293.
+          Pages active:                            231224.
+          Pages inactive:                          238682.
+          Pages speculative:                          534.
+          Pages throttled:                              0.
+          Pages wired down:                        212821.
+          Pages purgeable:                          15075.
+          "Translation faults":                3619403884.
+          Pages copy-on-write:                  205742534.
+          Pages zero filled:                   1133125308.
+          Pages reactivated:                    862283057.
+          Pages purged:                         221979774.
+          File-backed pages:                       115729.
+          Anonymous pages:                         354711.
+          Pages stored in compressor:             2284038.
+          Pages occupied by compressor:            452497.
+          Decompressions:                       992611451.
+          Compressions:                        1067810568.
+          Pageins:                               58750181.
+          Pageouts:                               2172799.
+          Swapins:                                6971267.
+          Swapouts:                               8892364.`);
+      });
+      await model.getFreeMemory();
+      test.isTrue(model.freeMemory === 3964518400, 'should use the file format on mac');
+      sinon.restore();
+
+      /**
+     * LINUX
+     */
+      sinon.stub(process, 'platform').value('linux');
+      model = new SystemModel();
+      sinon.replace(fs, 'readFile', (_,callback) => {
+        callback(null,
+          { toString: () => `MemTotal:        2097152 kB
+        MemFree:         2085696 kB
+        MemAvailable:    2085828 kB
+        Buffers:               0 kB
+        Cached:              132 kB
+        SwapCached:            0 kB
+        Active:                0 kB
+        Inactive:           4116 kB
+        Active(anon):          0 kB
+        Inactive(anon):     4116 kB
+        Active(file):          0 kB
+        Inactive(file):        0 kB
+        Unevictable:           0 kB
+        Mlocked:               0 kB
+        SwapTotal:             0 kB
+        SwapFree:              0 kB
+        Dirty:                 0 kB
+        Writeback:             0 kB
+        AnonPages:          4116 kB
+        Mapped:                0 kB
+        Shmem:                 0 kB
+        KReclaimable:    6807616 kB
+        Slab:               0 kB
+        SReclaimable:          0 kB
+        SUnreclaim:            0 kB
+        KernelStack:       36496 kB
+        PageTables:        48024 kB
+        NFS_Unstable:          0 kB
+        Bounce:                0 kB
+        WritebackTmp:          0 kB
+        CommitLimit:    325948112 kB
+        Committed_AS:   18755168 kB
+        VmallocTotal:   34359738367 kB
+        VmallocUsed:      163092 kB
+        VmallocChunk:          0 kB
+        Percpu:           525312 kB
+        HardwareCorrupted:     0 kB
+        AnonHugePages:         0 kB
+        ShmemHugePages:        0 kB
+        ShmemPmdMapped:        0 kB
+        FileHugePages:         0 kB
+        FilePmdMapped:         0 kB
+        HugePages_Total:    8192
+        HugePages_Free:     8189
+        HugePages_Rsvd:       61
+        HugePages_Surp:        0
+        Hugepagesize:       2048 kB
+        Hugetlb:        16777216 kB
+        DirectMap4k:    14918780 kB
+        DirectMap2M:    116037632 kB
+        DirectMap1G:     5242880 kB`});
+      });
+
+      await model.getFreeMemory();
+      console.log(model.freeMemory);
+      test.isTrue(model.freeMemory === 2135887872, 'should use the file format on linux');
+      sinon.restore();
+    }
+  );
+  Tinytest.addAsync(
+    'Models - System - freeMemory silent error',
+    async function (test) {
+      let model = new SystemModel();
+      /**
+     * MAC OS
+     */
+      sinon.stub(process, 'platform').value('darwin');
+      sinon.replace(cp, 'exec', (a, callback) => {
+        callback(/* error */ true,null);
+      });
+      await model.getFreeMemory();
+      test.isTrue(model.freeMemory > 0, 'should use fallback on mac');
+      sinon.restore();
+
+      /**
+     * LINUX
+     */
+      sinon.stub(process, 'platform').value('linux');
+      model = new SystemModel();
+      sinon.replace(fs, 'readFile', (_,callback) => {
+        callback(/* error */ true, null);
+      });
+
+      await model.getFreeMemory();
+      test.isTrue(model.freeMemory > 0 , 'should use fallback linux');
+      sinon.restore();
+    }
+  );
+} else {
+  Tinytest.addAsync(
+    'Models - System - freeMemory silent error',
+    async function (test, done) {
+      const model = new SystemModel();
+      await model.getFreeMemory();
+      test.isTrue(model.freeMemory > 0 , 'should use fallback linux');
+      done();
+    });
+}
+
+if (process.platform !== 'win32') {
+  Tinytest.addAsync(
+    'Models - System - freeMemory succeed on osx/linux',
+    async function (test, done) {
+      const model = new SystemModel();
+      let success = await model.getFreeMemory();
+      test.isTrue(success);
+      done();
+    }
+  );
+}
 
 Tinytest.add(
   'Models - System - new Sessions - count new session',
