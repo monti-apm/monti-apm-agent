@@ -9,7 +9,7 @@ Package.describe({
 
 let npmModules = {
   debug: '0.8.1',
-  'monti-apm-core': '1.7.5',
+  'monti-apm-core': '1.8.0-beta.5',
   'lru-cache': '5.1.1',
   'json-stringify-safe': '5.0.1',
   'monti-apm-sketches-js': '0.0.3',
@@ -119,7 +119,7 @@ function canRunTestsWithFetch () {
 }
 
 function configurePackage (api, isTesting) {
-  api.versionsFrom('METEOR@1.4');
+  api.versionsFrom('METEOR@1.6.0.1');
   api.use('montiapm:meteorx@2.2.0', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
