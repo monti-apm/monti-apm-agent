@@ -1,11 +1,10 @@
 import cp from 'child_process';
 import fs from 'fs';
 import { Meteor } from 'meteor/meteor';
-import { SystemModel, MEMORY_ROUNDING_FACTOR } from '../../lib/models/system';
-import { addAsyncTest, Wait, releaseParts } from '../_helpers/helpers';
-import { sleep } from '../../lib/utils';
 import sinon from 'sinon';
 import { MEMORY_ROUNDING_FACTOR, SystemModel } from '../../lib/models/system';
+import { sleep } from '../../lib/utils';
+import { Wait, addAsyncTest, releaseParts } from '../_helpers/helpers';
 
 /**
  * @flaky
