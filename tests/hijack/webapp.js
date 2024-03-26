@@ -28,15 +28,15 @@ if (httpMonitoringEnabled) {
     function (test, done) {
       Kadira.tracer.redactField('x--test--authorization');
 
-  let req = {
-    url: '/test',
-    method: 'GET',
-    headers: {
-      'content-type': 'application/json',
-      'content-length': '1000',
-      'x--test--authorization': 'secret',
-    },
-  };
+      let req = {
+        url: '/test',
+        method: 'GET',
+        headers: {
+          'content-type': 'application/json',
+          'content-length': '1000',
+          'x--test--authorization': 'secret',
+        },
+      };
       WebApp.rawHandlers.parent._router.stack[0].handle(
         req,
         {on () {}},

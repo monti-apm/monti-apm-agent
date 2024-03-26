@@ -14,7 +14,6 @@ import {
   FindMetricsForPub,
 } from '../_helpers/helpers';
 import { TestData } from '../_helpers/globals';
-import { Meteor } from 'meteor/meteor';
 import { sleep } from '../../lib/utils';
 import { Ntp } from '../../lib/ntp';
 
