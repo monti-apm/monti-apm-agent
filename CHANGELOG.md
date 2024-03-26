@@ -6,10 +6,16 @@
 * Add `Monti.event`
 * Tracer supports parallel events
 
+## v2.48.1
+March 22, 2024
+
+* Improve accuracy of system memory metrics
+
 ## v2.48.0
 March 6, 2024
 
 * Track waitedOn time for methods and publications - the amount of time it is blocking other methods and publications
+* Track system memory
 * Fix using outdated staticFilesByArch in development on some Meteor versions
 * Add `Monti.event` to match v3 of agent
 * Fix tracking wait time for publications
