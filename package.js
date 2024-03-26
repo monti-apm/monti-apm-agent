@@ -2,14 +2,14 @@
 
 Package.describe({
   summary: 'Performance Monitoring for Meteor',
-  version: '2.48.1',
+  version: '3.0.0-beta.4',
   git: 'https://github.com/monti-apm/monti-apm-agent.git',
   name: 'montiapm:agent'
 });
 
 let npmModules = {
   debug: '0.8.1',
-  'monti-apm-core': '1.7.5',
+  '@monti-apm/core': '2.0.0-beta.4',
   'lru-cache': '5.1.1',
   'json-stringify-safe': '5.0.1',
   'monti-apm-sketches-js': '0.0.3',
@@ -33,9 +33,7 @@ Package.onTest(function (api) {
   Npm.depends(Object.assign({}, npmModules, {sinon: '6.3.5'}));
   configurePackage(api, true);
   api.use([
-    'peerlibrary:reactive-publish',
     'tinytest',
-    'test-helpers',
   ], ['client', 'server']);
 
   // common before
@@ -56,7 +54,6 @@ Package.onTest(function (api) {
     'tests/hijack/user.js',
     'tests/hijack/email.js',
     'tests/hijack/base.js',
-    'tests/hijack/async.js',
     'tests/hijack/webapp.js',
     'tests/hijack/http.js',
     'tests/hijack/db.js',
@@ -80,9 +77,7 @@ Package.onTest(function (api) {
     'tests/event_loop_monitor.js',
   ], 'server');
 
-  if (canRunTestsWithFetch()) {
-    api.addFiles(['tests/hijack/http_fetch.js'], 'server');
-  }
+  api.addFiles(['tests/hijack/http_fetch.js'], 'server');
 
   // common client
   api.addFiles([
@@ -103,24 +98,9 @@ Package.onTest(function (api) {
   ], ['client', 'server']);
 });
 
-// use meteor/fetch in tests only for NodeJS 8.11+ (Meteor 1.7+)
-function canRunTestsWithFetch () {
-  const nums = process.versions.node.split('.').map(Number);
-
-  const major = nums[0];
-  const minor = nums[1];
-
-  if (major < 8) return false;
-
-  if (major > 8) return true;
-
-  // major === 8 and ...
-  return minor >= 11;
-}
-
 function configurePackage (api, isTesting) {
-  api.versionsFrom('METEOR@1.4');
-  api.use('montiapm:meteorx@2.2.0', ['server']);
+  api.versionsFrom('METEOR@3.0-beta.7');
+  api.use('montiapm:meteorx@2.3.1', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
   api.use('zodern:meteor-package-versions@0.2.0');
@@ -130,10 +110,11 @@ function configurePackage (api, isTesting) {
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
-  api.use(['http@1.0.0||2.0.0', 'email@1.0.0||2.0.0'], 'server', { weak: !isTesting });
 
-  api.use('fetch@0.1.0', 'server', {
-    weak: !(isTesting && canRunTestsWithFetch()),
+  api.use(['http', 'email'], 'server', { weak: !isTesting });
+
+  api.use('fetch', 'server', {
+    weak: !isTesting,
   });
 
   api.use(['random', 'ecmascript', 'tracker'], ['client']);
@@ -170,15 +151,15 @@ function configurePackage (api, isTesting) {
     'lib/hijack/wrap_observers.js',
     'lib/hijack/wrap_ddp_stringify.js',
     'lib/hijack/instrument.js',
-    'lib/hijack/db.js',
+    'lib/hijack/db/index.js',
     'lib/hijack/http.js',
     'lib/hijack/email.js',
-    'lib/hijack/async.js',
     'lib/hijack/error.js',
     'lib/hijack/set_labels.js',
     'lib/environment_variables.js',
     'lib/auto_connect.js',
     'lib/conflicting_agents.js',
+    'lib/async/async-hook.js',
   ], 'server');
 
   // only client

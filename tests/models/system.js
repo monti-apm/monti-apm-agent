@@ -3,18 +3,24 @@ import fs from 'fs';
 import { Meteor } from 'meteor/meteor';
 import sinon from 'sinon';
 import { MEMORY_ROUNDING_FACTOR, SystemModel } from '../../lib/models/system';
-import { Wait, releaseParts } from '../_helpers/helpers';
+import { sleep } from '../../lib/utils';
+import { Wait, addAsyncTest, releaseParts } from '../_helpers/helpers';
+
 /**
  * @flaky
  */
-Tinytest.add(
+addAsyncTest(
   'Models - System - buildPayload',
-  function (test) {
+  async function (test) {
     let model = new SystemModel();
-    Meteor._wrapAsync(function (callback) {
-      setTimeout(callback, 500);
-    })();
-    let payload = model.buildPayload().systemMetrics[0];
+
+    await sleep(500);
+
+    let payload = model.buildPayload();
+    await sleep(500);
+
+    payload = payload.systemMetrics[0];
+
     test.isTrue(payload.memory > 0, `memory: ${payload.memory}`);
     test.isTrue((payload.memory * 1024 * 1024 /* in bytes */) % MEMORY_ROUNDING_FACTOR === 0, 'memory is rounded');
     test.isTrue((payload.freeMemory * 1024 * 1024 /* in bytes */) % MEMORY_ROUNDING_FACTOR === 0, 'memory is rounded');
@@ -260,15 +266,21 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Models - System - new Sessions - inactive ddp client',
-  function (test) {
+  async function (test) {
     let model = new SystemModel();
+
     model.sessionTimeout = 100;
+
     let session = {socket: {headers: {'x-forwarded-for': '1.1.1.1'}}};
+
     model.handleSessionActivity({msg: 'connect'}, session);
-    Wait(200);
+
+    await sleep(200);
+
     model.handleSessionActivity({msg: 'sub'}, session);
+
     test.equal(model.newSessions, 2);
   }
 );
