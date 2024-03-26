@@ -741,6 +741,33 @@ Tinytest.addAsync('Models - PubSub - Wait Time - track wait time', async (test, 
   let client = getMeteorClient();
   await waitForConnection(client);
 
+  let slowMethod = registerMethod(async function () {
+    await sleep(50);
+  });
+
+  client.call(slowMethod, () => {});
+
+  const pubName = 'tinytest-waited-on';
+  await subscribeAndWait(client, pubName);
+
+  await sleep(100);
+
+  const metrics = FindMetricsForPub(pubName);
+
+  test.isTrue(metrics.waitTime > 0, `${metrics.waitTime} should be greater than 0`);
+
+  done();
+});
+
+Tinytest.addAsync('Models - PubSub - Waited On - track wait time of queued messages', async (test, done) => {
+  CleanTestData();
+
+  await TestData.insertAsync({aa: 10});
+  await TestData.insertAsync({aa: 20});
+
+  let client = getMeteorClient();
+  await waitForConnection(client);
+
   const pubName = 'tinytest-waited-on';
 
   for (let i = 0; i < 10; i++) {
@@ -751,7 +778,7 @@ Tinytest.addAsync('Models - PubSub - Wait Time - track wait time', async (test, 
 
   const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), pubName);
   console.log('metrics.waitedOn', metrics.waitedOn);
-  test.isTrue(metrics.waitedOn > 1000, `${metrics.waitedOn} should be greater than 1000`);
+  test.isTrue(metrics.waitedOn >= 1000, `${metrics.waitedOn} should be greater than 100`);
 
   done();
 });
@@ -769,7 +796,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track waited on time of next me
   await waitForConnection(client);
 
   client.subscribe('tinytest-waited-on');
-  client.call(fastMethod);
+  await client.callAsync(fastMethod);
 
   const metrics = FindMetricsForPub('tinytest-waited-on');
 

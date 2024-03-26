@@ -98,7 +98,7 @@ Package.onTest(function (api) {
 });
 
 function configurePackage (api, isTesting) {
-  api.versionsFrom('METEOR@3.0-beta.6');
+  api.versionsFrom('METEOR@3.0-beta.7');
   api.use('montiapm:meteorx@2.3.1', ['server']);
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });

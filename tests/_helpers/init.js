@@ -71,7 +71,7 @@ Meteor.publish('tinytest-data-cursor-fetch', async function () {
 });
 
 Meteor.publish('tinytest-waited-on', async function () {
-  await sleep(1000);
+  await sleep(100);
   return TestData.find();
 });
 
