@@ -453,15 +453,14 @@ addAsyncTest(
     const methodId = registerMethod(async function () {
       await Kadira.event('test', async () => {
         doCompute(50);
-        await TestData.insertAsync({});
-        await TestData.insertAsync({});
+        await TestData.insertAsync({a:2});
+        await TestData.insertAsync({b:3});
         await sleep(11);
       });
       info = getInfo();
     });
 
     await callAsync(methodId);
-
     test.equal(info.trace.metrics.compute >= 50, true);
     test.equal(info.trace.metrics.db > 0, true);
     test.equal(info.trace.metrics.async >= 10, true);
