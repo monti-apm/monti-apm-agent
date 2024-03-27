@@ -749,6 +749,7 @@ Tinytest.addAsync('Models - PubSub - Wait Time - track wait time', async (test, 
   const metrics = FindMetricsForPub(pubName);
 
   test.isTrue(metrics.waitTime > 0, `${metrics.waitTime} should be greater than 0`);
+  CloseClient(client);
 
   done();
 });
@@ -772,6 +773,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait time of queued messa
   const metrics = FindMetricsForPub(pubName);
 
   test.isTrue(metrics.waitedOn > 1000, `${metrics.waitedOn} should be greater than 1000`);
+  CloseClient(client);
 
   done();
 });
@@ -798,6 +800,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track waited on time of next me
   }
 
   test.isTrue(metrics.waitedOn > 10, `${metrics.waitedOn} should be greater than 10`);
+  CloseClient(client);
 
   done();
 });
@@ -828,6 +831,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait when unblock', async
     test.isTrue(metrics.waitedOn <= 150, 'waitedOn should be less or equal than 150');
   }
 
+  CloseClient(client);
 
   done();
 });
