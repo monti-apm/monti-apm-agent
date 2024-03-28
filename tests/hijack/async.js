@@ -60,7 +60,6 @@ Tinytest.add(
   }
 );
 
-
 Tinytest.add(
   'Async - end event on throwInto',
   function (test) {
@@ -74,7 +73,7 @@ Tinytest.add(
           }),
         );
       } catch (err) {
-        TestData.find({});
+        TestData.find({}).fetch();
 
         return Kadira._getInfo();
       }
