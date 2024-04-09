@@ -26,8 +26,8 @@ Now you can deploy your application and it will send information to Monti APM. W
 
 `montiapm:agent` is compatible with:
 
-- Meteor 1.6.0.1 and newer (for Meteor 1.4 and 1.5, use montiapm:agent@2.48.0)
-- Internet Explorer 10 and newer web browsers
+- Meteor 1.4.3.2 and newer
+- Internet Explorer 9 and newer web browsers
 - Can be used with [Monti APM](https://montiapm.com/) or the open sourced version of Kadira, though many new features are not supported by Kadira
 
 Features that require a newer version of Meteor are only enabled when using a supported version. For example, monitoring incoming HTTP requests is automatically enabled when the app uses Meteor 1.7 or newer.
