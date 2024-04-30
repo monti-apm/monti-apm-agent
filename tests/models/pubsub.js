@@ -678,6 +678,7 @@ addTestWithRoundedTime(
     }, 25);
 
     let payload = GetPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data-random'].liveFetchedDocSize, 50);
     CloseClient(client);
   }
