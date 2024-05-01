@@ -7,7 +7,6 @@ import {
   withDocCacheGetSize,
   releaseParts,
   waitForConnection,
-  getMeteorClient,
   registerMethod,
   CleanTestData,
   closeClient,
@@ -754,6 +753,7 @@ addAsyncTest('Models - PubSub - Wait Time - track wait time', async (test, clien
   const metrics = FindMetricsForPub(pubName);
 
   test.isTrue(metrics.waitTime > 0, `${metrics.waitTime} should be greater than 0`);
+  CloseClient(client);
 
 });
 
@@ -799,6 +799,7 @@ addAsyncTest('Models - PubSub - Waited On - track waited on time of next message
   }
 
   test.isTrue(metrics.waitedOn > 10, `${metrics.waitedOn} should be greater than 10`);
+  CloseClient(client);
 
 });
 
@@ -828,5 +829,6 @@ addAsyncTest('Models - PubSub - Waited On - track wait when unblock', async (tes
     test.isTrue(metrics.waitedOn <= 150, 'waitedOn should be less or equal than 150');
   }
 
+  CloseClient(client);
 
 });

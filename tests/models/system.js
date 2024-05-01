@@ -148,7 +148,7 @@ if (releaseParts[0] > 1 || (releaseParts[0] === 1 && releaseParts[1] > 8) ) {
      */
       sinon.stub(process, 'platform').value('darwin');
       sinon.replace(cp, 'exec', (a, callback) => {
-        callback(/* error */ true,null);
+        callback(/* error */ 'simulated error',null);
       });
       await model.getFreeMemory();
       test.isTrue(model.freeMemory > 0, 'should use fallback on mac');
@@ -160,7 +160,7 @@ if (releaseParts[0] > 1 || (releaseParts[0] === 1 && releaseParts[1] > 8) ) {
       sinon.stub(process, 'platform').value('linux');
       model = new SystemModel();
       sinon.replace(fs, 'readFile', (_,callback) => {
-        callback(/* error */ true, null);
+        callback(/* error */ 'simulated error', null);
       });
 
       await model.getFreeMemory();

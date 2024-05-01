@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "test": "meteor --release=3.0-beta.7 test-packages ./ ",
+    "test": "FORCE_COLOR=true meteor --release=3.0-beta.7 test-packages ./ ",
     "test:local": "METEOR_PACKAGE_DIRS=./packages meteor test-packages ./ --release=3.0-alpha.20",
     "lint": "eslint . --cache . --ext .js",
     "publish": "npm prune --production && meteor publish"
@@ -12,14 +12,14 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "debug": "^4.3.4",
+    "chalk": "^4.1.2",
+    "cli-highlight": "^2.1.11",
+    "diff": "^5.1.0",
     "eslint": "^8.52.0",
     "eslint-config-es": "^0.8.12",
     "eslint-plugin-babel": "^5.3.1",
-    "typescript": "^5.2.2",
-    "yaml": "2.3.2",
-    "diff": "5.1.0",
-    "cli-highlight": "2.1.11",
-    "chalk": "4.1.2"
+    "yaml": "^2.3.2",
+    "typescript": "^5.2.2"
   },
   "volta": {
     "node": "14.21.3"

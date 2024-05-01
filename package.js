@@ -32,6 +32,7 @@ Package.onUse(function (api) {
 Package.onTest(function (api) {
   Npm.depends(Object.assign({}, npmModules, {sinon: '6.3.5'}));
   configurePackage(api, true);
+
   api.use([
     'tinytest',
   ], ['client', 'server']);
@@ -41,14 +42,18 @@ Package.onTest(function (api) {
     'tests/models/base_error.js'
   ], ['client', 'server']);
 
+  // helpers
+  api.addFiles([
+    'tests/_helpers/globals.js',
+    'tests/_helpers/helpers.js',
+    'tests/_helpers/init.js',
+  ], ['server']);
+
   // common server
   api.addFiles([
     'tests/utils.js',
     'tests/ntp.js',
     'tests/jobs.js',
-    'tests/_helpers/globals.js',
-    'tests/_helpers/helpers.js',
-    'tests/_helpers/init.js',
     'tests/ping.js',
     'tests/hijack/info.js',
     'tests/hijack/user.js',
@@ -101,6 +106,14 @@ Package.onTest(function (api) {
 function configurePackage (api, isTesting) {
   api.versionsFrom('METEOR@3.0-beta.7');
   api.use('montiapm:meteorx@2.3.1', ['server']);
+
+  if (isTesting && process.env.REDIS_OPLOG_SETTINGS) {
+    api.use([
+      'cultofcoders:redis-oplog@2.2.1',
+      'disable-oplog@1.0.7'
+    ], ['server']);
+  }
+
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
   api.use('zodern:meteor-package-versions@0.2.0');
@@ -156,11 +169,18 @@ function configurePackage (api, isTesting) {
     'lib/hijack/email.js',
     'lib/hijack/error.js',
     'lib/hijack/set_labels.js',
+    'lib/hijack/redis_oplog.js',
     'lib/environment_variables.js',
     'lib/auto_connect.js',
     'lib/conflicting_agents.js',
     'lib/async/async-hook.js',
   ], 'server');
+
+  if (isTesting && process.env.REDIS_OPLOG_SETTINGS) {
+    api.addFiles([
+      'tests/hijack/redis_oplog.js',
+    ], 'server');
+  }
 
   // only client
   api.addFiles([

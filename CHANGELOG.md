@@ -6,6 +6,11 @@
 * Add `Monti.event`
 * Tracer supports parallel events
 
+## v2.48.2
+March 27, 2024
+
+* Fix some edge cases with publication wait time tracking that could result in a crash
+
 ## v2.48.1
 March 22, 2024
 
