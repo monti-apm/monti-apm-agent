@@ -1,21 +1,21 @@
 import { PubsubModel } from '../../lib/models/pubsub';
+import { Ntp } from '../../lib/ntp';
+import { sleep } from '../../lib/utils';
+import { TestData } from '../_helpers/globals';
 import {
-  addTestWithRoundedTime,
-  cleanTestData,
-  getPubSubPayload,
-  subscribeAndWait,
-  withDocCacheGetSize,
-  releaseParts,
-  waitForConnection,
-  registerMethod,
   CleanTestData,
-  closeClient,
   FindMetricsForPub,
   addAsyncTest,
+  addTestWithRoundedTime,
+  cleanTestData,
+  closeClient,
+  getPubSubPayload,
+  registerMethod,
+  releaseParts,
+  subscribeAndWait,
+  waitForConnection,
+  withDocCacheGetSize,
 } from '../_helpers/helpers';
-import { TestData } from '../_helpers/globals';
-import { sleep } from '../../lib/utils';
-import { Ntp } from '../../lib/ntp';
 
 addTestWithRoundedTime(
   'Models - PubSub - Metrics - same date',
@@ -753,8 +753,7 @@ addAsyncTest('Models - PubSub - Wait Time - track wait time', async (test, clien
   const metrics = FindMetricsForPub(pubName);
 
   test.isTrue(metrics.waitTime > 0, `${metrics.waitTime} should be greater than 0`);
-  CloseClient(client);
-
+  closeClient(client);
 });
 
 addAsyncTest('Models - PubSub - Waited On - track wait time of queued messages', async (test, client) => {
@@ -776,7 +775,6 @@ addAsyncTest('Models - PubSub - Waited On - track wait time of queued messages',
   const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), pubName);
   console.log('metrics.waitedOn', metrics.waitedOn);
   test.isTrue(metrics.waitedOn >= 1000, `${metrics.waitedOn} should be greater than 100`);
-
 });
 
 addAsyncTest('Models - PubSub - Waited On - track waited on time of next message', async (test, client) => {
@@ -799,8 +797,7 @@ addAsyncTest('Models - PubSub - Waited On - track waited on time of next message
   }
 
   test.isTrue(metrics.waitedOn > 10, `${metrics.waitedOn} should be greater than 10`);
-  CloseClient(client);
-
+  closeClient(client);
 });
 
 addAsyncTest('Models - PubSub - Waited On - track wait when unblock', async (test, client) => {
@@ -829,6 +826,5 @@ addAsyncTest('Models - PubSub - Waited On - track wait when unblock', async (tes
     test.isTrue(metrics.waitedOn <= 150, 'waitedOn should be less or equal than 150');
   }
 
-  CloseClient(client);
-
+  closeClient(client);
 });

@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "test": "FORCE_COLOR=true meteor --release=3.0-beta.7 test-packages ./ ",
-    "test:local": "METEOR_PACKAGE_DIRS=./packages meteor test-packages ./ --release=3.0-alpha.20",
+    "test": "FORCE_COLOR=true meteor --release=3.0-rc.0 test-packages ./ ",
+    "test:local": "METEOR_PACKAGE_DIRS=./packages meteor test-packages ./ --release=3.0-rc.0",
     "lint": "eslint . --cache . --ext .js",
     "publish": "npm prune --production && meteor publish"
   },
