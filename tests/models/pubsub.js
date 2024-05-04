@@ -779,6 +779,44 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait time of queued messa
   done();
 });
 
+Meteor.publish('tinytest-unblock-fast', function () {
+  console.log('unblock-fast-pub');
+  this.unblock();
+  Meteor._sleepForMs(100);
+  this.ready();
+});
+
+Tinytest.addAsync('Models - PubSub - Waited On - track waitedOn without wait time', async (test, done) => {
+  CleanTestData();
+
+  let slowMethod = RegisterMethod(function () {
+    console.log('slow method start');
+    Meteor._sleepForMs(100);
+    console.log('slow method end');
+  });
+  let fastMethod = RegisterMethod(function () {
+    console.log('fastMethod');
+  });
+
+
+  let client = GetMeteorClient();
+
+  // subscriptions and method calls made before connected are not run in order
+  waitForConnection(client);
+
+  const pubName = 'tinytest-unblock-fast';
+  client.call(slowMethod, () => {});
+  client.subscribe(pubName);
+  await new Promise(r => client.call(fastMethod, () => r()));
+
+  const metrics = FindMetricsForPub(pubName);
+
+  test.isTrue(metrics.waitedOn < 10 && metrics.waitedOn >= 0, `${metrics.waitedOn} should be less than 10`);
+  CloseClient(client);
+
+  done();
+});
+
 Tinytest.addAsync('Models - PubSub - Waited On - track waited on time of next message', async (test, done) => {
   CleanTestData();
   let fastMethod = RegisterMethod(function () {
