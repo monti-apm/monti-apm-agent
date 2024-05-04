@@ -221,7 +221,7 @@ Tinytest.addAsync('Models - Method - Waited On - track waitedOn without wait tim
     console.log('slow method end');
   });
   let unblockedMethod = RegisterMethod(function () {
-    this.unblock()
+    this.unblock();
     Meteor._sleepForMs(100);
     console.log('slow method end');
   });

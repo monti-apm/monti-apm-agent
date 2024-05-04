@@ -780,7 +780,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait time of queued messa
 });
 
 Meteor.publish('tinytest-unblock-fast', function () {
-  console.log('unblock-fast-pub')
+  console.log('unblock-fast-pub');
   this.unblock();
   Meteor._sleepForMs(100);
   this.ready();
