@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.49.0
+May 6, 2024
+
+* Support for redis-oplog
+* Improve accuracy of waited on metric
+
 ## v2.48.2
 March 27, 2024
 
