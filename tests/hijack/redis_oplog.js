@@ -259,7 +259,7 @@ Tinytest.add('Database - Redis Oplog - Changed', function (test) {
 
   TestData.update({}, { $set: { name: 'test5' } }, { multi: true });
 
-  Meteor._sleepForMs(100);
+  Meteor._sleepForMs(200);
 
   metrics = FindMetricsForPub(pub);
 
