@@ -1,5 +1,5 @@
 import { TestData, TestDataRedis, TestDataRedisNoRaceProtection } from '../_helpers/globals';
-import { GetMeteorClient, RegisterMethod, RegisterPublication, SubscribeAndWait } from '../_helpers/helpers';
+import { FindMetricsForPub, GetMeteorClient, RegisterMethod, RegisterPublication, SubscribeAndWait } from '../_helpers/helpers';
 
 /**
  * We only track the observers coming from subscriptions (which have `ownerInfo`)
@@ -23,7 +23,7 @@ Tinytest.add('Database - Redis Oplog - Added', function (test) {
 
   Meteor._sleepForMs(100);
 
-  const metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  const metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.initiallyAddedDocuments, 4);
   test.equal(metrics.totalObservers, 1);
@@ -45,14 +45,14 @@ Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
 
   const client = GetMeteorClient();
   const sub = SubscribeAndWait(client, pub);
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.polledDocuments, 1);
 
   TestData.insert({ name: 'test' });
   Meteor._sleepForMs(100);
   // as the selector IS matched, redis-oplog triggers a requery
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
   // 1 from initial subscription, 1 findOne + requery(2)
   test.equal(metrics.polledDocuments, 4);
 
@@ -61,7 +61,7 @@ Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
 
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.initiallyAddedDocuments, 1);
   test.equal(metrics.totalObservers, 1);
@@ -108,19 +108,19 @@ Tinytest.add('Database - Redis Oplog - With protect against race condition - che
   const client2 = GetMeteorClient();
   const sub = SubscribeAndWait(client, pub);
   const sub2 = SubscribeAndWait(client2, pub);
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.polledDocuments, 1);
 
   TestDataRedis.insert({ name: 'test' });
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
   test.equal(metrics.polledDocuments, 2);
 
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.initiallyAddedDocuments, 1);
   test.equal(metrics.totalObservers, 2);
@@ -147,19 +147,19 @@ Tinytest.add('Database - Redis Oplog - Without protect against race condition - 
   const client = GetMeteorClient();
   const sub = SubscribeAndWait(client, pub);
   const sub2 = SubscribeAndWait(client, pub);
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.polledDocuments, 1);
 
   TestDataRedisNoRaceProtection.insert({ name: 'test' });
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
   test.equal(metrics.polledDocuments, 1);
 
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.initiallyAddedDocuments, 1);
   test.equal(metrics.totalObservers, 2);
@@ -214,7 +214,7 @@ Tinytest.add('Database - Redis Oplog - Removed', function (test) {
 
   Meteor._sleepForMs(100);
 
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveRemovedDocuments, 1);
@@ -223,7 +223,7 @@ Tinytest.add('Database - Redis Oplog - Removed', function (test) {
 
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveRemovedDocuments, 3);
@@ -252,7 +252,7 @@ Tinytest.add('Database - Redis Oplog - Changed', function (test) {
 
   Meteor._sleepForMs(100);
 
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveChangedDocuments, 1);
@@ -261,7 +261,7 @@ Tinytest.add('Database - Redis Oplog - Changed', function (test) {
 
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveChangedDocuments, 4);
