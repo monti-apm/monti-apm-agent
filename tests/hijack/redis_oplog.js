@@ -1,10 +1,10 @@
 import { TestData, TestDataRedis, TestDataRedisNoRaceProtection } from '../_helpers/globals';
-import { FindMetricsForPub, GetMeteorClient, RegisterMethod, RegisterPublication, SubscribeAndWait } from '../_helpers/helpers';
+import { FindMetricsForPub, GetMeteorClient, RegisterMethod, RegisterPublication, SubscribeAndWait, addTestWithRoundedTime } from '../_helpers/helpers';
 
 /**
  * We only track the observers coming from subscriptions (which have `ownerInfo`)
  */
-Tinytest.add('Database - Redis Oplog - Added', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Added', function (test) {
   const pub = RegisterPublication(() => TestData.find({}));
 
   TestData.remove({});
@@ -36,7 +36,7 @@ Tinytest.add('Database - Redis Oplog - Added', function (test) {
   Meteor._sleepForMs(100);
 });
 
-Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Added with limit/skip', function (test) {
   const pub = RegisterPublication(() => TestData.find({name: 'test'}, {limit: 2, skip: 0}));
 
   TestData.remove({});
@@ -76,7 +76,7 @@ Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
 
   Meteor._sleepForMs(100);
 });
-Tinytest.add('Database - Redis Oplog - With protect against race condition - Check Trace', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - With protect against race condition - Check Trace', function (test) {
   // in this case, the mutator will refetch the doc when publishing it
   const methodId = RegisterMethod(() => TestDataRedis.update({name: 'test'}, {$set: {name: 'abv'}}));
 
@@ -96,7 +96,7 @@ Tinytest.add('Database - Redis Oplog - With protect against race condition - Che
 
   Meteor._sleepForMs(100);
 });
-Tinytest.add('Database - Redis Oplog - With protect against race condition - check for finds after receiving the msg', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - With protect against race condition - check for finds after receiving the msg', function (test) {
   // in this case, every subscriber will refetch the doc once when receiving it
   const pub = RegisterPublication(() => TestDataRedis.find({name: 'test'}));
 
@@ -136,7 +136,7 @@ Tinytest.add('Database - Redis Oplog - With protect against race condition - che
   Meteor._sleepForMs(100);
 });
 
-Tinytest.add('Database - Redis Oplog - Without protect against race condition - no extraneous finds', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Without protect against race condition - no extraneous finds', function (test) {
   // in this case, no subscriber will refetch the doc when receiving it
   const pub = RegisterPublication(() => TestDataRedisNoRaceProtection.find({}));
 
@@ -174,7 +174,7 @@ Tinytest.add('Database - Redis Oplog - Without protect against race condition - 
 
   Meteor._sleepForMs(100);
 });
-Tinytest.add('Database - Redis Oplog - Without protect against race condition - Check Trace', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Without protect against race condition - Check Trace', function (test) {
   // in this case, the mutator will refetch the doc when publishing it
   const methodId = RegisterMethod(() => TestDataRedisNoRaceProtection.update({name: 'test'}, {$set: {name: 'abv'}}));
 
@@ -196,7 +196,7 @@ Tinytest.add('Database - Redis Oplog - Without protect against race condition - 
   Meteor._sleepForMs(100);
 });
 
-Tinytest.add('Database - Redis Oplog - Removed', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Removed', function (test) {
   const pub = RegisterPublication(() => TestData.find({}));
 
   TestData.remove({});
@@ -234,7 +234,7 @@ Tinytest.add('Database - Redis Oplog - Removed', function (test) {
   Meteor._sleepForMs(100);
 });
 
-Tinytest.add('Database - Redis Oplog - Changed', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Changed', function (test) {
   const pub = RegisterPublication(() => TestData.find({}));
 
   TestData.remove({});
