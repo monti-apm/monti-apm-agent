@@ -1,10 +1,10 @@
 import { TestData, TestDataRedis, TestDataRedisNoRaceProtection } from '../_helpers/globals';
-import { GetMeteorClient, RegisterMethod, RegisterPublication, SubscribeAndWait } from '../_helpers/helpers';
+import { FindMetricsForPub, GetMeteorClient, RegisterMethod, RegisterPublication, SubscribeAndWait, addTestWithRoundedTime } from '../_helpers/helpers';
 
 /**
  * We only track the observers coming from subscriptions (which have `ownerInfo`)
  */
-Tinytest.add('Database - Redis Oplog - Added', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Added', function (test) {
   const pub = RegisterPublication(() => TestData.find({}));
 
   TestData.remove({});
@@ -23,7 +23,7 @@ Tinytest.add('Database - Redis Oplog - Added', function (test) {
 
   Meteor._sleepForMs(100);
 
-  const metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  const metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.initiallyAddedDocuments, 4);
   test.equal(metrics.totalObservers, 1);
@@ -36,7 +36,7 @@ Tinytest.add('Database - Redis Oplog - Added', function (test) {
   Meteor._sleepForMs(100);
 });
 
-Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Added with limit/skip', function (test) {
   const pub = RegisterPublication(() => TestData.find({name: 'test'}, {limit: 2, skip: 0}));
 
   TestData.remove({});
@@ -45,14 +45,14 @@ Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
 
   const client = GetMeteorClient();
   const sub = SubscribeAndWait(client, pub);
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.polledDocuments, 1);
 
   TestData.insert({ name: 'test' });
   Meteor._sleepForMs(100);
   // as the selector IS matched, redis-oplog triggers a requery
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
   // 1 from initial subscription, 1 findOne + requery(2)
   test.equal(metrics.polledDocuments, 4);
 
@@ -61,7 +61,7 @@ Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
 
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.initiallyAddedDocuments, 1);
   test.equal(metrics.totalObservers, 1);
@@ -76,7 +76,7 @@ Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
 
   Meteor._sleepForMs(100);
 });
-Tinytest.add('Database - Redis Oplog - With protect against race condition - Check Trace', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - With protect against race condition - Check Trace', function (test) {
   // in this case, the mutator will refetch the doc when publishing it
   const methodId = RegisterMethod(() => TestDataRedis.update({name: 'test'}, {$set: {name: 'abv'}}));
 
@@ -96,7 +96,7 @@ Tinytest.add('Database - Redis Oplog - With protect against race condition - Che
 
   Meteor._sleepForMs(100);
 });
-Tinytest.add('Database - Redis Oplog - With protect against race condition - check for finds after receiving the msg', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - With protect against race condition - check for finds after receiving the msg', function (test) {
   // in this case, every subscriber will refetch the doc once when receiving it
   const pub = RegisterPublication(() => TestDataRedis.find({name: 'test'}));
 
@@ -108,19 +108,19 @@ Tinytest.add('Database - Redis Oplog - With protect against race condition - che
   const client2 = GetMeteorClient();
   const sub = SubscribeAndWait(client, pub);
   const sub2 = SubscribeAndWait(client2, pub);
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.polledDocuments, 1);
 
   TestDataRedis.insert({ name: 'test' });
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
   test.equal(metrics.polledDocuments, 2);
 
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.initiallyAddedDocuments, 1);
   test.equal(metrics.totalObservers, 2);
@@ -136,7 +136,7 @@ Tinytest.add('Database - Redis Oplog - With protect against race condition - che
   Meteor._sleepForMs(100);
 });
 
-Tinytest.add('Database - Redis Oplog - Without protect against race condition - no extraneous finds', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Without protect against race condition - no extraneous finds', function (test) {
   // in this case, no subscriber will refetch the doc when receiving it
   const pub = RegisterPublication(() => TestDataRedisNoRaceProtection.find({}));
 
@@ -147,19 +147,19 @@ Tinytest.add('Database - Redis Oplog - Without protect against race condition - 
   const client = GetMeteorClient();
   const sub = SubscribeAndWait(client, pub);
   const sub2 = SubscribeAndWait(client, pub);
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.polledDocuments, 1);
 
   TestDataRedisNoRaceProtection.insert({ name: 'test' });
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
   test.equal(metrics.polledDocuments, 1);
 
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.initiallyAddedDocuments, 1);
   test.equal(metrics.totalObservers, 2);
@@ -174,7 +174,7 @@ Tinytest.add('Database - Redis Oplog - Without protect against race condition - 
 
   Meteor._sleepForMs(100);
 });
-Tinytest.add('Database - Redis Oplog - Without protect against race condition - Check Trace', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Without protect against race condition - Check Trace', function (test) {
   // in this case, the mutator will refetch the doc when publishing it
   const methodId = RegisterMethod(() => TestDataRedisNoRaceProtection.update({name: 'test'}, {$set: {name: 'abv'}}));
 
@@ -196,7 +196,7 @@ Tinytest.add('Database - Redis Oplog - Without protect against race condition - 
   Meteor._sleepForMs(100);
 });
 
-Tinytest.add('Database - Redis Oplog - Removed', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Removed', function (test) {
   const pub = RegisterPublication(() => TestData.find({}));
 
   TestData.remove({});
@@ -214,7 +214,7 @@ Tinytest.add('Database - Redis Oplog - Removed', function (test) {
 
   Meteor._sleepForMs(100);
 
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveRemovedDocuments, 1);
@@ -223,7 +223,7 @@ Tinytest.add('Database - Redis Oplog - Removed', function (test) {
 
   Meteor._sleepForMs(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveRemovedDocuments, 3);
@@ -234,7 +234,7 @@ Tinytest.add('Database - Redis Oplog - Removed', function (test) {
   Meteor._sleepForMs(100);
 });
 
-Tinytest.add('Database - Redis Oplog - Changed', function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Changed', function (test) {
   const pub = RegisterPublication(() => TestData.find({}));
 
   TestData.remove({});
@@ -252,16 +252,16 @@ Tinytest.add('Database - Redis Oplog - Changed', function (test) {
 
   Meteor._sleepForMs(100);
 
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveChangedDocuments, 1);
 
   TestData.update({}, { $set: { name: 'test5' } }, { multi: true });
 
-  Meteor._sleepForMs(100);
+  Meteor._sleepForMs(200);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveChangedDocuments, 4);
