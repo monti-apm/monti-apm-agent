@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.49.1
+May 9, 2024
+
+* Remove unnecessary log added in 2.49.0
+
 ## v2.49.0
 May 6, 2024
 
