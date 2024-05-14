@@ -678,6 +678,7 @@ addTestWithRoundedTime(
     }, 25);
 
     let payload = GetPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data-random'].liveFetchedDocSize, 50);
     CloseClient(client);
   }
@@ -749,6 +750,7 @@ Tinytest.addAsync('Models - PubSub - Wait Time - track wait time', async (test, 
   const metrics = FindMetricsForPub(pubName);
 
   test.isTrue(metrics.waitTime > 0, `${metrics.waitTime} should be greater than 0`);
+  CloseClient(client);
 
   done();
 });
@@ -772,6 +774,45 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait time of queued messa
   const metrics = FindMetricsForPub(pubName);
 
   test.isTrue(metrics.waitedOn > 1000, `${metrics.waitedOn} should be greater than 1000`);
+  CloseClient(client);
+
+  done();
+});
+
+Meteor.publish('tinytest-unblock-fast', function () {
+  console.log('unblock-fast-pub');
+  this.unblock();
+  Meteor._sleepForMs(100);
+  this.ready();
+});
+
+Tinytest.addAsync('Models - PubSub - Waited On - track waitedOn without wait time', async (test, done) => {
+  CleanTestData();
+
+  let slowMethod = RegisterMethod(function () {
+    console.log('slow method start');
+    Meteor._sleepForMs(100);
+    console.log('slow method end');
+  });
+  let fastMethod = RegisterMethod(function () {
+    console.log('fastMethod');
+  });
+
+
+  let client = GetMeteorClient();
+
+  // subscriptions and method calls made before connected are not run in order
+  waitForConnection(client);
+
+  const pubName = 'tinytest-unblock-fast';
+  client.call(slowMethod, () => {});
+  client.subscribe(pubName);
+  await new Promise(r => client.call(fastMethod, () => r()));
+
+  const metrics = FindMetricsForPub(pubName);
+
+  test.isTrue(metrics.waitedOn < 10 && metrics.waitedOn >= 0, `${metrics.waitedOn} should be less than 10`);
+  CloseClient(client);
 
   done();
 });
@@ -798,6 +839,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track waited on time of next me
   }
 
   test.isTrue(metrics.waitedOn > 10, `${metrics.waitedOn} should be greater than 10`);
+  CloseClient(client);
 
   done();
 });
@@ -828,6 +870,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait when unblock', async
     test.isTrue(metrics.waitedOn <= 150, 'waitedOn should be less or equal than 150');
   }
 
+  CloseClient(client);
 
   done();
 });

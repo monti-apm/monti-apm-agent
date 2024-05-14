@@ -1,9 +1,31 @@
 # Changelog
 
+## v2.49.1
+May 9, 2024
+
+* Remove unnecessary log added in 2.49.0
+
+## v2.49.0
+May 6, 2024
+
+* Support for redis-oplog
+* Improve accuracy of waited on metric
+
+## v2.48.2
+March 27, 2024
+
+* Fix some edge cases with publication wait time tracking that could result in a crash
+
+## v2.48.1
+March 22, 2024
+
+* Improve accuracy of system memory metrics
+
 ## v2.48.0
 March 6, 2024
 
 * Track waitedOn time for methods and publications - the amount of time it is blocking other methods and publications
+* Track system memory
 * Fix using outdated staticFilesByArch in development on some Meteor versions
 * Add `Monti.event` to match v3 of agent
 * Fix tracking wait time for publications
