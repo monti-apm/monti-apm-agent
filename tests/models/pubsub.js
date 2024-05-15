@@ -9,6 +9,7 @@ import {
   addTestWithRoundedTime,
   cleanTestData,
   closeClient,
+  getMeteorClient,
   getPubSubPayload,
   registerMethod,
   releaseParts,
@@ -777,11 +778,43 @@ addAsyncTest('Models - PubSub - Waited On - track wait time of queued messages',
   test.isTrue(metrics.waitedOn >= 1000, `${metrics.waitedOn} should be greater than 100`);
 });
 
-addAsyncTest('Models - PubSub - Waited On - track waited on time of next message', async (test, client) => {
+Tinytest.addAsync('Models - PubSub - Waited On - track waitedOn without wait time', async (test, done) => {
+  await CleanTestData();
+
+  let slowMethod = registerMethod(async function () {
+    console.log('slow method start');
+    await sleep(100);
+    console.log('slow method end');
+  });
+  let fastMethod = registerMethod(function async () {
+    console.log('fastMethod');
+  });
+
+
+  let client = getMeteorClient();
+
+  // subscriptions and method calls made before connected are not run in order
+  await waitForConnection(client);
+
+  const pubName = 'tinytest-unblock-fast';
+  client.call(slowMethod, () => {});
+  client.subscribe(pubName);
+  await new Promise(r => client.call(fastMethod, () => r()));
+
+  const metrics = FindMetricsForPub(pubName);
+
+  test.isTrue(metrics.waitedOn < 10 && metrics.waitedOn >= 0, `${metrics.waitedOn} should be less than 10`);
+  closeClient(client);
+
+  done();
+});
+
+Tinytest.addAsync('Models - PubSub - Waited On - track waited on time of next message', async (test, done) => {
   CleanTestData();
   let fastMethod = registerMethod(function () {
     console.log('fastMethod');
   });
+  let client = getMeteorClient();
 
   // If we subscribe and call before connected
   // Meteor sends the messages in the wrong order

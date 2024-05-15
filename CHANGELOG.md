@@ -6,6 +6,17 @@
 * Add `Monti.event`
 * Tracer supports parallel events
 
+## v2.49.1
+May 9, 2024
+
+* Remove unnecessary log added in 2.49.0
+
+## v2.49.0
+May 6, 2024
+
+* Support for redis-oplog
+* Improve accuracy of waited on metric
+
 ## v2.48.2
 March 27, 2024
 

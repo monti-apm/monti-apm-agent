@@ -1,11 +1,11 @@
 import { sleep } from '../../lib/utils';
 import { TestData, TestDataRedis, TestDataRedisNoRaceProtection } from '../_helpers/globals';
-import { addAsyncTest, getMeteorClient, registerMethod, registerPublication, subscribeAndWait } from '../_helpers/helpers';
+import { FindMetricsForPub, addAsyncTest, getMeteorClient, registerMethod, registerPublication, subscribeAndWait } from '../_helpers/helpers';
 
 /**
  * We only track the observers coming from subscriptions (which have `ownerInfo`)
  */
-addAsyncTest('Database - Redis Oplog - Added', async function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Added', async async function (test) {
   const pub = registerPublication(() => TestData.find({}));
 
   await TestData.removeAsync({});
@@ -24,7 +24,7 @@ addAsyncTest('Database - Redis Oplog - Added', async function (test) {
 
   await sleep(100);
 
-  const metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  const metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.initiallyAddedDocuments, 4);
   test.equal(metrics.totalObservers, 1);
@@ -37,23 +37,23 @@ addAsyncTest('Database - Redis Oplog - Added', async function (test) {
   await sleep(100);
 });
 
-addAsyncTest('Database - Redis Oplog - Added with limit/skip', async function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Added with limit/skip', async async function (test) {
   const pub = registerPublication(() => TestData.find({name: 'test'}, {limit: 2, skip: 0}));
 
   await TestData.removeAsync({});
 
   await TestData.insertAsync({ name: 'test' });
 
-  const client = getMeteorClient();
-  const sub = await subscribeAndWait(client, pub);
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  const client = GetMeteorClient();
+  const sub = SubscribeAndWait(client, pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.polledDocuments, 1);
 
   await TestData.insertAsync({ name: 'test' });
   await sleep(100);
   // as the selector IS matched, redis-oplog triggers a requery
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
   // 1 from initial subscription, 1 findOne + requery(2)
   test.equal(metrics.polledDocuments, 4);
 
@@ -62,7 +62,7 @@ addAsyncTest('Database - Redis Oplog - Added with limit/skip', async function (t
 
   await sleep(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.initiallyAddedDocuments, 1);
   test.equal(metrics.totalObservers, 1);
@@ -77,7 +77,7 @@ addAsyncTest('Database - Redis Oplog - Added with limit/skip', async function (t
 
   await sleep(100);
 });
-addAsyncTest('Database - Redis Oplog - With protect against race condition - Check Trace', async function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - With protect against race condition - Check Trace', async function (test) {
   // in this case, the mutator will refetch the doc when publishing it
   const methodId = registerMethod(() => TestDataRedis.update({name: 'test'}, {$set: {name: 'abv'}}));
 
@@ -97,7 +97,7 @@ addAsyncTest('Database - Redis Oplog - With protect against race condition - Che
 
   await sleep(100);
 });
-addAsyncTest('Database - Redis Oplog - With protect against race condition - check for finds after receiving the msg', async function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - With protect against race condition - check for finds after receiving the msg', async function (test) {
   // in this case, every subscriber will refetch the doc once when receiving it
   const pub = registerPublication(() => TestDataRedis.find({name: 'test'}));
 
@@ -109,19 +109,19 @@ addAsyncTest('Database - Redis Oplog - With protect against race condition - che
   const client2 = getMeteorClient();
   const sub = await subscribeAndWait(client, pub);
   const sub2 = await subscribeAndWait(client2, pub);
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.polledDocuments, 1);
 
   await TestDataRedis.insertAsync({ name: 'test' });
   await sleep(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
   test.equal(metrics.polledDocuments, 2);
 
   await sleep(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.initiallyAddedDocuments, 1);
   test.equal(metrics.totalObservers, 2);
@@ -137,7 +137,7 @@ addAsyncTest('Database - Redis Oplog - With protect against race condition - che
   await sleep(100);
 });
 
-addAsyncTest('Database - Redis Oplog - Without protect against race condition - no extraneous finds', async function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Without protect against race condition - no extraneous finds', async function (test) {
   // in this case, no subscriber will refetch the doc when receiving it
   const pub = registerPublication(() => TestDataRedisNoRaceProtection.find({}));
 
@@ -148,19 +148,19 @@ addAsyncTest('Database - Redis Oplog - Without protect against race condition - 
   const client = getMeteorClient();
   const sub = await subscribeAndWait(client, pub);
   const sub2 = await subscribeAndWait(client, pub);
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.polledDocuments, 1);
 
   await TestDataRedisNoRaceProtection.insertAsync({ name: 'test' });
   await sleep(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
   test.equal(metrics.polledDocuments, 1);
 
   await sleep(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.initiallyAddedDocuments, 1);
   test.equal(metrics.totalObservers, 2);
@@ -175,7 +175,7 @@ addAsyncTest('Database - Redis Oplog - Without protect against race condition - 
 
   await sleep(100);
 });
-addAsyncTest('Database - Redis Oplog - Without protect against race condition - Check Trace', async function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Without protect against race condition - Check Trace', async function (test) {
   // in this case, the mutator will refetch the doc when publishing it
   const methodId = registerMethod(() => TestDataRedisNoRaceProtection.update({name: 'test'}, {$set: {name: 'abv'}}));
 
@@ -197,8 +197,8 @@ addAsyncTest('Database - Redis Oplog - Without protect against race condition - 
   await sleep(100);
 });
 
-addAsyncTest('Database - Redis Oplog - Removed', async function (test) {
-  const pub = registerPublication(() => TestData.find({}));
+addTestWithRoundedTime('Database - Redis Oplog - Removed', async function (test) {
+  const pub = RegisterPublication(() => TestData.find({}));
 
   await TestData.removeAsync({});
 
@@ -215,7 +215,7 @@ addAsyncTest('Database - Redis Oplog - Removed', async function (test) {
 
   await sleep(100);
 
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveRemovedDocuments, 1);
@@ -224,7 +224,7 @@ addAsyncTest('Database - Redis Oplog - Removed', async function (test) {
 
   await sleep(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveRemovedDocuments, 3);
@@ -235,8 +235,8 @@ addAsyncTest('Database - Redis Oplog - Removed', async function (test) {
   await sleep(100);
 });
 
-addAsyncTest('Database - Redis Oplog - Changed', async function (test) {
-  const pub = registerPublication(() => TestData.find({}));
+addTestWithRoundedTime('Database - Redis Oplog - Changed', async function (test) {
+  const pub = RegisterPublication(() => TestData.find({}));
 
   await TestData.removeAsync({});
 
@@ -253,7 +253,7 @@ addAsyncTest('Database - Redis Oplog - Changed', async function (test) {
 
   await sleep(100);
 
-  let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveChangedDocuments, 1);
@@ -262,7 +262,7 @@ addAsyncTest('Database - Redis Oplog - Changed', async function (test) {
 
   await sleep(100);
 
-  metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
+  metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveChangedDocuments, 4);

@@ -1,8 +1,8 @@
 import { MethodsModel } from '../../lib/models/methods';
-import { TestData } from '../_helpers/globals';
-import { CleanTestData, findMetricsForMethod, getMeteorClient, addAsyncTest, callAsync, clientCallAsync, registerMethod, withDocCacheGetSize } from '../_helpers/helpers';
-import { sleep } from '../../lib/utils';
 import { Ntp } from '../../lib/ntp';
+import { sleep } from '../../lib/utils';
+import { TestData } from '../_helpers/globals';
+import { CleanTestData, addAsyncTest, callAsync, clientCallAsync, findMetricsForMethod, getMeteorClient, registerMethod, withDocCacheGetSize } from '../_helpers/helpers';
 
 addAsyncTest(
   'Models - Method - buildPayload simple',
@@ -207,6 +207,41 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messa
   done();
 });
 
+
+Tinytest.addAsync('Models - Method - Waited On - track waitedOn without wait time', async (test, done) => {
+  CleanTestData();
+
+  let slowMethod = RegisterMethod(function () {
+    console.log('slow method start');
+    Meteor._sleepForMs(100);
+    console.log('slow method end');
+  });
+  let unblockedMethod = RegisterMethod(function () {
+    this.unblock();
+    Meteor._sleepForMs(100);
+    console.log('slow method end');
+  });
+  let fastMethod = RegisterMethod(function () {
+    console.log('fastMethod');
+  });
+
+
+  let client = GetMeteorClient();
+
+  // subscriptions and method calls made before connected are not run in order
+  waitForConnection(client);
+
+  client.call(slowMethod, () => {});
+  client.call(unblockedMethod, () => {});
+  await new Promise(r => client.call(fastMethod, () => r()));
+
+  const metrics = findMetricsForMethod(unblockedMethod);
+
+  test.isTrue(metrics.waitedOn < 10, `${metrics.waitedOn} should be less than 10`);
+  CloseClient(client);
+
+  done();
+});
 Tinytest.addAsync('Models - Method - Waited On - check unblock time', async (test, done) => {
   let methodId = registerMethod( async function (id) {
     this.unblock();
