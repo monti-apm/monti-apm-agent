@@ -2,7 +2,7 @@ import { MethodsModel } from '../../lib/models/methods';
 import { Ntp } from '../../lib/ntp';
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
-import { CleanTestData, addAsyncTest, callAsync, clientCallAsync, findMetricsForMethod, getMeteorClient, registerMethod, withDocCacheGetSize } from '../_helpers/helpers';
+import { CleanTestData, addAsyncTest, callAsync, clientCallAsync, closeClient, findMetricsForMethod, getMeteorClient, registerMethod, waitForConnection, withDocCacheGetSize } from '../_helpers/helpers';
 
 addAsyncTest(
   'Models - Method - buildPayload simple',
@@ -211,25 +211,25 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messa
 Tinytest.addAsync('Models - Method - Waited On - track waitedOn without wait time', async (test, done) => {
   CleanTestData();
 
-  let slowMethod = RegisterMethod(function () {
+  let slowMethod = registerMethod(async function () {
     console.log('slow method start');
-    Meteor._sleepForMs(100);
+    await sleep(100);
     console.log('slow method end');
   });
-  let unblockedMethod = RegisterMethod(function () {
+  let unblockedMethod = registerMethod(async function () {
     this.unblock();
-    Meteor._sleepForMs(100);
+    await sleep(100);
     console.log('slow method end');
   });
-  let fastMethod = RegisterMethod(function () {
+  let fastMethod = registerMethod(function () {
     console.log('fastMethod');
   });
 
 
-  let client = GetMeteorClient();
+  let client = getMeteorClient();
 
   // subscriptions and method calls made before connected are not run in order
-  waitForConnection(client);
+  await waitForConnection(client);
 
   client.call(slowMethod, () => {});
   client.call(unblockedMethod, () => {});
@@ -238,7 +238,7 @@ Tinytest.addAsync('Models - Method - Waited On - track waitedOn without wait tim
   const metrics = findMetricsForMethod(unblockedMethod);
 
   test.isTrue(metrics.waitedOn < 10, `${metrics.waitedOn} should be less than 10`);
-  CloseClient(client);
+  closeClient(client);
 
   done();
 });
