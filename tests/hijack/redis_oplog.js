@@ -1,27 +1,28 @@
+import { sleep } from '../../lib/utils';
 import { TestData, TestDataRedis, TestDataRedisNoRaceProtection } from '../_helpers/globals';
-import { GetMeteorClient, RegisterMethod, RegisterPublication, SubscribeAndWait } from '../_helpers/helpers';
+import { addAsyncTest, getMeteorClient, registerMethod, registerPublication, subscribeAndWait } from '../_helpers/helpers';
 
 /**
  * We only track the observers coming from subscriptions (which have `ownerInfo`)
  */
-Tinytest.add('Database - Redis Oplog - Added', function (test) {
-  const pub = RegisterPublication(() => TestData.find({}));
+addAsyncTest('Database - Redis Oplog - Added', async function (test) {
+  const pub = registerPublication(() => TestData.find({}));
 
-  TestData.remove({});
+  await TestData.removeAsync({});
 
-  TestData.insert({ name: 'test1' });
-  TestData.insert({ name: 'test2' });
-  TestData.insert({ name: 'test3' });
-  TestData.insert({ name: 'test4' });
+  await TestData.insertAsync({ name: 'test1' });
+  await TestData.insertAsync({ name: 'test2' });
+  await TestData.insertAsync({ name: 'test3' });
+  await TestData.insertAsync({ name: 'test4' });
 
-  const client = GetMeteorClient();
-  const sub = SubscribeAndWait(client, pub);
+  const client = getMeteorClient();
+  const sub = await subscribeAndWait(client, pub);
 
-  TestData.insert({ name: 'test5' });
-  TestData.insert({ name: 'test6' });
-  TestData.insert({ name: 'test7' });
+  await TestData.insertAsync({ name: 'test5' });
+  await TestData.insertAsync({ name: 'test6' });
+  await TestData.insertAsync({ name: 'test7' });
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
   const metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
 
@@ -31,35 +32,35 @@ Tinytest.add('Database - Redis Oplog - Added', function (test) {
   test.equal(metrics.liveAddedDocuments, 3);
 
   sub.stop();
-  TestData.remove({});
+  await TestData.removeAsync({});
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 });
 
-Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
-  const pub = RegisterPublication(() => TestData.find({name: 'test'}, {limit: 2, skip: 0}));
+addAsyncTest('Database - Redis Oplog - Added with limit/skip', async function (test) {
+  const pub = registerPublication(() => TestData.find({name: 'test'}, {limit: 2, skip: 0}));
 
-  TestData.remove({});
+  await TestData.removeAsync({});
 
-  TestData.insert({ name: 'test' });
+  await TestData.insertAsync({ name: 'test' });
 
-  const client = GetMeteorClient();
-  const sub = SubscribeAndWait(client, pub);
+  const client = getMeteorClient();
+  const sub = await subscribeAndWait(client, pub);
   let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
 
   test.equal(metrics.polledDocuments, 1);
 
-  TestData.insert({ name: 'test' });
-  Meteor._sleepForMs(100);
+  await TestData.insertAsync({ name: 'test' });
+  await sleep(100);
   // as the selector IS matched, redis-oplog triggers a requery
   metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
   // 1 from initial subscription, 1 findOne + requery(2)
   test.equal(metrics.polledDocuments, 4);
 
-  TestData.insert({ name: 'doesnt-match-cursor' });
+  await TestData.insertAsync({ name: 'doesnt-match-cursor' });
   // as the selector IS NOT matched, redis-oplog does not trigger a requery
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
   metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
 
@@ -72,53 +73,53 @@ Tinytest.add('Database - Redis Oplog - Added with limit/skip', function (test) {
 
 
   sub.stop();
-  TestData.remove({});
+  await TestData.removeAsync({});
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 });
-Tinytest.add('Database - Redis Oplog - With protect against race condition - Check Trace', function (test) {
+addAsyncTest('Database - Redis Oplog - With protect against race condition - Check Trace', async function (test) {
   // in this case, the mutator will refetch the doc when publishing it
-  const methodId = RegisterMethod(() => TestDataRedis.update({name: 'test'}, {$set: {name: 'abv'}}));
+  const methodId = registerMethod(() => TestDataRedis.update({name: 'test'}, {$set: {name: 'abv'}}));
 
-  TestDataRedis.remove({});
+  await TestDataRedis.removeAsync({});
 
-  TestDataRedis.insert({ name: 'test' });
+  await TestDataRedis.insertAsync({ name: 'test' });
 
-  const client = GetMeteorClient();
-  client.call(methodId);
+  const client = getMeteorClient();
+  await client.callAsync(methodId);
   Meteor._sleepForMs(1000);
 
   let trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
   const dbEvents = trace.events.filter((o) => o[0] === 'db');
   test.equal(dbEvents.length, 2);
 
-  TestDataRedis.remove({});
+  await TestDataRedis.removeAsync({});
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 });
-Tinytest.add('Database - Redis Oplog - With protect against race condition - check for finds after receiving the msg', function (test) {
+addAsyncTest('Database - Redis Oplog - With protect against race condition - check for finds after receiving the msg', async function (test) {
   // in this case, every subscriber will refetch the doc once when receiving it
-  const pub = RegisterPublication(() => TestDataRedis.find({name: 'test'}));
+  const pub = registerPublication(() => TestDataRedis.find({name: 'test'}));
 
-  TestDataRedis.remove({});
+  await TestDataRedis.removeAsync({});
 
-  TestDataRedis.insert({ name: 'test' });
+  await TestDataRedis.insertAsync({ name: 'test' });
 
-  const client = GetMeteorClient();
-  const client2 = GetMeteorClient();
-  const sub = SubscribeAndWait(client, pub);
-  const sub2 = SubscribeAndWait(client2, pub);
+  const client = getMeteorClient();
+  const client2 = getMeteorClient();
+  const sub = await subscribeAndWait(client, pub);
+  const sub2 = await subscribeAndWait(client2, pub);
   let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
 
   test.equal(metrics.polledDocuments, 1);
 
-  TestDataRedis.insert({ name: 'test' });
-  Meteor._sleepForMs(100);
+  await TestDataRedis.insertAsync({ name: 'test' });
+  await sleep(100);
 
   metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
   test.equal(metrics.polledDocuments, 2);
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
   metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
 
@@ -131,33 +132,33 @@ Tinytest.add('Database - Redis Oplog - With protect against race condition - che
 
   sub.stop();
   sub2.stop();
-  TestDataRedis.remove({});
+  await TestDataRedis.removeAsync({});
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 });
 
-Tinytest.add('Database - Redis Oplog - Without protect against race condition - no extraneous finds', function (test) {
+addAsyncTest('Database - Redis Oplog - Without protect against race condition - no extraneous finds', async function (test) {
   // in this case, no subscriber will refetch the doc when receiving it
-  const pub = RegisterPublication(() => TestDataRedisNoRaceProtection.find({}));
+  const pub = registerPublication(() => TestDataRedisNoRaceProtection.find({}));
 
-  TestDataRedisNoRaceProtection.remove({});
+  await TestDataRedisNoRaceProtection.removeAsync({});
 
-  TestDataRedisNoRaceProtection.insert({ name: 'test' });
+  await TestDataRedisNoRaceProtection.insertAsync({ name: 'test' });
 
-  const client = GetMeteorClient();
-  const sub = SubscribeAndWait(client, pub);
-  const sub2 = SubscribeAndWait(client, pub);
+  const client = getMeteorClient();
+  const sub = await subscribeAndWait(client, pub);
+  const sub2 = await subscribeAndWait(client, pub);
   let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
 
   test.equal(metrics.polledDocuments, 1);
 
-  TestDataRedisNoRaceProtection.insert({ name: 'test' });
-  Meteor._sleepForMs(100);
+  await TestDataRedisNoRaceProtection.insertAsync({ name: 'test' });
+  await sleep(100);
 
   metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
   test.equal(metrics.polledDocuments, 1);
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
   metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
 
@@ -170,20 +171,20 @@ Tinytest.add('Database - Redis Oplog - Without protect against race condition - 
 
   sub.stop();
   sub2.stop();
-  TestDataRedisNoRaceProtection.remove({});
+  await TestDataRedisNoRaceProtection.removeAsync({});
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 });
-Tinytest.add('Database - Redis Oplog - Without protect against race condition - Check Trace', function (test) {
+addAsyncTest('Database - Redis Oplog - Without protect against race condition - Check Trace', async function (test) {
   // in this case, the mutator will refetch the doc when publishing it
-  const methodId = RegisterMethod(() => TestDataRedisNoRaceProtection.update({name: 'test'}, {$set: {name: 'abv'}}));
+  const methodId = registerMethod(() => TestDataRedisNoRaceProtection.update({name: 'test'}, {$set: {name: 'abv'}}));
 
-  TestDataRedisNoRaceProtection.remove({});
+  await TestDataRedisNoRaceProtection.removeAsync({});
 
-  TestDataRedisNoRaceProtection.insert({ name: 'test' });
+  await TestDataRedisNoRaceProtection.insertAsync({ name: 'test' });
 
-  const client = GetMeteorClient();
-  client.call(methodId);
+  const client = getMeteorClient();
+  await client.callAsync(methodId);
   Meteor._sleepForMs(1000);
 
   let trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
@@ -191,37 +192,37 @@ Tinytest.add('Database - Redis Oplog - Without protect against race condition - 
   test.equal(dbEvents.length, 3);
   test.equal(dbEvents[2][2].func, 'fetch');
 
-  TestDataRedisNoRaceProtection.remove({});
+  await TestDataRedisNoRaceProtection.removeAsync({});
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 });
 
-Tinytest.add('Database - Redis Oplog - Removed', function (test) {
-  const pub = RegisterPublication(() => TestData.find({}));
+addAsyncTest('Database - Redis Oplog - Removed', async function (test) {
+  const pub = registerPublication(() => TestData.find({}));
 
-  TestData.remove({});
+  await TestData.removeAsync({});
 
-  const client = GetMeteorClient();
-  const sub = SubscribeAndWait(client, pub);
+  const client = getMeteorClient();
+  const sub = await subscribeAndWait(client, pub);
 
-  TestData.insert({ name: 'test1' });
-  TestData.insert({ name: 'test2' });
-  TestData.insert({ name: 'test3' });
+  await TestData.insertAsync({ name: 'test1' });
+  await TestData.insertAsync({ name: 'test2' });
+  await TestData.insertAsync({ name: 'test3' });
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
-  TestData.remove({ name: 'test2' });
+  await TestData.removeAsync({ name: 'test2' });
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
   let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
 
   test.equal(metrics.totalObservers, 1);
   test.equal(metrics.liveRemovedDocuments, 1);
 
-  TestData.remove({});
+  await TestData.removeAsync({});
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
   metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
 
@@ -229,28 +230,28 @@ Tinytest.add('Database - Redis Oplog - Removed', function (test) {
   test.equal(metrics.liveRemovedDocuments, 3);
 
   sub.stop();
-  TestData.remove({});
+  await TestData.removeAsync({});
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 });
 
-Tinytest.add('Database - Redis Oplog - Changed', function (test) {
-  const pub = RegisterPublication(() => TestData.find({}));
+addAsyncTest('Database - Redis Oplog - Changed', async function (test) {
+  const pub = registerPublication(() => TestData.find({}));
 
-  TestData.remove({});
+  await TestData.removeAsync({});
 
-  const client = GetMeteorClient();
-  const sub = SubscribeAndWait(client, pub);
+  const client = getMeteorClient();
+  const sub = await subscribeAndWait(client, pub);
 
-  TestData.insert({ name: 'test1' });
-  TestData.insert({ name: 'test2' });
-  TestData.insert({ name: 'test3' });
+  await TestData.insertAsync({ name: 'test1' });
+  await TestData.insertAsync({ name: 'test2' });
+  await TestData.insertAsync({ name: 'test3' });
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
   TestData.update({ name: 'test2' }, { $set: { name: 'test4' } });
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
   let metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
 
@@ -259,7 +260,7 @@ Tinytest.add('Database - Redis Oplog - Changed', function (test) {
 
   TestData.update({}, { $set: { name: 'test5' } }, { multi: true });
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
   metrics = Kadira.models.pubsub._getMetrics(new Date(), pub);
 
@@ -267,7 +268,7 @@ Tinytest.add('Database - Redis Oplog - Changed', function (test) {
   test.equal(metrics.liveChangedDocuments, 4);
 
   sub.stop();
-  TestData.remove({});
+  await TestData.removeAsync({});
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 });
