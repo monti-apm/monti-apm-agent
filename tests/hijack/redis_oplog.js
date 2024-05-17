@@ -1,6 +1,6 @@
 import { sleep } from '../../lib/utils';
 import { TestData, TestDataRedis, TestDataRedisNoRaceProtection } from '../_helpers/globals';
-import {GetMeteorClient, SubscribeAndWait, RegisterPublication, FindMetricsForPub, addTestWithRoundedTime, getMeteorClient, registerMethod, registerPublication, subscribeAndWait } from '../_helpers/helpers';
+import { FindMetricsForPub, GetMeteorClient, SubscribeAndWait, addTestWithRoundedTime, getMeteorClient, registerMethod, registerPublication, subscribeAndWait } from '../_helpers/helpers';
 
 /**
  * We only track the observers coming from subscriptions (which have `ownerInfo`)
@@ -198,7 +198,7 @@ addTestWithRoundedTime('Database - Redis Oplog - Without protect against race co
 });
 
 addTestWithRoundedTime('Database - Redis Oplog - Removed', async function (test) {
-  const pub = RegisterPublication(() => TestData.find({}));
+  const pub = registerPublication(() => TestData.find({}));
 
   await TestData.removeAsync({});
 
@@ -236,7 +236,7 @@ addTestWithRoundedTime('Database - Redis Oplog - Removed', async function (test)
 });
 
 addTestWithRoundedTime('Database - Redis Oplog - Changed', async function (test) {
-  const pub = RegisterPublication(() => TestData.find({}));
+  const pub = registerPublication(() => TestData.find({}));
 
   await TestData.removeAsync({});
 
