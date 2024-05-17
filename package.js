@@ -104,7 +104,7 @@ Package.onTest(function (api) {
 });
 
 function configurePackage (api, isTesting) {
-  api.versionsFrom('METEOR@3.0-beta.7');
+  api.versionsFrom('METEOR@3.0-rc.1');
   api.use('montiapm:meteorx@2.3.1', ['server']);
 
   if (isTesting && process.env.REDIS_OPLOG_SETTINGS) {
