@@ -1,6 +1,6 @@
 import { sleep } from '../../lib/utils';
 import { TestData, TestDataRedis, TestDataRedisNoRaceProtection } from '../_helpers/globals';
-import { FindMetricsForPub, GetMeteorClient, SubscribeAndWait, addTestWithRoundedTime, getMeteorClient, registerMethod, registerPublication, subscribeAndWait } from '../_helpers/helpers';
+import { FindMetricsForPub, SubscribeAndWait, addTestWithRoundedTime, getMeteorClient, registerMethod, registerPublication, subscribeAndWait } from '../_helpers/helpers';
 
 /**
  * We only track the observers coming from subscriptions (which have `ownerInfo`)
@@ -44,7 +44,7 @@ addTestWithRoundedTime('Database - Redis Oplog - Added with limit/skip', async f
 
   await TestData.insertAsync({ name: 'test' });
 
-  const client = GetMeteorClient();
+  const client = getMeteorClient();
   const sub = SubscribeAndWait(client, pub);
   let metrics = FindMetricsForPub(pub);
 
