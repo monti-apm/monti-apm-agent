@@ -119,7 +119,7 @@ rules:
   no-catch-shadow: 2
   no-class-assign: 2
   no-cond-assign: 2
-  no-console: 0
+  no-console: 2
   no-const-assign: 2
   no-constant-condition: 2
   no-continue: 0
@@ -291,3 +291,7 @@ rules:
   prefer-rest-params: 0
   symbol-description: 1
   callback-return: 0
+overrides:
+  - files: ['**/tests/**/*.{js,cjs,mjs}']
+    rules:
+      no-console: 0
