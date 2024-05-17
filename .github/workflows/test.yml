@@ -13,7 +13,7 @@ jobs:
       matrix:
         meteorRelease:
           # Meteor 3 beta
-          - '--release 3.0-beta.7'
+          - '--release 3.0-rc.1'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
