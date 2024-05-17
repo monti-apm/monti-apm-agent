@@ -13,8 +13,6 @@ jobs:
       matrix:
         meteorRelease:
           - '--release 3.0-rc.1'
-          # Left empty to use latest version
-          -
     env:
       REDIS_OPLOG_SETTINGS: '{"debug":true}'
     steps:
