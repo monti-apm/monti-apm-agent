@@ -25,6 +25,9 @@ parserOptions:
   sourceType: 'module'
   ecmaVersion: 2017
 overrides:
+  - files: ['**/tests/**/*.{js,cjs,mjs}']
+    rules:
+      no-console: 0
   - files: ['*.ts', '*.tsx']
     extends: ['plugin:@typescript-eslint/recommended']
     rules:
@@ -291,7 +294,3 @@ rules:
   prefer-rest-params: 0
   symbol-description: 1
   callback-return: 0
-overrides:
-  - files: ['**/tests/**/*.{js,cjs,mjs}']
-    rules:
-      no-console: 0

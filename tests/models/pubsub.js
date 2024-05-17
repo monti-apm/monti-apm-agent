@@ -809,7 +809,7 @@ Tinytest.addAsync('Models - PubSub - Waited On - track waitedOn without wait tim
   done();
 });
 
-Tinytest.addAsync('Models - PubSub - Waited On - track waited on time of next message', async (test, done) => {
+Tinytest.addAsync('Models - PubSub - Waited On - track waited on time of next message', async (test) => {
   CleanTestData();
   let fastMethod = registerMethod(function () {
     console.log('fastMethod');

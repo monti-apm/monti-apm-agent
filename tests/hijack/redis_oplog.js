@@ -1,11 +1,11 @@
 import { sleep } from '../../lib/utils';
 import { TestData, TestDataRedis, TestDataRedisNoRaceProtection } from '../_helpers/globals';
-import { FindMetricsForPub, addAsyncTest, getMeteorClient, registerMethod, registerPublication, subscribeAndWait } from '../_helpers/helpers';
+import {GetMeteorClient, SubscribeAndWait, RegisterPublication, FindMetricsForPub, addTestWithRoundedTime, getMeteorClient, registerMethod, registerPublication, subscribeAndWait } from '../_helpers/helpers';
 
 /**
  * We only track the observers coming from subscriptions (which have `ownerInfo`)
  */
-addTestWithRoundedTime('Database - Redis Oplog - Added', async async function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Added', async function (test) {
   const pub = registerPublication(() => TestData.find({}));
 
   await TestData.removeAsync({});
@@ -37,7 +37,7 @@ addTestWithRoundedTime('Database - Redis Oplog - Added', async async function (t
   await sleep(100);
 });
 
-addTestWithRoundedTime('Database - Redis Oplog - Added with limit/skip', async async function (test) {
+addTestWithRoundedTime('Database - Redis Oplog - Added with limit/skip', async function (test) {
   const pub = registerPublication(() => TestData.find({name: 'test'}, {limit: 2, skip: 0}));
 
   await TestData.removeAsync({});
