@@ -108,7 +108,7 @@ addAsyncTest(
       ['wait',{waitOn: []}],
       ...isRedisOplogEnabled ? [
         ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docSize: 12, docsFetched: 1, projection: JSON.stringify({_id: 1})}],
-        ['db',{coll: 'tinytest-data', func: 'remove', selector: JSON.stringify({_id: 'aa'}), removedDocs: 1}]
+        ['db',{coll: 'tinytest-data', func: 'removeAsync', selector: JSON.stringify({_id: 'aa'}), removedDocs: 1}]
       ] : [['db', {coll: 'tinytest-data', func: 'removeAsync', selector: JSON.stringify({_id: 'aa'}), removedDocs: 1}]],
       ['complete']
     ];

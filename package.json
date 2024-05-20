@@ -3,9 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "test": "FORCE_COLOR=true meteor --release=3.0-rc.0 test-packages ./ ",
-    "test:redis": "REDIS_OPLOG_SETTINGS='{\"debug\":true}' FORCE_COLOR=true meteor --release=3.0-rc.0 test-packages ./ ",
-    "test:local": "METEOR_PACKAGE_DIRS=./packages meteor test-packages ./ --release=3.0-rc.0",
+    "test": "FORCE_COLOR=true meteor --release=3.0-rc.1 test-packages ./ ",
+    "test:redis": "REDIS_OPLOG_SETTINGS='{\"debug\":true}' FORCE_COLOR=true meteor --release=3.0-rc.1 test-packages ./ ",
+    "test:local": "METEOR_PACKAGE_DIRS=./packages meteor test-packages ./ --release=3.0-rc.1",
     "lint": "eslint . --cache . --ext .js",
     "publish": "npm prune --production && meteor publish"
   },
