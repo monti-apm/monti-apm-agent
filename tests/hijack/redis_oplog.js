@@ -1,6 +1,6 @@
 import { sleep } from '../../lib/utils';
 import { TestData, TestDataRedis, TestDataRedisNoRaceProtection } from '../_helpers/globals';
-import { subscribeAndWait, addTestWithRoundedTime, getMeteorClient, registerMethod, registerPublication, findMetricsForMethod, FindMetricsForPub } from '../_helpers/helpers';
+import { subscribeAndWait, addTestWithRoundedTime, getMeteorClient, registerMethod, registerPublication, FindMetricsForPub } from '../_helpers/helpers';
 
 /**
  * We only track the observers coming from subscriptions (which have `ownerInfo`)
