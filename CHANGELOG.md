@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.49.2
+June 18, 2024
+
+* Fix error in redis oplog monitoring ([#123](https://github.com/monti-apm/monti-apm-agent/issues/123))
+
 ## v2.49.1
 May 9, 2024
 
