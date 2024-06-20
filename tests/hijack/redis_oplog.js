@@ -277,30 +277,30 @@ addTestWithRoundedTime('Database - Redis Oplog - Remove with limit', function (t
   TestData.remove({});
   const client = GetMeteorClient();
 
-    const sub = SubscribeAndWait(client, pub);
+  const sub = SubscribeAndWait(client, pub);
 
-    TestData.insert({ name: 'test1' });
-    TestData.insert({ name: 'test2' });
-    TestData.insert({ name: 'test3' });
+  TestData.insert({ name: 'test1' });
+  TestData.insert({ name: 'test2' });
+  TestData.insert({ name: 'test3' });
 
-    Meteor._sleepForMs(100);
-    TestData.remove({ name: 'test2' });
+  Meteor._sleepForMs(100);
+  TestData.remove({ name: 'test2' });
 
-    Meteor._sleepForMs(100);
+  Meteor._sleepForMs(100);
 
-    let metrics = FindMetricsForPub(pub);
+  let metrics = FindMetricsForPub(pub);
 
-    test.equal(metrics.totalObservers, 1, 'observers');
-    test.equal(metrics.liveRemovedDocuments, 1, 'removed');
+  test.equal(metrics.totalObservers, 1, 'observers');
+  test.equal(metrics.liveRemovedDocuments, 1, 'removed');
 
-    TestData.remove({});
+  TestData.remove({});
 
-    Meteor._sleepForMs(100);
+  Meteor._sleepForMs(100);
 
-    metrics = FindMetricsForPub(pub);
+  metrics = FindMetricsForPub(pub);
 
-    test.equal(metrics.totalObservers, 1, 'observers');
-    test.equal(metrics.liveRemovedDocuments, 3, 'removed');
+  test.equal(metrics.totalObservers, 1, 'observers');
+  test.equal(metrics.liveRemovedDocuments, 3, 'removed');
 
-    sub.stop();
+  sub.stop();
 });
