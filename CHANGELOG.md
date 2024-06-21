@@ -1,5 +1,11 @@
 # Changelog
 
+## Next
+
+* Support Meteor 3
+* Add `Monti.event`
+* Tracer supports parallel events
+
 ## v2.49.3
 June 20, 2024
 
