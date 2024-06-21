@@ -272,3 +272,36 @@ addTestWithRoundedTime('Database - Redis Oplog - Changed', async function (test)
 
   await sleep(100);
 });
+
+addTestWithRoundedTime('Database - Redis Oplog - Remove with limit', function (test) {
+  const pub = RegisterPublication(() => TestData.find({}, { limit: 100 }));
+  TestData.remove({});
+  const client = GetMeteorClient();
+
+  const sub = SubscribeAndWait(client, pub);
+
+  TestData.insert({ name: 'test1' });
+  TestData.insert({ name: 'test2' });
+  TestData.insert({ name: 'test3' });
+
+  Meteor._sleepForMs(100);
+  TestData.remove({ name: 'test2' });
+
+  Meteor._sleepForMs(100);
+
+  let metrics = FindMetricsForPub(pub);
+
+  test.equal(metrics.totalObservers, 1, 'observers');
+  test.equal(metrics.liveRemovedDocuments, 1, 'removed');
+
+  TestData.remove({});
+
+  Meteor._sleepForMs(100);
+
+  metrics = FindMetricsForPub(pub);
+
+  test.equal(metrics.totalObservers, 1, 'observers');
+  test.equal(metrics.liveRemovedDocuments, 3, 'removed');
+
+  sub.stop();
+});
