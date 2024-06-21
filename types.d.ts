@@ -3,6 +3,7 @@ export type KadiraInfo = any
 
 export type ConnectOptions = {
     enableErrorTracking?: boolean
+    enableClientPerformanceTracking?: boolean
     endpoint?: string
     hostname?: string
     uploadSourceMaps?: boolean
