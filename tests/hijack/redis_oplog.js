@@ -273,30 +273,30 @@ addTestWithRoundedTime('Database - Redis Oplog - Changed', async function (test)
   await sleep(100);
 });
 
-addTestWithRoundedTime('Database - Redis Oplog - Remove with limit', function (test) {
-  const pub = RegisterPublication(() => TestData.find({}, { limit: 100 }));
-  TestData.remove({});
-  const client = GetMeteorClient();
+addTestWithRoundedTime('Database - Redis Oplog - Remove with limit', async function (test) {
+  const pub = registerPublication(() => TestData.find({}, { limit: 100 }));
+  await TestData.removeAsync({});
+  const client = getMeteorClient();
 
-  const sub = SubscribeAndWait(client, pub);
+  const sub = await subscribeAndWait(client, pub);
 
   TestData.insert({ name: 'test1' });
   TestData.insert({ name: 'test2' });
   TestData.insert({ name: 'test3' });
 
-  Meteor._sleepForMs(100);
-  TestData.remove({ name: 'test2' });
+  await sleep(100);
+  await TestData.removeAsync({ name: 'test2' });
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
   let metrics = FindMetricsForPub(pub);
 
   test.equal(metrics.totalObservers, 1, 'observers');
   test.equal(metrics.liveRemovedDocuments, 1, 'removed');
 
-  TestData.remove({});
+  await TestData.removeAsync({});
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
   metrics = FindMetricsForPub(pub);
 
