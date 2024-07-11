@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const http = require('http');
 const app = http.createServer((req, res) => {
   console.log('AUTH:', req.headers);
