@@ -2,7 +2,7 @@
 
 Package.describe({
   summary: 'Performance Monitoring for Meteor',
-  version: '3.0.0-beta.5',
+  version: '3.0.0-beta.6',
   git: 'https://github.com/monti-apm/monti-apm-agent.git',
   name: 'montiapm:agent'
 });
@@ -104,7 +104,7 @@ Package.onTest(function (api) {
 });
 
 function configurePackage (api, isTesting) {
-  api.versionsFrom('METEOR@3.0-rc.8');
+  api.versionsFrom('METEOR@3.0');
   api.use('montiapm:meteorx@2.3.1', ['server']);
 
   if (isTesting && process.env.REDIS_OPLOG_SETTINGS) {
