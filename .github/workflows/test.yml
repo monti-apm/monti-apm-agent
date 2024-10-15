@@ -12,8 +12,10 @@ jobs:
       fail-fast: false
       matrix:
         meteorRelease:
-          # Meteor 3 beta
           - '--release 3.0'
+          - '--release 3.0.4'
+          # latest release
+          -
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
