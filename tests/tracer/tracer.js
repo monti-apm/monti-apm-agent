@@ -374,7 +374,7 @@ addAsyncTest(
     const methodId = registerMethod(async function () {
       doCompute(20);
       await Kadira.event('test', async () => {
-        doCompute(50);
+        doCompute(41);
         await TestData.insertAsync({});
       });
       doCompute(10);
