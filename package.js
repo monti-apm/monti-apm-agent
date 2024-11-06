@@ -72,6 +72,7 @@ Package.onTest(function (api) {
     'tests/models/pubsub.js',
     'tests/models/system.js',
     'tests/models/errors.js',
+    'tests/models/jobs.js',
     'tests/tracer/tracer_store.js',
     'tests/tracer/tracer.js',
     'tests/tracer/default_filters.js',
