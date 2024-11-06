@@ -18,6 +18,7 @@ addAsyncTest('HTTP - meteor/http - call a server', async function (test) {
     ['start',{userId: null,params: '[]'}],
     ['wait',{waitOn: []}],
     ['http',{method: 'GET',url: 'http://localhost:3301',library: 'meteor/http',statusCode: 1,async: true}],
+    ['http',{method: 'GET', url: 'http://localhost:3301/',library: 'meteor/fetch',}, {offset: 1}],
     ['complete']
   ];
 
