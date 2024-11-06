@@ -14,6 +14,7 @@ jobs:
         meteorRelease:
           - '--release 3.0'
           - '--release 3.0.3'
+          - '--release 3.1-beta.0'
           # latest release
           -
     steps:
