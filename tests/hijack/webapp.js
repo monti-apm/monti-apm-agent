@@ -1,5 +1,5 @@
 import { WebApp } from 'meteor/webapp';
-import { wrapWebApp } from '../../lib/hijack/wrap_webapp';
+import { getRouter, wrapWebApp } from '../../lib/hijack/wrap_webapp';
 import { releaseParts } from '../_helpers/helpers';
 
 // Check if Meteor 1.7 or newer, which are the
@@ -37,7 +37,7 @@ if (httpMonitoringEnabled) {
           'x--test--authorization': 'secret',
         },
       };
-      WebApp.rawHandlers.parent._router.stack[0].handle(
+      getRouter(WebApp.rawHandlers).stack[0].handle(
         req,
         {on () {}},
         function () {
