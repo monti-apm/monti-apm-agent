@@ -126,6 +126,7 @@ export const CleanTestData = function () {
   Kadira.models.pubsub.metricsByMinute = {};
   Kadira.models.pubsub.subscriptions = {};
   Kadira.models.jobs.jobMetricsByMinute = {};
+  Kadira.models.jobs.activeJobCounts.clear();
 };
 
 export const SubscribeAndWait = function (client, name, args) {

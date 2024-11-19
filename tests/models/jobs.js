@@ -21,6 +21,7 @@ Tinytest.add(
           jobs: {
             hello: {
               count: 2,
+              added: 0,
               errors: 0,
               wait: 0,
               db: 0,
@@ -56,12 +57,46 @@ Tinytest.add(
   }
 );
 
+Tinytest.addAsync(
+  'Models - Jobs - track new jobs',
+  async function (test) {
+    model.trackNewJob('analyze');
+    model.trackNewJob('analyze');
+    model.trackNewJob('analyze');
+
+    let payload = model.buildPayload();
+    test.equal(payload.jobMetrics[0].jobs.analyze.added, 3);
+    CleanTestData();
+  }
+);
+
+Tinytest.addAsync(
+  'Models - Jobs - track active jobs',
+  async function (test) {
+    model.activeJobCounts.clear();
+    model.trackActiveJobs('analyze', 1);
+    model.trackActiveJobs('analyze', 1);
+
+    let payload = model.buildPayload();
+    console.dir(payload, { depth: 10 });
+    test.equal(payload.jobMetrics[0].jobs.analyze.active, 2);
+
+    model.trackActiveJobs('analyze', -1);
+
+    payload = model.buildPayload();
+    test.equal(payload.jobMetrics[0].jobs.analyze.active, 1);
+
+    CleanTestData();
+  }
+);
+
 Tinytest.add(
   'Models - Jobs - traceJob - return sync value',
   function (test) {
     let result = Kadira._traceJob({ name: 'hello' }, () => 5);
 
     test.equal(result, 5);
+    CleanTestData();
   }
 );
 
@@ -71,6 +106,7 @@ Tinytest.addAsync(
     let result = await Kadira._traceJob({ name: 'hello' }, () => Promise.resolve(5));
 
     test.equal(result, 5);
+    CleanTestData();
   }
 );
 
@@ -85,6 +121,36 @@ Tinytest.addAsync(
     test.equal(payload.jobMetrics[0].jobs.hello.count, 1);
     test.ok(payload.jobMetrics[0].jobs.hello.total > 0);
     test.ok(payload.jobMetrics[0].jobs.hello.db > 0);
+    CleanTestData();
+  }
+);
+
+Tinytest.addAsync(
+  'Models - Jobs - traceJob - track active status',
+  async function (test) {
+    model.activeJobCounts.clear();
+
+    let resolver;
+    let promise = new Promise(resolve => {
+      resolver = resolve;
+    });
+
+    let jobPromise = Kadira._traceJob({ name: 'hello' }, async () => {
+      await promise;
+    });
+
+    let payload = Kadira.models.jobs.buildPayload();
+    test.equal(payload.jobMetrics[0].jobs.hello.active, 1);
+    test.equal(payload.jobMetrics[0].jobs.hello.count, 0);
+
+    resolver();
+    await jobPromise;
+
+    payload = Kadira.models.jobs.buildPayload();
+    test.equal(payload.jobMetrics[0].jobs.hello.active, undefined);
+    test.equal(payload.jobMetrics[0].jobs.hello.count, 1);
+
+    CleanTestData();
   }
 );
 
