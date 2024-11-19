@@ -152,6 +152,31 @@ export const SubscribeAndWait = function (client, name, args) {
   }
 };
 
+export const callPromise = function (client, ...args) {
+  return new Promise((resolve, reject) => {
+    client.call(...args, (err, result) => {
+      if (err) {
+        return reject(err);
+      }
+
+      resolve(result);
+    });
+  });
+};
+
+export const subscribePromise = function (client, ...args) {
+  return new Promise((resolve, reject) => {
+    client.subscribe(...args, {
+      onError (err) {
+        reject(err);
+      },
+      onReady () {
+        resolve();
+      }
+    });
+  });
+};
+
 export function compareNear (v1, v2, maxDifference) {
   maxDifference = maxDifference || 30;
   let diff = Math.abs(v1 - v2);
