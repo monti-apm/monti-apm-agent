@@ -103,8 +103,8 @@ You should use the same method that you used to give the agent the app id and se
 | eventStackTrace     | EVENT_STACK_TRACE             | false                       | If true, records a stack trace when an event starts. Slightly decreases server performance.                                                                                                             |
 | disableNtp          | OPTIONS_DISABLE_NTP           | false                       | Disable NTP time synchronization used to get the accurate time in case the server or client's clock is wrong                                                                                            |
 | stalledTimeout      | STALLED_TIMEOUT               | 1800000 (30m)               | Timeout used to detect when methods and subscriptions might be stalled (have been running for a long time and might never return). The value is in milliseconds, and can be disabled by setting it to 0 |
-| proxy               | MONTI_OPTIONS_PROXY           | none                        | Allows you to connect to Monti APM using a proxy |
-| disableInstrumentation | MONTI_DISABLE_INSTRUMENTATION | false                     | Disables instrumentation. Useful for disabling without uninstalling the package |
+| proxy               | OPTIONS_PROXY           | none                        | Allows you to connect to Monti APM using a proxy |
+| disableInstrumentation | DISABLE_INSTRUMENTATION | false                     | Disables recording most metrics and traces. Can be configured using Meteor.settings, or by env variable |
 
 
 ### Traces
