@@ -6,51 +6,47 @@ import { TestData } from '../_helpers/globals';
 const model = new JobsModel();
 
 Tinytest.add(
-  'Models - Jobs - buildPayload simple',
+  'Models - Jobs - buildMetricsPayload simple',
   function (test) {
     createCompletedJob('hello', 100, 5);
     createCompletedJob('hello', 800, 10);
 
-    let payload = model.buildPayload();
-    payload.jobRequests = [];
+    let payload = model.buildMetricsPayload();
 
-    let expected = {
-      jobMetrics: [
-        {
-          startTime: 100,
-          jobs: {
-            hello: {
-              count: 2,
-              added: 0,
-              errors: 0,
-              wait: 0,
-              db: 0,
-              http: 0,
-              email: 0,
-              async: 0,
-              compute: 7.5,
-              total: 7.5,
-              fetchedDocSize: 0,
-              histogram: {
-                alpha: 0.02,
-                bins: {
-                  41: 1,
-                  58: 1
-                },
-                maxNumBins: 2048,
-                n: 2,
-                gamma: 1.0408163265306123,
-                numBins: 2
-              }
+    let expected = [
+      {
+        startTime: 100,
+        jobs: {
+          hello: {
+            count: 2,
+            added: 0,
+            errors: 0,
+            wait: 0,
+            db: 0,
+            http: 0,
+            email: 0,
+            async: 0,
+            compute: 7.5,
+            total: 7.5,
+            fetchedDocSize: 0,
+            histogram: {
+              alpha: 0.02,
+              bins: {
+                41: 1,
+                58: 1
+              },
+              maxNumBins: 2048,
+              n: 2,
+              gamma: 1.0408163265306123,
+              numBins: 2
             }
           }
         }
-      ],
-      jobRequests: []
-    };
+      }
+    ];
 
-    let startTime = expected.jobMetrics[0].startTime;
-    expected.jobMetrics[0].startTime = Kadira.syncedDate.syncTime(startTime);
+    let startTime = expected[0].startTime;
+    expected[0].startTime = Kadira.syncedDate.syncTime(startTime);
     // TODO comparing without parsing and stringifing fails
     test.equal(EJSON.parse(EJSON.stringify(payload)), EJSON.parse(EJSON.stringify(expected)));
     CleanTestData();
@@ -64,8 +60,8 @@ Tinytest.addAsync(
     model.trackNewJob('analyze');
     model.trackNewJob('analyze');
 
-    let payload = model.buildPayload();
-    test.equal(payload.jobMetrics[0].jobs.analyze.added, 3);
+    let payload = model.buildMetricsPayload();
+    test.equal(payload[0].jobs.analyze.added, 3);
     CleanTestData();
   }
 );
@@ -77,14 +73,14 @@ Tinytest.addAsync(
     model.trackActiveJobs('analyze', 1);
     model.trackActiveJobs('analyze', 1);
 
-    let payload = model.buildPayload();
+    let payload = model.buildMetricsPayload();
     console.dir(payload, { depth: 10 });
-    test.equal(payload.jobMetrics[0].jobs.analyze.active, 2);
+    test.equal(payload[0].jobs.analyze.active, 2);
 
     model.trackActiveJobs('analyze', -1);
 
-    payload = model.buildPayload();
-    test.equal(payload.jobMetrics[0].jobs.analyze.active, 1);
+    payload = model.buildMetricsPayload();
+    test.equal(payload[0].jobs.analyze.active, 1);
 
     CleanTestData();
   }
@@ -117,10 +113,10 @@ Tinytest.addAsync(
       TestData.find().fetch();
     });
 
-    let payload = Kadira.models.jobs.buildPayload();
-    test.equal(payload.jobMetrics[0].jobs.hello.count, 1);
-    test.ok(payload.jobMetrics[0].jobs.hello.total > 0);
-    test.ok(payload.jobMetrics[0].jobs.hello.db > 0);
+    let payload = Kadira.models.jobs.buildMetricsPayload();
+    test.equal(payload[0].jobs.hello.count, 1);
+    test.ok(payload[0].jobs.hello.total > 0);
+    test.ok(payload[0].jobs.hello.db > 0);
     CleanTestData();
   }
 );
@@ -139,16 +135,16 @@ Tinytest.addAsync(
       await promise;
     });
 
-    let payload = Kadira.models.jobs.buildPayload();
-    test.equal(payload.jobMetrics[0].jobs.hello.active, 1);
-    test.equal(payload.jobMetrics[0].jobs.hello.count, 0);
+    let payload = Kadira.models.jobs.buildMetricsPayload();
+    test.equal(payload[0].jobs.hello.active, 1);
+    test.equal(payload[0].jobs.hello.count, 0);
 
     resolver();
     await jobPromise;
 
-    payload = Kadira.models.jobs.buildPayload();
-    test.equal(payload.jobMetrics[0].jobs.hello.active, undefined);
-    test.equal(payload.jobMetrics[0].jobs.hello.count, 1);
+    payload = Kadira.models.jobs.buildMetricsPayload();
+    test.equal(payload[0].jobs.hello.active, undefined);
+    test.equal(payload[0].jobs.hello.count, 1);
 
     CleanTestData();
   }

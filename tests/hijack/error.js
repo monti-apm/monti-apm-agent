@@ -12,7 +12,7 @@ Tinytest.add(
     Kadira.models.error = new ErrorModel('foo');
     Meteor._debug('_debug', '_stack');
     let payload = Kadira.models.error.buildPayload();
-    let error = payload.errors[0];
+    let error = payload[0];
     let expected = {
       appId: 'foo',
       name: '_debug',
@@ -51,7 +51,7 @@ Tinytest.add(
     Meteor._debug('_debug');
 
     let payload = Kadira.models.error.buildPayload();
-    let error = payload.errors[0];
+    let error = payload[0];
     const stack = error.stacks[0].stack;
 
     test.equal(error.name, '_debug');
@@ -78,8 +78,8 @@ Tinytest.add(
     }
 
     let payload = Kadira.models.error.buildPayload();
-    let error = payload.errors[0];
-    test.equal(1, payload.errors.length);
+    let error = payload[0];
+    test.equal(1, payload.length);
     test.equal(error.type, 'method');
     test.equal(error.subType, method);
     _resetErrorTracking(originalErrorTrackingStatus);
@@ -101,8 +101,8 @@ Tinytest.addAsync(
     client.subscribe(pubsub, {
       onError () {
         let payload = Kadira.models.error.buildPayload();
-        let error = payload.errors[0];
-        test.equal(1, payload.errors.length);
+        let error = payload[0];
+        test.equal(1, payload.length);
         test.equal(error.type, 'sub');
         test.equal(error.subType, pubsub);
         _resetErrorTracking(originalErrorTrackingStatus);
@@ -124,7 +124,7 @@ Tinytest.addAsync(
     Kadira.models.error = new ErrorModel('foo');
     Meteor._debug();
     let payload = Kadira.models.error.buildPayload();
-    test.equal(0, payload.errors.length);
+    test.equal(0, payload.length);
     _resetErrorTracking(originalErrorTrackingStatus);
     done();
   }
@@ -167,7 +167,7 @@ if (!['1.4', '1.5', '1.6'].find(prefix => Meteor.release.startsWith(`METEOR@${pr
         throw error;
       })();
       let payload = Kadira.models.error.buildPayload();
-      let errorTrace = payload.errors[0];
+      let errorTrace = payload[0];
       let expected = {
         appId: 'foo',
         name: 'Exception in callback of async function: [test]',
@@ -211,9 +211,9 @@ Tinytest.addAsync(
     Meteor.defer(function () {
       let payload = Kadira.models.error.buildPayload();
       // eslint-disable-next-line no-shadow
-      let error = payload.errors[0];
+      let error = payload[0];
 
-      test.equal(1, payload.errors.length);
+      test.equal(1, payload.length);
       test.equal(error.type, 'server-internal');
       test.equal(error.subType, 'unhandledRejection');
 
@@ -234,9 +234,9 @@ Tinytest.addAsync(
     Meteor.defer(function () {
       let payload = Kadira.models.error.buildPayload();
       // eslint-disable-next-line no-shadow
-      let error = payload.errors[0];
+      let error = payload[0];
 
-      test.equal(1, payload.errors.length);
+      test.equal(1, payload.length);
       test.equal(error.name, 'unhandledRejection: undefined');
       test.equal(error.type, 'server-internal');
       test.equal(error.subType, 'unhandledRejection');
@@ -261,7 +261,7 @@ Tinytest.addAsync(
       let errorMessage = 'reason [ERR_CODE]';
       test.equal(ex.message, errorMessage);
       let payload = Kadira.models.error.buildPayload();
-      let error = payload.errors[0];
+      let error = payload[0];
       test.isTrue(error.stacks[0].stack.indexOf(errorMessage) >= 0);
 
       let lastEvent = error.trace.events[error.trace.events.length - 1];
@@ -288,7 +288,7 @@ Tinytest.addAsync(
       let errorMessage = 'reason [ERR_CODE]';
       test.equal(ex.message, errorMessage);
       let payload = Kadira.models.error.buildPayload();
-      let error = payload.errors[0];
+      let error = payload[0];
       test.isTrue(error.stacks[0].stack.indexOf(errorMessage) >= 0);
 
       let lastEvent = error.trace.events[error.trace.events.length - 1];
@@ -317,7 +317,7 @@ Tinytest.addAsync(
       let errorMessage = 'the-message';
       test.isTrue(ex.message.match(/Internal server error/));
       let payload = Kadira.models.error.buildPayload();
-      let error = payload.errors[0];
+      let error = payload[0];
       test.isTrue(error.stacks[0].stack.indexOf(errorMessage) >= 0);
 
       let lastEvent = error.trace.events[error.trace.events.length - 1];

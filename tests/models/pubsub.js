@@ -70,7 +70,7 @@ addTestWithRoundedTime(
 );
 
 addTestWithRoundedTime(
-  'Models - PubSub - BuildPayload - subs',
+  'Models - PubSub - buildMetricsPayload - subs',
   function (test) {
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
@@ -79,16 +79,16 @@ addTestWithRoundedTime(
     model._getMetrics(d1, pub).subs++;
     model._getMetrics(d1, pub).subs++;
     let metrics = [
-      model.buildPayload(),
+      model.buildMetricsPayload(),
       model.metricsByMinute
     ];
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.subs, 3);
+    test.equal(metrics[0][0].pubs.postsList.subs, 3);
     test.equal(metrics[1], {});
   }
 );
 
 addTestWithRoundedTime(
-  'Models - PubSub - BuildPayload - routes',
+  'Models - PubSub - buildMetricsPayload - routes',
   function (test) {
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
@@ -100,16 +100,16 @@ addTestWithRoundedTime(
     model._getMetrics(d1, pub).subRoutes[route]++;
     model._getMetrics(d1, pub).subRoutes[route]++;
     let metrics = [
-      model.buildPayload(),
+      model.buildMetricsPayload(),
       model.metricsByMinute
     ];
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.subRoutes['route1'], 3);
+    test.equal(metrics[0][0].pubs.postsList.subRoutes['route1'], 3);
     test.equal(metrics[1], {});
   }
 );
 
 addTestWithRoundedTime(
-  'Models - PubSub - BuildPayload - response time',
+  'Models - PubSub - buildMetricsPayload - response time',
   function (test) {
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
@@ -118,16 +118,16 @@ addTestWithRoundedTime(
     metrics.resTime = 3000;
     metrics.subs = 3;
     metrics = [
-      model.buildPayload(),
+      model.buildMetricsPayload(),
       model.metricsByMinute
     ];
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.resTime, 1000);
+    test.equal(metrics[0][0].pubs.postsList.resTime, 1000);
     test.equal(metrics[1], {});
   }
 );
 
 addTestWithRoundedTime(
-  'Models - PubSub - BuildPayload - lifetime',
+  'Models - PubSub - buildMetricsPayload - lifetime',
   function (test) {
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
@@ -136,33 +136,33 @@ addTestWithRoundedTime(
     metrics.lifeTime = 4000;
     metrics.unsubs = 2;
     metrics = [
-      model.buildPayload(),
+      model.buildMetricsPayload(),
       model.metricsByMinute
     ];
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.lifeTime, 2000);
+    test.equal(metrics[0][0].pubs.postsList.lifeTime, 2000);
     test.equal(metrics[1], {});
   }
 );
 
 addTestWithRoundedTime(
-  'Models - PubSub - BuildPayload - multiple publications',
+  'Models - PubSub - buildMetricsPayload - multiple publications',
   function (test) {
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let model = new PubsubModel();
     model._getMetrics(d1, 'postsList').subs = 2;
     model._getMetrics(d1, 'singlePost').subs++;
     let metrics = [
-      model.buildPayload(),
+      model.buildMetricsPayload(),
       model.metricsByMinute
     ];
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.subs, 2);
-    test.equal(metrics[0].pubMetrics[0].pubs.singlePost.subs, 1);
+    test.equal(metrics[0][0].pubs.postsList.subs, 2);
+    test.equal(metrics[0][0].pubs.singlePost.subs, 1);
     test.equal(metrics[1], {});
   }
 );
 
 addTestWithRoundedTime(
-  'Models - PubSub - BuildPayload - multiple dates',
+  'Models - PubSub - buildMetricsPayload - multiple dates',
   function (test) {
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let d2 = new Date('2013 Dec 11 20:31:12').getTime();
@@ -170,17 +170,17 @@ addTestWithRoundedTime(
     model._getMetrics(d1, 'postsList').subs = 2;
     model._getMetrics(d2, 'postsList').subs++;
     let metrics = [
-      model.buildPayload(),
+      model.buildMetricsPayload(),
       model.metricsByMinute
     ];
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.subs, 2);
-    test.equal(metrics[0].pubMetrics[1].pubs.postsList.subs, 1);
+    test.equal(metrics[0][0].pubs.postsList.subs, 2);
+    test.equal(metrics[0][1].pubs.postsList.subs, 1);
     test.equal(metrics[1], {});
   }
 );
 
 addTestWithRoundedTime(
-  'Models - PubSub - BuildPayload - multiple subscriptions and dates',
+  'Models - PubSub - buildMetricsPayload - multiple subscriptions and dates',
   function (test) {
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let d2 = new Date('2013 Dec 11 20:31:12').getTime();
@@ -188,11 +188,11 @@ addTestWithRoundedTime(
     model._getMetrics(d1, 'postsList').subs = 2;
     model._getMetrics(d2, 'singlePost').subs++;
     let metrics = [
-      model.buildPayload(),
+      model.buildMetricsPayload(),
       model.metricsByMinute
     ];
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.subs, 2);
-    test.equal(metrics[0].pubMetrics[1].pubs.singlePost.subs, 1);
+    test.equal(metrics[0][0].pubs.postsList.subs, 2);
+    test.equal(metrics[0][1].pubs.singlePost.subs, 1);
     test.equal(metrics[1], {});
   }
 );
@@ -212,11 +212,11 @@ addTestWithRoundedTime(
     model.incrementHandleCount({name: 'postsList'}, false);
     model.incrementHandleCount({name: 'postsList'}, false);
     let metrics = [
-      model.buildPayload(),
+      model.buildMetricsPayload(),
       model.metricsByMinute
     ];
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.totalObservers, 2);
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.cachedObservers, 0);
+    test.equal(metrics[0][0].pubs.postsList.totalObservers, 2);
+    test.equal(metrics[0][0].pubs.postsList.cachedObservers, 0);
     Kadira.syncedDate.getTime = original;
   }
 );
@@ -236,11 +236,11 @@ addTestWithRoundedTime(
     model.incrementHandleCount({name: 'postsList'}, false);
     model.incrementHandleCount({name: 'postsList'}, true);
     let metrics = [
-      model.buildPayload(),
+      model.buildMetricsPayload(),
       model.metricsByMinute
     ];
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.totalObservers, 2);
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.cachedObservers, 1);
+    test.equal(metrics[0][0].pubs.postsList.totalObservers, 2);
+    test.equal(metrics[0][0].pubs.postsList.cachedObservers, 1);
     Kadira.syncedDate.getTime = original;
   }
 );
@@ -260,13 +260,13 @@ addTestWithRoundedTime(
     model.incrementHandleCount({name: 'postsList'}, false);
     model.incrementHandleCount({name: 'postsList'}, true);
     let metrics = [
-      model.buildPayload(),
+      model.buildMetricsPayload(),
       model.metricsByMinute
     ];
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.totalObservers, 1);
-    test.equal(metrics[0].pubMetrics[0].pubs.postsList.cachedObservers, 0);
-    test.equal(metrics[0].pubMetrics[1].pubs.postsList.totalObservers, 1);
-    test.equal(metrics[0].pubMetrics[1].pubs.postsList.cachedObservers, 1);
+    test.equal(metrics[0][0].pubs.postsList.totalObservers, 1);
+    test.equal(metrics[0][0].pubs.postsList.cachedObservers, 0);
+    test.equal(metrics[0][1].pubs.postsList.totalObservers, 1);
+    test.equal(metrics[0][1].pubs.postsList.cachedObservers, 1);
     Date.now = original;
   }
 );

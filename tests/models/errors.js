@@ -6,7 +6,7 @@ Tinytest.add(
   'Models - Errors - empty',
   function (test) {
     let model = new ErrorModel('_appId');
-    let metrics = model.buildPayload().errors;
+    let metrics = model.buildPayload();
     test.isTrue(Array.isArray(metrics));
     test.equal(metrics.length, 0);
   }
@@ -67,7 +67,7 @@ Tinytest.add(
     let error = {name: '_name', message: '_message', stack: '_stack'};
     let trace = {type: '_type', subType: '_subType', name: '_name'};
     model.trackError(error, trace);
-    let metrics = model.buildPayload().errors;
+    let metrics = model.buildPayload();
     test.isTrue(Array.isArray(metrics));
     test.equal(metrics.length, 1);
     let payload = metrics[0];
@@ -109,7 +109,7 @@ Tinytest.add(
     model.trackError(error, trace);
     model.trackError(error, trace);
     model.trackError(error, trace);
-    let metrics = model.buildPayload().errors;
+    let metrics = model.buildPayload();
     test.isTrue(Array.isArray(metrics));
     test.equal(metrics.length, 1);
     let payload = metrics[0];
@@ -139,7 +139,7 @@ Tinytest.add(
       model.trackError(error, trace);
     });
 
-    let metrics = model.buildPayload().errors;
+    let metrics = model.buildPayload();
     test.isTrue(Array.isArray(metrics));
     test.equal(metrics.length, 3);
 
@@ -173,7 +173,7 @@ Tinytest.add(
       model.trackError(error, trace);
     });
 
-    let metrics = model.buildPayload().errors;
+    let metrics = model.buildPayload();
     test.isTrue(Array.isArray(metrics));
     test.equal(metrics.length, 10);
 

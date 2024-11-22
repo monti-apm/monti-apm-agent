@@ -98,12 +98,13 @@ if (httpMonitoringEnabled) {
     function (test) {
       const result = HTTP.get(Meteor.absoluteUrl('global-imports.js'));
       test.isTrue(result.content.includes('Package['));
-      let payload = Kadira.models.http.buildPayload();
+      let payload = Kadira.models.http.buildMetricsPayload();
 
-      let staticMetrics = payload.httpMetrics[0].routes['GET-<static file>'];
+      let staticMetrics = payload[0].routes['GET-<static file>'];
       test.isTrue(staticMetrics.count > 0);
     });
 }
+
 
 if (releaseParts[0] > 1 ||
   (releaseParts[0] === 1 && releaseParts[1] > 8)) {

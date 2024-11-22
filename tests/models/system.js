@@ -8,13 +8,13 @@ import { Wait, releaseParts } from '../_helpers/helpers';
  * @flaky
  */
 Tinytest.add(
-  'Models - System - buildPayload',
+  'Models - System - buildMetricsPayload',
   function (test) {
     let model = new SystemModel();
     Meteor._wrapAsync(function (callback) {
       setTimeout(callback, 500);
     })();
-    let payload = model.buildPayload().systemMetrics[0];
+    let payload = model.buildMetricsPayload()[0];
     test.isTrue(payload.memory > 0, `memory: ${payload.memory}`);
     test.isTrue((payload.memory * 1024 * 1024 /* in bytes */) % MEMORY_ROUNDING_FACTOR === 0, 'memory is rounded');
     test.isTrue((payload.freeMemory * 1024 * 1024 /* in bytes */) % MEMORY_ROUNDING_FACTOR === 0, 'memory is rounded');

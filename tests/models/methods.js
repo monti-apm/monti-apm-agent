@@ -5,52 +5,48 @@ import { CleanTestData, CloseClient, GetMeteorClient, RegisterMethod, Wait, With
 import { Meteor } from 'meteor/meteor';
 
 Tinytest.add(
-  'Models - Method - buildPayload simple',
+  'Models - Method - buildMetricsPayload simple',
   function (test) {
     CreateMethodCompleted('aa', 'hello', 1, 100, 5);
     CreateMethodCompleted('aa', 'hello', 2, 800 , 10);
 
-    let payload = model.buildPayload();
-    payload.methodRequests = [];
+    let payload = model.buildMetricsPayload();
 
-    let expected = {
-      methodMetrics: [
-        {
-          startTime: 100,
-          methods: {
-            hello: {
-              count: 2,
-              errors: 0,
-              wait: 0,
-              waitedOn: 0,
-              db: 0,
-              http: 0,
-              email: 0,
-              async: 0,
-              compute: 7.5,
-              total: 7.5,
-              fetchedDocSize: 0,
-              sentMsgSize: 0,
-              histogram: {
-                alpha: 0.02,
-                bins: {
-                  41: 1,
-                  58: 1
-                },
-                maxNumBins: 2048,
-                n: 2,
-                gamma: 1.0408163265306123,
-                numBins: 2
-              }
+    let expected = [
+      {
+        startTime: 100,
+        methods: {
+          hello: {
+            count: 2,
+            errors: 0,
+            wait: 0,
+            waitedOn: 0,
+            db: 0,
+            http: 0,
+            email: 0,
+            async: 0,
+            compute: 7.5,
+            total: 7.5,
+            fetchedDocSize: 0,
+            sentMsgSize: 0,
+            histogram: {
+              alpha: 0.02,
+              bins: {
+                41: 1,
+                58: 1
+              },
+              maxNumBins: 2048,
+              n: 2,
+              gamma: 1.0408163265306123,
+              numBins: 2
             }
           }
         }
-      ],
-      methodRequests: []
-    };
+      }
+    ];
 
-    let startTime = expected.methodMetrics[0].startTime;
-    expected.methodMetrics[0].startTime = Kadira.syncedDate.syncTime(startTime);
+    let startTime = expected[0].startTime;
+    expected[0].startTime = Kadira.syncedDate.syncTime(startTime);
     // TODO comparing without parsing and stringifing fails
     test.equal(EJSON.parse(EJSON.stringify(payload)), EJSON.parse(EJSON.stringify(expected)));
     CleanTestData();
@@ -58,11 +54,11 @@ Tinytest.add(
 );
 
 Tinytest.add(
-  'Models - Method - buildPayload with errors',
+  'Models - Method - buildMetricsPayload with errors',
   function (test) {
     CreateMethodCompleted('aa', 'hello', 1, 100, 5);
     CreateMethodErrored('aa', 'hello', 2, 'the-error', 800, 10);
-    let payload = model.buildPayload();
+    let payload = model.buildMetricsPayload();
     let expected = [{
       startTime: 100,
       methods: {
@@ -95,7 +91,7 @@ Tinytest.add(
     }];
     // TODO comparing without stringify fails
     expected[0].startTime = Kadira.syncedDate.syncTime(expected[0].startTime);
-    test.equal(EJSON.parse(EJSON.stringify(payload.methodMetrics)), EJSON.parse(EJSON.stringify(expected)));
+    test.equal(EJSON.parse(EJSON.stringify(payload)), EJSON.parse(EJSON.stringify(expected)));
     CleanTestData();
   }
 );
@@ -118,10 +114,10 @@ Tinytest.add(
     }, 30);
     Wait(100);
 
-    let payload = Kadira.models.methods.buildPayload();
-    let index = payload.methodMetrics.findIndex(methodMetrics => methodId in methodMetrics.methods);
+    let methodMetrics = Kadira.models.methods.buildMetricsPayload();
+    let index = methodMetrics.findIndex(metrics => methodId in metrics.methods);
 
-    test.equal(payload.methodMetrics[index].methods[methodId].fetchedDocSize, 60);
+    test.equal(methodMetrics[index].methods[methodId].fetchedDocSize, 60);
     CleanTestData();
   }
 );
@@ -143,12 +139,12 @@ Tinytest.add(
     let client = GetMeteorClient();
     client.call(methodId);
 
-    let payload = Kadira.models.methods.buildPayload();
+    let methodMetrics = Kadira.models.methods.buildMetricsPayload();
 
     let expected = (JSON.stringify({ msg: 'updated', methods: ['1'] }) +
         JSON.stringify({ msg: 'result', id: '1', result: returnValue })).length;
 
-    test.equal(payload.methodMetrics[0].methods[methodId].sentMsgSize, expected);
+    test.equal(methodMetrics[0].methods[methodId].sentMsgSize, expected);
     CleanTestData();
   }
 );

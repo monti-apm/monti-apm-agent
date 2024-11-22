@@ -95,7 +95,7 @@ export const FindMetricsForPub = function (pubname) {
 };
 
 export const GetPubSubPayload = function (detailInfoNeeded) {
-  return Kadira.models.pubsub.buildPayload(detailInfoNeeded).pubMetrics;
+  return Kadira.models.pubsub.buildMetricsPayload(detailInfoNeeded);
 };
 
 export function findMetricsForMethod (name) {
