@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.49.4
+July 11, 2024
+
+* Handle traces with invalid errors
+
 ## v2.49.3
 June 20, 2024
 
