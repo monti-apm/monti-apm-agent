@@ -34,7 +34,7 @@ jobs:
           - '--release 2.10.0'
           - '--release 2.11.0'
           - '--release 2.12'
-          - '--release 2.13.2'
+          - '--release 2.13.3'
           - '--release 2.14'
           - '--release 2.15'
           - '--release 2.16'
