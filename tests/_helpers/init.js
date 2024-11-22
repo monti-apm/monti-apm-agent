@@ -6,13 +6,13 @@ Kadira.connect('foo', 'bar', {enableErrorTracking: true});
 let http = Npm.require('http');
 let Future = Npm.require('fibers/future');
 
-let server3301 = new Future();
+let server3303 = new Future();
 let server8808 = new Future();
 
 http.createServer(function (req, res) {
   res.writeHead(200);
   res.end('hello');
-}).listen(3301, server3301.return.bind(server3301));
+}).listen(3303, server3303.return.bind(server3303));
 
 http.createServer(function (req, res) {
   let data = '';
@@ -47,7 +47,7 @@ http.createServer(function (req, res) {
   });
 }).listen(8808, server8808.return.bind(server8808));
 
-server3301.wait();
+server3303.wait();
 server8808.wait();
 
 // TODO use RegisterPublication instead of these

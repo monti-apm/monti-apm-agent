@@ -6,9 +6,11 @@ Tinytest.add('HTTP - meteor/fetch - async call', function (test) {
   const methodId = RegisterMethod(function () {
     const f = new Future();
     let result;
-    fetch('http://localhost:3301/').then(function (res) {
+    fetch('http://localhost:3303/').then(function (res) {
       result = res;
       f.return();
+    }).catch(err => {
+      console.log(err);
     });
     f.wait();
     return result.status;
@@ -19,7 +21,7 @@ Tinytest.add('HTTP - meteor/fetch - async call', function (test) {
   const expected = [
     ['start', undefined, { userId: null, params: '[]' }],
     ['wait', undefined, { waitOn: [] }],
-    ['http', undefined, { method: 'GET', url: 'http://localhost:3301/', library: 'meteor/fetch' }],
+    ['http', undefined, { method: 'GET', url: 'http://localhost:3303/', library: 'meteor/fetch' }],
     ['complete']
   ];
   test.equal(events, expected);
