@@ -31,8 +31,13 @@ jobs:
           - '--release 2.7.3'
           - '--release 2.8.2'
           - '--release 2.9.0'
-          # Left empty to use latest version
-          -
+          - '--release 2.10.0'
+          - '--release 2.11.0'
+          - '--release 2.12'
+          - '--release 2.13.2'
+          - '--release 2.14'
+          - '--release 2.15'
+          - '--release 2.16'
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -40,11 +45,11 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '22.x'
 
       - name: Install Dependencies
         run: |
-          curl https://install.meteor.com | /bin/sh
+          curl https://install.meteor.com/\?release\=${{ matrix.meteorRelease }} | /bin/sh
           npm i -g @zodern/mtest
 
       - name: Run Tests
