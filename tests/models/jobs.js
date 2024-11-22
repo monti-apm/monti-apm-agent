@@ -90,6 +90,30 @@ Tinytest.addAsync(
   }
 );
 
+Tinytest.addAsync(
+  'Models - Jobs - Monti.recordNewJob',
+  async function (test) {
+    Kadira.recordNewJob('hello');
+    let payload = Kadira.models.jobs.buildPayload();
+    test.equal(payload.jobMetrics[0].jobs.hello.added, 1);
+    CleanTestData();
+  }
+);
+
+Tinytest.addAsync(
+  'Models - Jobs - Monti.recordPendingJobs',
+  async function (test) {
+    Kadira.recordPendingJobs('hello', 5);
+    let payload = Kadira.models.jobs.buildPayload();
+    test.equal(payload.jobMetrics[0].jobs.hello.pending, 5);
+
+    Kadira.recordPendingJobs('hello', 0);
+    payload = Kadira.models.jobs.buildPayload();
+    test.equal(payload.jobMetrics.length, 0);
+    CleanTestData();
+  }
+);
+
 Tinytest.add(
   'Models - Jobs - traceJob - return sync value',
   function (test) {
