@@ -49,7 +49,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          curl https://install.meteor.com/\?release\=${{ matrix.meteorRelease }} | /bin/sh
+          curl https://install.meteor.com | /bin/sh
           npm i -g @zodern/mtest
 
       - name: Run Tests
