@@ -93,7 +93,7 @@ Tinytest.addAsync(
 Tinytest.add(
   'Models - Jobs - traceJob - return sync value',
   function (test) {
-    let result = Kadira._traceJob({ name: 'hello' }, () => 5);
+    let result = Kadira.traceJob({ name: 'hello' }, () => 5);
 
     test.equal(result, 5);
     CleanTestData();
@@ -103,7 +103,7 @@ Tinytest.add(
 Tinytest.addAsync(
   'Models - Jobs - traceJob - return async value',
   async function (test) {
-    let result = await Kadira._traceJob({ name: 'hello' }, () => Promise.resolve(5));
+    let result = await Kadira.traceJob({ name: 'hello' }, () => Promise.resolve(5));
 
     test.equal(result, 5);
     CleanTestData();
@@ -113,7 +113,7 @@ Tinytest.addAsync(
 Tinytest.addAsync(
   'Models - Jobs - traceJob - track sync processor',
   async function (test) {
-    Kadira._traceJob({ name: 'hello' }, () => {
+    Kadira.traceJob({ name: 'hello' }, () => {
       TestData.find().fetch();
     });
 
@@ -135,7 +135,7 @@ Tinytest.addAsync(
       resolver = resolve;
     });
 
-    let jobPromise = Kadira._traceJob({ name: 'hello' }, async () => {
+    let jobPromise = Kadira.traceJob({ name: 'hello' }, async () => {
       await promise;
     });
 
