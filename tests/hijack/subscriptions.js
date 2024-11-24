@@ -111,6 +111,7 @@ Tinytest.add(
     CleanTestData();
     EnableTrackingMethods();
     let client = GetMeteorClient();
+    waitForConnection(client);
     let h1 = SubscribeAndWait(client, 'tinytest-data');
     Wait(50);
     h1.stop();
