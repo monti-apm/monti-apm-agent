@@ -178,7 +178,7 @@ Tinytest.add(
     let metrics = TestHelpers.findMetricsForPub('tinytest-data');
 
     console.log({elapsedTime});
-    test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 100 + elapsedTime, 60));
+    test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 100, 60));
     TestHelpers.closeClient(client);
   }
 );
