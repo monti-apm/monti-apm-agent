@@ -13,18 +13,7 @@ jobs:
       matrix:
         meteorRelease:
           - '--release 1.11'
-          - '--release 1.12.1'
-          - '--release 2.1.1'
-          - '--release 2.2'
-          - '--release 2.3.2'
-          - '--release 2.4.1'
-          - '--release 2.5.6'
-          - '--release 2.6.1'
-          - '--release 2.7.3'
-          - '--release 2.8.2'
-          - '--release 2.9.0'
-          # Left empty to use latest version
-          -
+          - '--release 2.16'
     env:
       REDIS_OPLOG_SETTINGS: '{"debug":true}'
     steps:

@@ -2,14 +2,14 @@
 
 Package.describe({
   summary: 'Performance Monitoring for Meteor',
-  version: '2.50.0-beta.2',
+  version: '2.50.0-beta.3',
   git: 'https://github.com/monti-apm/monti-apm-agent.git',
   name: 'montiapm:agent'
 });
 
 let npmModules = {
   debug: '0.8.1',
-  'monti-apm-core': '1.8.0-beta.5',
+  'monti-apm-core': '1.8.0',
   'lru-cache': '5.1.1',
   'json-stringify-safe': '5.0.1',
   'monti-apm-sketches-js': '0.0.3',

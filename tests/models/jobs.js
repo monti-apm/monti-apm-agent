@@ -53,9 +53,9 @@ Tinytest.add(
   }
 );
 
-Tinytest.addAsync(
+Tinytest.add(
   'Models - Jobs - track new jobs',
-  async function (test) {
+  function (test) {
     model.trackNewJob('analyze');
     model.trackNewJob('analyze');
     model.trackNewJob('analyze');
@@ -66,9 +66,9 @@ Tinytest.addAsync(
   }
 );
 
-Tinytest.addAsync(
+Tinytest.add(
   'Models - Jobs - track active jobs',
-  async function (test) {
+  function (test) {
     model.activeJobCounts.clear();
     model.trackActiveJobs('analyze', 1);
     model.trackActiveJobs('analyze', 1);
@@ -87,9 +87,33 @@ Tinytest.addAsync(
 );
 
 Tinytest.add(
+  'Models - Jobs - Monti.recordNewJob',
+  async function (test) {
+    Kadira.recordNewJob('hello');
+    let payload = Kadira.models.jobs.buildPayload();
+    test.equal(payload.jobMetrics[0].jobs.hello.added, 1);
+    CleanTestData();
+  }
+);
+
+Tinytest.add(
+  'Models - Jobs - Monti.recordPendingJobs',
+  async function (test) {
+    Kadira.recordPendingJobs('hello', 5);
+    let payload = Kadira.models.jobs.buildPayload();
+    test.equal(payload.jobMetrics[0].jobs.hello.pending, 5);
+
+    Kadira.recordPendingJobs('hello', 0);
+    payload = Kadira.models.jobs.buildPayload();
+    test.equal(payload.jobMetrics.length, 0);
+    CleanTestData();
+  }
+);
+
+Tinytest.add(
   'Models - Jobs - traceJob - return sync value',
   function (test) {
-    let result = Kadira._traceJob({ name: 'hello' }, () => 5);
+    let result = Kadira.traceJob({ name: 'hello' }, () => 5);
 
     test.equal(result, 5);
     CleanTestData();
@@ -98,18 +122,19 @@ Tinytest.add(
 
 Tinytest.addAsync(
   'Models - Jobs - traceJob - return async value',
-  async function (test) {
-    let result = await Kadira._traceJob({ name: 'hello' }, () => Promise.resolve(5));
+  async function (test, done) {
+    let result = await Kadira.traceJob({ name: 'hello' }, () => Promise.resolve(5));
 
     test.equal(result, 5);
     CleanTestData();
+    done();
   }
 );
 
-Tinytest.addAsync(
+Tinytest.add(
   'Models - Jobs - traceJob - track sync processor',
-  async function (test) {
-    Kadira._traceJob({ name: 'hello' }, () => {
+  function (test) {
+    Kadira.traceJob({ name: 'hello' }, () => {
       TestData.find().fetch();
     });
 
@@ -123,7 +148,7 @@ Tinytest.addAsync(
 
 Tinytest.addAsync(
   'Models - Jobs - traceJob - track active status',
-  async function (test) {
+  async function (test, done) {
     model.activeJobCounts.clear();
 
     let resolver;
@@ -131,7 +156,7 @@ Tinytest.addAsync(
       resolver = resolve;
     });
 
-    let jobPromise = Kadira._traceJob({ name: 'hello' }, async () => {
+    let jobPromise = Kadira.traceJob({ name: 'hello' }, async () => {
       await promise;
     });
 
@@ -147,6 +172,7 @@ Tinytest.addAsync(
     test.equal(payload[0].jobs.hello.count, 1);
 
     CleanTestData();
+    done();
   }
 );
 

@@ -1,5 +1,18 @@
 # Changelog
 
+## Next
+
+* Create custom traces with `Monti.traceJob`
+* Add monitoring for job queues, cron jobs, and custom functions
+* Add `disableInstrumentation` option
+* Use websockets to start cpu profiling
+* Support for recording heap snapshots
+
+## v2.49.4
+July 11, 2024
+
+* Handle traces with invalid errors
+
 ## v2.49.3
 June 20, 2024
 
