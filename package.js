@@ -9,7 +9,7 @@ Package.describe({
 
 let npmModules = {
   debug: '0.8.1',
-  '@monti-apm/core': '2.0.0-beta.5',
+  '@monti-apm/core': '2.0.0-beta.7',
   'lru-cache': '5.1.1',
   'json-stringify-safe': '5.0.1',
   'monti-apm-sketches-js': '0.0.3',
@@ -124,7 +124,7 @@ function configurePackage (api, isTesting) {
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
 
-  api.use(['http@3.0.0-alpha300.18', 'email'], 'server', { weak: !isTesting });
+  api.use(['http@3.0.0-alpha300.18||3.0.0', 'email'], 'server', { weak: !isTesting });
 
   api.use('fetch', 'server', {
     weak: !isTesting,
