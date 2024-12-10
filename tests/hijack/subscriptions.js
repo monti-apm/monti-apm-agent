@@ -166,7 +166,7 @@ Tinytest.add(
 
     TestHelpers.wait(100);
 
-    Kadira.EventBus.once('pubsub', 'observerDeleted', (ownerInfo) => console.log('on sub stop:', JSON.stringify(ownerInfo)));
+    Kadira.EventBus.once('pubsub', 'observerDeleted', (ownerInfo) => console.log('on sub stop:', Date.now(), JSON.stringify(ownerInfo)));
 
     st = Date.now();
     h1.stop();
@@ -177,7 +177,7 @@ Tinytest.add(
     TestHelpers.wait(100);
 
     let metrics = TestHelpers.findMetricsForPub('tinytest-data');
-
+    console.dir(metrics);
     console.log({elapsedTime});
     test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 100, 60));
     TestHelpers.closeClient(client);
