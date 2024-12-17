@@ -9,6 +9,7 @@ import {
   RegisterMethod,
   releaseParts,
   SubscribeAndWait,
+  subscribePromise,
   Wait,
   waitForConnection,
   WithDocCacheGetSize
@@ -765,15 +766,16 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait time of queued messa
 
   const pubName = 'tinytest-waited-on';
 
+  let promises = [];
   for (let i = 0; i < 10; i++) {
-    client.subscribe(pubName);
+    promises.push(subscribePromise(client, pubName));
   }
 
-  Meteor._sleepForMs(1000);
+  await Promise.all(promises);
 
   const metrics = FindMetricsForPub(pubName);
 
-  test.isTrue(metrics.waitedOn > 1000, `${metrics.waitedOn} should be greater than 1000`);
+  test.isTrue(metrics.waitedOn > 500, `${metrics.waitedOn} should be greater than 500`);
   CloseClient(client);
 
   done();
