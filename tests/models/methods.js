@@ -1,7 +1,7 @@
 import { EJSON } from 'meteor/ejson';
 import { MethodsModel } from '../../lib/models/methods';
 import { TestData } from '../_helpers/globals';
-import { CleanTestData, CloseClient, GetMeteorClient, RegisterMethod, Wait, WithDocCacheGetSize, findMetricsForMethod, waitForConnection } from '../_helpers/helpers';
+import { CleanTestData, CloseClient, GetMeteorClient, RegisterMethod, Wait, WithDocCacheGetSize, callPromise, findMetricsForMethod, waitForConnection } from '../_helpers/helpers';
 import { Meteor } from 'meteor/meteor';
 
 Tinytest.add(
@@ -189,6 +189,7 @@ Tinytest.add(
   }
 );
 
+
 Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messages', async (test, done) => {
   let methodId = RegisterMethod( function (id) {
     Meteor._sleepForMs(25);
@@ -197,11 +198,12 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messa
 
   let client = GetMeteorClient();
 
+  let promises = [];
   for (let i = 0; i < 10; i++) {
-    client.call(methodId, i, () => {});
+    promises.push(callPromise(client, methodId, i));
   }
 
-  Meteor._sleepForMs(1000);
+  await Promise.all(promises);
 
   const metrics = findMetricsForMethod(methodId);
 
@@ -255,11 +257,12 @@ Tinytest.addAsync('Models - Method - Waited On - check unblock time', async (tes
 
   let client = GetMeteorClient();
 
+  let promises = [];
   for (let i = 0; i < 10; i++) {
-    client.call(methodId, i, () => {});
+    promises.push(callPromise(client, methodId, i));
   }
 
-  Meteor._sleepForMs(1000);
+  await Promise.all(promises);
 
   const metrics = findMetricsForMethod(methodId);
 
@@ -276,10 +279,10 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of next message
 
   let client = GetMeteorClient();
 
-  client.call(slowMethod, () => {});
-  client.call(fastMethod, () => {});
-
-  Meteor._sleepForMs(200);
+  await Promise.all([
+    callPromise(client, slowMethod),
+    callPromise(client, fastMethod),
+  ]);
 
   const metrics = findMetricsForMethod(slowMethod);
   test.isTrue(metrics.waitedOn >= 20, `${metrics.waitedOn} should be greater than 20`);

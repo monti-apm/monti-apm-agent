@@ -2,7 +2,7 @@
 
 Package.describe({
   summary: 'Performance Monitoring for Meteor',
-  version: '2.50.0-beta.2',
+  version: '2.50.0-beta.4',
   git: 'https://github.com/monti-apm/monti-apm-agent.git',
   name: 'montiapm:agent'
 });
@@ -72,6 +72,7 @@ Package.onTest(function (api) {
     'tests/models/pubsub.js',
     'tests/models/system.js',
     'tests/models/errors.js',
+    'tests/models/jobs.js',
     'tests/tracer/tracer_store.js',
     'tests/tracer/tracer.js',
     'tests/tracer/default_filters.js',
