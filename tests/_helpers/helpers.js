@@ -218,18 +218,6 @@ export const subscribeAndWait = function (client, name, args) {
   });
 };
 
-export const callPromise = function (client, ...args) {
-  return new Promise((resolve, reject) => {
-    client.call(...args, (err, result) => {
-      if (err) {
-        return reject(err);
-      }
-
-      resolve(result);
-    });
-  });
-};
-
 export const subscribePromise = function (client, ...args) {
   return new Promise((resolve, reject) => {
     client.subscribe(...args, {
