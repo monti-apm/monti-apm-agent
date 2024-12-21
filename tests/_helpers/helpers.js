@@ -193,6 +193,8 @@ export const CleanTestData = async function () {
   await TestData.removeAsync({});
   Kadira.models.pubsub.metricsByMinute = {};
   Kadira.models.pubsub.subscriptions = {};
+  Kadira.models.jobs.jobMetricsByMinute = {};
+  Kadira.models.jobs.activeJobCounts.clear();
 };
 
 export const cleanTestData = CleanTestData;
@@ -213,6 +215,31 @@ export const subscribeAndWait = function (client, name, args) {
     });
 
     sub = client.subscribe(...args);
+  });
+};
+
+export const callPromise = function (client, ...args) {
+  return new Promise((resolve, reject) => {
+    client.call(...args, (err, result) => {
+      if (err) {
+        return reject(err);
+      }
+
+      resolve(result);
+    });
+  });
+};
+
+export const subscribePromise = function (client, ...args) {
+  return new Promise((resolve, reject) => {
+    client.subscribe(...args, {
+      onError (err) {
+        reject(err);
+      },
+      onReady () {
+        resolve();
+      }
+    });
   });
 };
 

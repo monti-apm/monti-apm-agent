@@ -185,6 +185,7 @@ addAsyncTest(
   }
 );
 
+
 Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messages', async (test, done) => {
   let methodId = registerMethod( async function (id) {
     await sleep(25);
@@ -193,11 +194,12 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messa
 
   let client = getMeteorClient();
 
+  let promises = [];
   for (let i = 0; i < 10; i++) {
-    client.call(methodId, i, () => {});
+    promises.push(clientCallAsync(client, methodId, i));
   }
 
-  await sleep(1000);
+  await Promise.all(promises);
 
   const metrics = findMetricsForMethod(methodId);
 
@@ -251,11 +253,12 @@ Tinytest.addAsync('Models - Method - Waited On - check unblock time', async (tes
 
   let client = getMeteorClient();
 
+  let promises = [];
   for (let i = 0; i < 10; i++) {
-    client.call(methodId, i, () => {});
+    promises.push(clientCallAsync(client, methodId, i));
   }
 
-  await sleep(1000);
+  await Promise.all(promises);
 
   const metrics = findMetricsForMethod(methodId);
 
@@ -272,10 +275,10 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of next message
 
   let client = getMeteorClient();
 
-  client.call(slowMethod, () => {});
-  client.call(fastMethod, () => {});
-
-  await sleep(200);
+  await Promise.all([
+    clientCallAsync(client, slowMethod),
+    clientCallAsync(client, fastMethod),
+  ]);
 
   const metrics = findMetricsForMethod(slowMethod);
   test.isTrue(metrics.waitedOn >= 20, `${metrics.waitedOn} should be greater than 20`);

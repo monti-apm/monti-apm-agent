@@ -155,7 +155,7 @@ addAsyncTest(
 
     await sleep(100);
 
-    Kadira.EventBus.once('pubsub', 'observerDeleted', (ownerInfo) => console.log('on sub stop:', JSON.stringify(ownerInfo)));
+    Kadira.EventBus.once('pubsub', 'observerDeleted', (ownerInfo) => console.log('on sub stop:', Date.now(), JSON.stringify(ownerInfo)));
 
     st = Date.now();
     h1.stop();

@@ -23,7 +23,7 @@ Tinytest.add(
       connectArgs = Array.prototype.slice.call(arguments);
     };
 
-    Kadira._connectWithEnv();
+    Kadira._connectWithEnv(Kadira._parseEnv(process.env));
 
     test.equal(connectArgs[0], 'rcZSEaSgMaxH4c2df');
     test.equal(connectArgs[1], '9af3daf3-64f3-4448-8b1e-4286fdf5f499');

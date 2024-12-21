@@ -26,11 +26,11 @@ Now you can deploy your application and it will send information to Monti APM. W
 
 `montiapm:agent` is compatible with:
 
-- Meteor 1.4.3.2 and newer
+- Meteor 1.4.3.2 and newer, including Meteor 3. Meteor will install the correct version of `montiapm:agent` for the version of Meteor.
 - Internet Explorer 9 and newer web browsers
 - Can be used with [Monti APM](https://montiapm.com/) or the open sourced version of Kadira, though many new features are not supported by Kadira
 
-Features that require a newer version of Meteor are only enabled when using a supported version. For example, monitoring incoming HTTP requests is automatically enabled when the app uses Meteor 1.7 or newer.
+Some features have a higher minimum version of Meteor, and are disabled in older Meteor versions.  For example, monitoring incoming HTTP requests is enabled for apps using Meteor 1.7 or newer.
 
 ### Auto Connect
 
@@ -104,6 +104,9 @@ You should use the same method that you used to give the agent the app id and se
 | disableNtp                 | OPTIONS_DISABLE_NTP                   | false                       | Disable NTP time synchronization used to get the accurate time in case the server or client's clock is wrong                                                                                            |
 | stalledTimeout             | STALLED_TIMEOUT                       | 1800000 (30m)               | Timeout used to detect when methods and subscriptions might be stalled (have been running for a long time and might never return). The value is in milliseconds, and can be disabled by setting it to 0 |
 | proxy                      | MONTI_OPTIONS_PROXY                   | none                        | Allows you to connect to Monti APM using a proxy                                                                                                                                                        |
+| disableInstrumentation | DISABLE_INSTRUMENTATION | false                     | Disables recording most metrics and traces. Can be configured using Meteor.settings, or by env variable |
+
+
 ### Traces
 
 The agent collects traces of methods and publish functions. Every minute, it sends the outlier traces to Monti APM for you to view.
@@ -204,6 +207,65 @@ The fields are redacted from:
 - body of incoming http requests, when the body is JSON
 
 By default, the `password` field is redacted.
+
+## Job Monitoring
+
+### Custom Traces
+
+You can create custom traces for any block of code. The code will be traced as a job, and appear in the Jobs dashboard in Monti APM.
+
+```js
+
+Monti.traceJob(options, functionToTrace);
+
+Monti.traceJob({ name: 'job name' }, () => {
+  // ... code to trace
+});
+```
+
+Options can have these properties. `name` is the only property required.
+- `name`, which is the name of the trace or job. It is used to group metrics and traces together for the same job.
+- `waitTime`, which is how long the job waited to run after it was scheduled to run. Shown in Monti APM as the job delay
+- `data`, which can have the job data or any other details you want to store in the trace. It is shown under the `Start` event in the trace.
+
+The `functionToTrace` is called immediately, and it's return value is returned by `Monti.traceJob`.
+
+When `Monti.traceJob` is called inside a trace, it does nothing and simply runs `functionToTrace`.
+
+We recommend not using more than a few dozen names for custom traces.
+
+### Pending Jobs
+
+Monti APM does not automatically track pending jobs to avoid causing performance issues.
+However, your app can report the metric to Monti APM.
+
+The pending metric is intended for job queues to know how many jobs are waiting to be processed. We recommend reporting the metric within 20 seconds of the app starting, and every 10 - 50 seconds afterwards.
+
+```js
+async function reportPending() {
+  // How you get the pending count depends on the job queue library
+  // This is one way you can with BullMQ.
+  let counts = await queue.getJobCounts('wait');
+
+  Monti.recordPendingJobs('job name', counts.wait);
+}
+
+// Report the count when the app starts
+reportPending();
+
+// Update the count every 20 seconds
+setInterval(() => reportPending(), 1000 * 20);
+```
+
+### New Jobs
+
+When using `Monti.traceJob`, the `added` metric for the job is not recorded. This metric is intended for job queues to track how many new jobs were created, to understand how the rate of new jobs and completed jobs compares. You can manually record new jobs with:
+
+```js
+Monti.recordNewJob('job name');
+```
+
+Each time the function is called, it increments the `added` metric by 1.
 
 ### Development
 
