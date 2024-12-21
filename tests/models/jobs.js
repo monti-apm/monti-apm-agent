@@ -1,13 +1,13 @@
 import { EJSON } from 'meteor/ejson';
 import { JobsModel } from '../../lib/models/jobs';
-import { CleanTestData } from '../_helpers/helpers';
-import { TestData } from '../_helpers/globals';
+import { cleanTestData, CleanTestData } from '../_helpers/helpers';
+import { MontiAsyncStorage } from '../../lib/async/als';
 
 const model = new JobsModel();
 
-Tinytest.add(
+Tinytest.addAsync(
   'Models - Jobs - buildPayload simple',
-  function (test) {
+  async function (test) {
     createCompletedJob('hello', 100, 5);
     createCompletedJob('hello', 800, 10);
 
@@ -53,32 +53,31 @@ Tinytest.add(
     expected.jobMetrics[0].startTime = Kadira.syncedDate.syncTime(startTime);
     // TODO comparing without parsing and stringifing fails
     test.equal(EJSON.parse(EJSON.stringify(payload)), EJSON.parse(EJSON.stringify(expected)));
-    CleanTestData();
+    await CleanTestData();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Models - Jobs - track new jobs',
-  function (test) {
+  async function (test) {
     model.trackNewJob('analyze');
     model.trackNewJob('analyze');
     model.trackNewJob('analyze');
 
     let payload = model.buildPayload();
     test.equal(payload.jobMetrics[0].jobs.analyze.added, 3);
-    CleanTestData();
+    await CleanTestData();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Models - Jobs - track active jobs',
-  function (test) {
+  async function (test) {
     model.activeJobCounts.clear();
     model.trackActiveJobs('analyze', 1);
     model.trackActiveJobs('analyze', 1);
 
     let payload = model.buildPayload();
-    console.dir(payload, { depth: 10 });
     test.equal(payload.jobMetrics[0].jobs.analyze.active, 2);
 
     model.trackActiveJobs('analyze', -1);
@@ -86,21 +85,21 @@ Tinytest.add(
     payload = model.buildPayload();
     test.equal(payload.jobMetrics[0].jobs.analyze.active, 1);
 
-    CleanTestData();
+    await CleanTestData();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Models - Jobs - Monti.recordNewJob',
   async function (test) {
     Kadira.recordNewJob('hello');
     let payload = Kadira.models.jobs.buildPayload();
     test.equal(payload.jobMetrics[0].jobs.hello.added, 1);
-    CleanTestData();
+    await CleanTestData();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Models - Jobs - Monti.recordPendingJobs',
   async function (test) {
     Kadira.recordPendingJobs('hello', 5);
@@ -110,43 +109,48 @@ Tinytest.add(
     Kadira.recordPendingJobs('hello', 0);
     payload = Kadira.models.jobs.buildPayload();
     test.equal(payload.jobMetrics.length, 0);
-    CleanTestData();
+    await CleanTestData();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Models - Jobs - traceJob - return sync value',
-  function (test) {
-    let result = Kadira.traceJob({ name: 'hello' }, () => 5);
+  async function (test) {
+    let result = runTraceJob({ name: 'hello' }, () => 5);
 
     test.equal(result, 5);
-    CleanTestData();
+    await cleanTestData();
   }
 );
 
 Tinytest.addAsync(
   'Models - Jobs - traceJob - return async value',
   async function (test, done) {
-    let result = await Kadira.traceJob({ name: 'hello' }, () => Promise.resolve(5));
+    let result = await runTraceJob({ name: 'hello' }, () => Promise.resolve(5));
 
     test.equal(result, 5);
-    CleanTestData();
+    await cleanTestData();
     done();
   }
 );
 
-Tinytest.add(
+Tinytest.addAsync(
   'Models - Jobs - traceJob - track sync processor',
-  function (test) {
-    Kadira.traceJob({ name: 'hello' }, () => {
-      TestData.find().fetch();
+  async function (test) {
+    await cleanTestData();
+
+    runTraceJob({ name: 'hello' }, () => {
+      let now = Date.now();
+      while (Date.now() - 5 < now) {
+        // nothing
+      }
     });
 
     let payload = Kadira.models.jobs.buildPayload();
+
     test.equal(payload.jobMetrics[0].jobs.hello.count, 1);
-    test.ok(payload.jobMetrics[0].jobs.hello.total > 0);
-    test.ok(payload.jobMetrics[0].jobs.hello.db > 0);
-    CleanTestData();
+    test.isTrue(payload.jobMetrics[0].jobs.hello.total > 0);
+    test.isTrue(payload.jobMetrics[0].jobs.hello.compute > 0);
   }
 );
 
@@ -160,7 +164,7 @@ Tinytest.addAsync(
       resolver = resolve;
     });
 
-    let jobPromise = Kadira.traceJob({ name: 'hello' }, async () => {
+    let jobPromise = runTraceJob({ name: 'hello' }, async () => {
       await promise;
     });
 
@@ -175,7 +179,7 @@ Tinytest.addAsync(
     test.equal(payload.jobMetrics[0].jobs.hello.active, undefined);
     test.equal(payload.jobMetrics[0].jobs.hello.count, 1);
 
-    CleanTestData();
+    await CleanTestData();
     done();
   }
 );
@@ -186,4 +190,10 @@ function createCompletedJob (jobName, startTime, totalTime = 5) {
   method.events.push({ type: 'complete', at: startTime + totalTime });
   method = Kadira.tracer.buildTrace(method);
   model.processJob(method);
+}
+
+function runTraceJob (options, fn) {
+  return MontiAsyncStorage.run(null, () => {
+    return Monti.traceJob(options, fn);
+  });
 }
