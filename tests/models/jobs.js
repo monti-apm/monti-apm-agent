@@ -59,6 +59,20 @@ Tinytest.addAsync(
 );
 
 Tinytest.addAsync(
+  'Models - Jobs - should not have NaN with active job',
+  async function (test) {
+    await cleanTestData();
+    Kadira.models.jobs.trackActiveJobs('hello', 1);
+
+    let payload = Kadira.models.jobs.buildPayload();
+    test.equal(payload.jobMetrics[0].jobs.hello.count, 0);
+    test.equal(payload.jobMetrics[0].jobs.hello.active, 1);
+    test.equal(payload.jobMetrics[0].jobs.hello.async, 0);
+    await cleanTestData();
+  }
+);
+
+Tinytest.addAsync(
   'Models - Jobs - track new jobs',
   async function (test) {
     model.trackNewJob('analyze');
