@@ -985,17 +985,17 @@ addAsyncTest('Tracer - Build Trace - the correct number of async events are capt
   let info;
 
   const methodId = registerMethod(async function () {
-    await sleep(60);
-    await sleep(70);
+    await sleep(15);
+    await sleep(20);
 
     info = getInfo();
 
-    return await sleep(80);
+    return await sleep(20);
   });
 
   await callAsync(methodId);
 
-  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 50);
+  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 10);
 
   test.equal(asyncEvents.length, 3);
 });
@@ -1006,7 +1006,7 @@ addAsyncTest('Tracer - Build Trace - the correct number of async events are capt
   let info;
 
   Meteor.publish(subName, async function () {
-    await sleep(100);
+    await sleep(20);
 
     info = getInfo();
 
@@ -1015,7 +1015,7 @@ addAsyncTest('Tracer - Build Trace - the correct number of async events are capt
 
   await subscribeAndWait(client, subName);
 
-  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 100);
+  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 15);
 
   test.equal(asyncEvents.length,1);
 });
