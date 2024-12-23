@@ -2,6 +2,7 @@ import { EJSON } from 'meteor/ejson';
 import { JobsModel } from '../../lib/models/jobs';
 import { cleanTestData, CleanTestData } from '../_helpers/helpers';
 import { MontiAsyncStorage } from '../../lib/async/als';
+import { sleep } from '../../lib/utils';
 
 const model = new JobsModel();
 
@@ -151,6 +152,21 @@ Tinytest.addAsync(
     test.equal(payload.jobMetrics[0].jobs.hello.count, 1);
     test.isTrue(payload.jobMetrics[0].jobs.hello.total > 0);
     test.isTrue(payload.jobMetrics[0].jobs.hello.compute > 0);
+  }
+);
+
+Tinytest.addAsync(
+  'Models - Jobs - traceJob - track async time',
+  async function (test) {
+    await runTraceJob({ name: 'hello' }, async () => {
+      await sleep(10);
+    });
+
+    let payload = Kadira.models.jobs.buildPayload();
+    test.equal(payload.jobMetrics[0].jobs.hello.count, 1);
+    test.isTrue(payload.jobMetrics[0].jobs.hello.total > 0);
+    test.isTrue(payload.jobMetrics[0].jobs.hello.async > 1);
+    await cleanTestData();
   }
 );
 
