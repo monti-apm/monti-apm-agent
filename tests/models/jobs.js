@@ -91,6 +91,20 @@ Tinytest.add(
 );
 
 Tinytest.add(
+  'Models - Jobs - should not have NaN with active job',
+  function (test) {
+    CleanTestData();
+    Kadira.models.jobs.trackActiveJobs('hello', 1);
+
+    let payload = Kadira.models.jobs.buildPayload();
+    test.equal(payload.jobMetrics[0].jobs.hello.count, 0);
+    test.equal(payload.jobMetrics[0].jobs.hello.active, 1);
+    test.equal(payload.jobMetrics[0].jobs.hello.async, 0);
+    CleanTestData();
+  }
+);
+
+Tinytest.add(
   'Models - Jobs - Monti.recordNewJob',
   async function (test) {
     Kadira.recordNewJob('hello');
