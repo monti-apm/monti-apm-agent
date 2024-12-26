@@ -2,14 +2,14 @@
 
 Package.describe({
   summary: 'Performance Monitoring for Meteor',
-  version: '3.0.0-beta.9',
+  version: '3.0.0-beta.11',
   git: 'https://github.com/monti-apm/monti-apm-agent.git',
   name: 'montiapm:agent'
 });
 
 let npmModules = {
   debug: '0.8.1',
-  '@monti-apm/core': '2.0.0-beta.7',
+  '@monti-apm/core': '2.0.0-beta.8',
   'lru-cache': '5.1.1',
   'json-stringify-safe': '5.0.1',
   'monti-apm-sketches-js': '0.0.3',
@@ -69,6 +69,7 @@ Package.onTest(function (api) {
     'tests/models/pubsub.js',
     'tests/models/system.js',
     'tests/models/errors.js',
+    'tests/models/jobs.js',
     'tests/tracer/tracer_store.js',
     'tests/tracer/tracer.js',
     'tests/tracer/default_filters.js',
@@ -117,7 +118,7 @@ function configurePackage (api, isTesting) {
   api.use('meteorhacks:zones@1.2.1', { weak: true });
   api.use('simple:json-routes@2.1.0', { weak: true });
   api.use('zodern:meteor-package-versions@0.2.0');
-  api.use('zodern:types@1.0.11');
+  api.use('zodern:types@1.0.13');
 
   api.use([
     'minimongo', 'mongo', 'ddp', 'ejson', 'ddp-common',

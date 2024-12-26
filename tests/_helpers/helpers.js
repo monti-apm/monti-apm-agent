@@ -12,7 +12,7 @@ import util from 'util';
 const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
 export const callAsync = async (method, ...args) => _client.callAsync(method, ...args);
-export const clientCallAsync = async (client, method, ...args) => client.callAsync(method, ...args).stubValuePromise;
+export const clientCallAsync = async (client, method, ...args) => client.callAsync(method, ...args);
 
 export const getMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
@@ -193,6 +193,8 @@ export const CleanTestData = async function () {
   await TestData.removeAsync({});
   Kadira.models.pubsub.metricsByMinute = {};
   Kadira.models.pubsub.subscriptions = {};
+  Kadira.models.jobs.jobMetricsByMinute = {};
+  Kadira.models.jobs.activeJobCounts.clear();
 };
 
 export const cleanTestData = CleanTestData;
@@ -213,6 +215,19 @@ export const subscribeAndWait = function (client, name, args) {
     });
 
     sub = client.subscribe(...args);
+  });
+};
+
+export const subscribePromise = function (client, ...args) {
+  return new Promise((resolve, reject) => {
+    client.subscribe(...args, {
+      onError (err) {
+        reject(err);
+      },
+      onReady () {
+        resolve();
+      }
+    });
   });
 };
 

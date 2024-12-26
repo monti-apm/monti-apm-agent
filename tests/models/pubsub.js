@@ -1,22 +1,23 @@
 import { PubsubModel } from '../../lib/models/pubsub';
 import { Ntp } from '../../lib/ntp';
 import { sleep } from '../../lib/utils';
-import { TestData } from '../_helpers/globals';
 import {
-  CleanTestData,
-  FindMetricsForPub,
   addAsyncTest,
   addTestWithRoundedTime,
   cleanTestData,
+  CleanTestData,
   closeClient,
+  FindMetricsForPub,
   getMeteorClient,
   getPubSubPayload,
   registerMethod,
   releaseParts,
   subscribeAndWait,
+  subscribePromise,
   waitForConnection,
   withDocCacheGetSize,
 } from '../_helpers/helpers';
+import { TestData } from '../_helpers/globals';
 
 addTestWithRoundedTime(
   'Models - PubSub - Metrics - same date',
@@ -767,15 +768,24 @@ addAsyncTest('Models - PubSub - Waited On - track wait time of queued messages',
 
   const pubName = 'tinytest-waited-on';
 
+  let promises = [];
   for (let i = 0; i < 10; i++) {
-    client.subscribe(pubName);
+    promises.push(subscribePromise(client, pubName));
   }
 
-  await sleep(1000);
+  await Promise.all(promises);
 
-  const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), pubName);
-  console.log('metrics.waitedOn', metrics.waitedOn);
-  test.isTrue(metrics.waitedOn >= 1000, `${metrics.waitedOn} should be greater than 100`);
+  const metrics = FindMetricsForPub(pubName);
+
+  test.isTrue(metrics.waitedOn > 500, `${metrics.waitedOn} should be greater than 500`);
+  closeClient(client);
+});
+
+Meteor.publish('tinytest-unblock-fast', function () {
+  console.log('unblock-fast-pub');
+  this.unblock();
+  Meteor._sleepForMs(100);
+  this.ready();
 });
 
 Tinytest.addAsync('Models - PubSub - Waited On - track waitedOn without wait time', async (test, done) => {

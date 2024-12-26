@@ -29,6 +29,12 @@ export namespace Tracer {
     function addFilter(filterFunction: (eventType: EventType, data: Record<string, any>, info: TraceInfo) => any): void
 }
 
+export interface TraceJobOptions {
+    name: string;
+    data?: object
+    waitTime?: number
+}
+
 export namespace Monti {
     var tracer: typeof Tracer
 
@@ -44,6 +50,10 @@ export namespace Monti {
 
     function startEvent(name: string, data?: Record<string, any>, fn?: Function): MontiEvent | false;
     function endEvent(event: MontiEvent | false, data?: Record<string, any>): void;
+
+    function traceJob<T extends (...args: any) => any>(options: TraceJobOptions, fn: T): ReturnType<T>
+    function recordNewJob (jobName: string): void;
+    function recordPendingJobs (jobName: string, count: number): void;
 }
 
 declare var MontiNamespace: typeof Monti
@@ -52,4 +62,3 @@ declare global {
     var Monti: typeof MontiNamespace
     var Kadira: typeof MontiNamespace
 }
-

@@ -455,16 +455,18 @@ addAsyncTest(
         doCompute(50);
         await TestData.insertAsync({ a: 2 });
         await TestData.insertAsync({ b: 3 });
+        await TestData.insertAsync({ b: 3 });
+        await TestData.insertAsync({ b: 3 });
         await sleep(11);
       });
       info = getInfo();
     });
 
     await callAsync(methodId);
-    test.equal(info.trace.metrics.compute >= 50, true);
-    test.equal(info.trace.metrics.db > 0, true);
-    test.equal(info.trace.metrics.async >= 10, true);
-    test.equal(info.trace.metrics.custom, undefined);
+    test.equal(info.trace.metrics.compute >= 50, true, `${info.trace.metrics.compute} >= 50`);
+    test.equal(info.trace.metrics.db > 0, true, `${info.trace.metrics.db} > 0`);
+    test.equal(info.trace.metrics.async >= 10, true, `${info.trace.metrics.async} >= 10`);
+    test.equal(info.trace.metrics.custom, undefined, `${info.trace.metrics.custom} == undefined`);
   }
 );
 
@@ -983,17 +985,17 @@ addAsyncTest('Tracer - Build Trace - the correct number of async events are capt
   let info;
 
   const methodId = registerMethod(async function () {
-    await sleep(60);
-    await sleep(70);
+    await sleep(15);
+    await sleep(20);
 
     info = getInfo();
 
-    return await sleep(80);
+    return await sleep(20);
   });
 
   await callAsync(methodId);
 
-  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 50);
+  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 10);
 
   test.equal(asyncEvents.length, 3);
 });
@@ -1004,7 +1006,7 @@ addAsyncTest('Tracer - Build Trace - the correct number of async events are capt
   let info;
 
   Meteor.publish(subName, async function () {
-    await sleep(100);
+    await sleep(20);
 
     info = getInfo();
 
@@ -1013,7 +1015,7 @@ addAsyncTest('Tracer - Build Trace - the correct number of async events are capt
 
   await subscribeAndWait(client, subName);
 
-  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 100);
+  const asyncEvents = info.trace.events.filter(([type, duration]) => type === EventType.Async && duration >= 15);
 
   test.equal(asyncEvents.length,1);
 });

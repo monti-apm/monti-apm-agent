@@ -1,6 +1,6 @@
 .build*
 node_modules/
-.npm
+.npm/.package-garbage-*
 smart.lock
 versions.json
 .idea
