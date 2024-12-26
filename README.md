@@ -2,7 +2,6 @@
 
 ![Github Workflow Status](https://img.shields.io/github/actions/workflow/status/monti-apm/monti-apm-agent/test.yml?branch=master&style=flat-square)
 
-
 [![Monti APM - Performance Monitoring for Meteor](https://docs.montiapm.com/images/overview-2.png)](https://montiapm.com)
 
 This package is based on [meteorhacks/kadira](https://atmospherejs.com/meteorhacks/kadira).
@@ -15,8 +14,8 @@ This package is based on [meteorhacks/kadira](https://atmospherejs.com/meteorhac
 4. Configure your Meteor app with the `AppId` and `AppSecret` by adding the following code snippet to a `server/monti.js` file:
 
 ```js
-Meteor.startup(function() {
-  Monti.connect('<AppId>', '<AppSecret>');
+Meteor.startup(function () {
+  Monti.connect("<AppId>", "<AppSecret>");
 });
 ```
 
@@ -60,7 +59,7 @@ Export the following environment variables before running or deploying your app:
 ```bash
 export MONTI_APP_ID=<appId>
 export MONTI_APP_SECRET=<appSecret>
-````
+```
 
 ### Error Tracking
 
@@ -91,11 +90,12 @@ You should use the same method that you used to give the agent the app id and se
 #### List of Options
 
 | Name                       | Environment Variable                  | Default                     | Description                                                                                                                                                                                             |
-|----------------------------|---------------------------------------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------- | ------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | appId                      | APP_ID                                | none                        |                                                                                                                                                                                                         |
 | appSecret                  | APP_SECRET                            | none                        |                                                                                                                                                                                                         |
 | enableErrorTracking        | OPTIONS_ENABLE_ERROR_TRACKING         | true                        | Enable sending errors to Monti APM                                                                                                                                                                      |
 | disableClientErrorTracking | OPTIONS_DISABLE_CLIENT_ERROR_TRACKING | false                       | Disable sending client errors to Monti APM                                                                                                                                                              |
+| disableAwaitDetector       | OPTIONS_DISABLE_AWAIT_DETECTOR        | false                       | Disable capture of async events                                                                                                                                                                         |
 | endpoint                   | OPTIONS_ENDPOINT                      | https://engine.montiapm.com | Monti / Kadira engine url                                                                                                                                                                               |
 | hostname                   | OPTIONS_HOSTNAME                      | Server's hostname           | What the instance is named in Monti APM                                                                                                                                                                 |
 | uploadSourceMaps           | UPLOAD_SOURCE_MAPS                    | true                        | Enables sending source maps to Monti APM to improve error stack traces                                                                                                                                  |
@@ -104,6 +104,7 @@ You should use the same method that you used to give the agent the app id and se
 | disableNtp                 | OPTIONS_DISABLE_NTP                   | false                       | Disable NTP time synchronization used to get the accurate time in case the server or client's clock is wrong                                                                                            |
 | stalledTimeout             | STALLED_TIMEOUT                       | 1800000 (30m)               | Timeout used to detect when methods and subscriptions might be stalled (have been running for a long time and might never return). The value is in milliseconds, and can be disabled by setting it to 0 |
 | proxy                      | MONTI_OPTIONS_PROXY                   | none                        | Allows you to connect to Monti APM using a proxy                                                                                                                                                        |
+
 ### Traces
 
 The agent collects traces of methods and publish functions. Every minute, it sends the outlier traces to Monti APM for you to view.
@@ -126,26 +127,30 @@ The agent records up to one level of nested events.
 You can add custom events to the traces to time specific code or events, or to provide more details to the trace.
 
 ```js
-Monti.event('event name', {
-  // This object can have any details you want to store
-  // The object is optional
-  userId: userId
-}, async () => {
-  // do the work inside the event
-  // the event will automatically end when this function returns
-});
+Monti.event(
+  "event name",
+  {
+    // This object can have any details you want to store
+    // The object is optional
+    userId: userId,
+  },
+  async () => {
+    // do the work inside the event
+    // the event will automatically end when this function returns
+  }
+);
 
 // Older api. Not recommended since it doesn't nest child events in Meteor 3
-const event = Monti.startEvent('event name', {
+const event = Monti.startEvent("event name", {
   // This object can have any details you want
-  organization: organizationId
+  organization: organizationId,
 });
 
 // After code runs or event happens
 Monti.endEvent(event, {
   // This object can have any details you want
   // It is merged with the object created when starting the event
-  organizationMembers: 10
+  organizationMembers: 10,
 });
 ```
 
@@ -160,27 +165,29 @@ The agent stores user ids, queries, arguments, and other data with each trace to
 Add a filter with:
 
 ```js
-Monti.tracer.addFilter((eventType, data, { type: traceType, name: traceName }) => {
-  if (
-    // traceType can be 'method', 'sub', or 'http'
-    traceType === 'method' &&
-    // traceName has the method or publication name. For http traces
-    // it is '<http method>-<route name>', for example 'POST-/user/:id'.
-    traceName === 'account.setPassword' &&
-    // The eventType can be start, db, http, email, wait, async,
-    // custom, fs, error, or complete.
-    eventType === 'start'
-  ) {
-    // data is the object shown in Monti APM when clicking "Show More" in a trace.
-    // What is in data depends on the event type.
-    delete data.params;
-  }
+Monti.tracer.addFilter(
+  (eventType, data, { type: traceType, name: traceName }) => {
+    if (
+      // traceType can be 'method', 'sub', or 'http'
+      traceType === "method" &&
+      // traceName has the method or publication name. For http traces
+      // it is '<http method>-<route name>', for example 'POST-/user/:id'.
+      traceName === "account.setPassword" &&
+      // The eventType can be start, db, http, email, wait, async,
+      // custom, fs, error, or complete.
+      eventType === "start"
+    ) {
+      // data is the object shown in Monti APM when clicking "Show More" in a trace.
+      // What is in data depends on the event type.
+      delete data.params;
+    }
 
-  return data;
-});
+    return data;
+  }
+);
 
 Monti.tracer.addFilter((eventType, data) => {
-  if (eventType === 'db') {
+  if (eventType === "db") {
     delete data.selector;
   }
 
@@ -199,6 +206,7 @@ Monti.tracer.redactField('authorization');
 The value of the field is changed to `Monti: redacted`.
 
 The fields are redacted from:
+
 - headers in traces for incoming HTTP requests
 - params sent when calling a method or subscribing to a publication
 - body of incoming http requests, when the body is JSON
