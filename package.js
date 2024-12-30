@@ -2,7 +2,7 @@
 
 Package.describe({
   summary: 'Performance Monitoring for Meteor',
-  version: '2.50.0-beta.5',
+  version: '2.50.0',
   git: 'https://github.com/monti-apm/monti-apm-agent.git',
   name: 'montiapm:agent'
 });
@@ -21,7 +21,6 @@ let npmModules = {
   // used by WebApp.
   parseurl: '1.3.3',
 };
-
 
 Package.onUse(function (api) {
   Npm.depends(npmModules);

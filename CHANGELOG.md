@@ -1,6 +1,8 @@
 # Changelog
 
-## Next
+## v2.50.0
+
+December 30, 2024
 
 * Create custom traces with `Monti.traceJob`
 * Add monitoring for job queues, cron jobs, and custom functions
