@@ -2,9 +2,9 @@
   "lockfileVersion": 4,
   "dependencies": {
     "@monti-apm/core": {
-      "version": "2.0.0-beta.8",
-      "resolved": "https://registry.npmjs.org/@monti-apm/core/-/core-2.0.0-beta.8.tgz",
-      "integrity": "sha512-zHMx7LMebIoeJ6gWzfeIa2Uu/xvYAfhKM6vcmhDYj4izNu8PQlrXubIRjHPi+Raw0cJCk/7r+YN7rzp5mQD+ag==",
+      "version": "2.0.0-beta.9",
+      "resolved": "https://registry.npmjs.org/@monti-apm/core/-/core-2.0.0-beta.9.tgz",
+      "integrity": "sha512-99Wy/hyzrZgnEMC1iofQ4dP6jA5ldHSu12j0aDU4zMfAWR3KGI83ckuWAZs9N199k5N79B20OzXyzsYaCVwFjw==",
       "dependencies": {
         "debug": {
           "version": "3.2.7",
