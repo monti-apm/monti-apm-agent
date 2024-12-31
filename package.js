@@ -22,7 +22,6 @@ let npmModules = {
   parseurl: '1.3.3',
 };
 
-
 Package.onUse(function (api) {
   Npm.depends(npmModules);
   configurePackage(api, false);
