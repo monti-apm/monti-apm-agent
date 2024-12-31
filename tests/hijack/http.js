@@ -1,50 +1,27 @@
-import { HTTP } from 'meteor/http';
-import { CleanTestData, GetLastMethodEvents, GetMeteorClient, RegisterMethod } from '../_helpers/helpers';
-const Future = Npm.require('fibers/future');
+import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod } from '../_helpers/helpers';
+import { asyncHttpGet } from '../_helpers/http';
 
-Tinytest.add('HTTP - meteor/http - call a server', function (test) {
-  const methodId = RegisterMethod(function () {
-    const result = HTTP.get('http://localhost:3301');
+/**
+ * @warning Every HTTP call should be async since Release 3.0
+ */
+addAsyncTest('HTTP - meteor/http - call a server', async function (test) {
+  const methodId = registerMethod(async function () {
+    const result = await asyncHttpGet('http://localhost:3301');
     return result.statusCode;
   });
-  const client = GetMeteorClient();
-  const result = client.call(methodId);
-  const events = GetLastMethodEvents([0, 2]);
-  const expected = [
-    ['start', undefined, { userId: null, params: '[]' }],
-    ['wait', undefined, { waitOn: [] }],
-    ['http', undefined, { url: 'http://localhost:3301', method: 'GET', statusCode: 200, library: 'meteor/http' }],
-    ['complete']
-  ];
-  test.equal(events, expected);
-  test.equal(result, 200);
-  CleanTestData();
-}
-);
 
-Tinytest.add('HTTP - meteor/http - async callback', function (test) {
-  const methodId = RegisterMethod(function () {
-    const f = new Future();
-    let result;
-    HTTP.get('http://localhost:3301', function (err, res) {
-      result = res;
-      f.return();
-    });
-    f.wait();
-    return result.statusCode;
-  });
-  const client = GetMeteorClient();
-  const result = client.call(methodId);
-  const events = GetLastMethodEvents([0, 2]);
+  const result = await callAsync(methodId);
+
+  const events = getLastMethodEvents([0, 2, 3]);
+
   const expected = [
-    ['start', undefined, { userId: null, params: '[]' }],
-    ['wait', undefined, { waitOn: [] }],
-    ['http', undefined, { url: 'http://localhost:3301', method: 'GET', async: true, library: 'meteor/http' }],
-    ['async', undefined, {}],
+    ['start',{userId: null,params: '[]'}],
+    ['wait',{waitOn: []}],
+    ['http',{method: 'GET',url: 'http://localhost:3301',library: 'meteor/http',statusCode: 1,async: true}],
+    ['http',{method: 'GET', url: 'http://localhost:3301/',library: 'meteor/fetch',}, {offset: 1}],
     ['complete']
   ];
-  test.equal(events, expected);
+
+  test.stableEqual(events, expected);
   test.equal(result, 200);
-  CleanTestData();
-}
-);
+});
