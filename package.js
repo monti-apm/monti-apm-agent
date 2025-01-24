@@ -124,7 +124,9 @@ function configurePackage (api, isTesting) {
     'underscore', 'random', 'webapp', 'ecmascript'
   ], ['server']);
 
-  api.use(['http@3.0.0-alpha300.18||3.0.0', 'email'], 'server', { weak: !isTesting });
+  if (isTesting) {
+    api.use(['http@3.0.0', 'email'], 'server');
+  }
 
   api.use('fetch', 'server', {
     weak: !isTesting,
