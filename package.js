@@ -109,7 +109,7 @@ function configurePackage (api, isTesting) {
 
   if (isTesting && process.env.REDIS_OPLOG_SETTINGS) {
     api.use([
-      'quave:redis-oplog@3.0.0',
+      'cultofcoders:redis-oplog@3.0.0',
       'disable-oplog@1.0.7'
     ], ['server']);
   }
