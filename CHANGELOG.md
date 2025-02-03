@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.50.1
+
+February 3, 2025
+
+* Fix recording job metrics when server only creates new jobs
+* Instrument quave:synced-cron on Meteor 2
+* Metrics for bullmq jobs will now be grouped by the combination of the queue name and job name
+
 ## v2.50.0
 
 December 30, 2024
