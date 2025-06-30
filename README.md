@@ -215,7 +215,7 @@ Options can have these properties. `name` is the only property required.
 - `waitTime`, which is how long the job waited to run after it was scheduled to run. Shown in Monti APM as the job delay
 - `data`, which can have the job data or any other details you want to store in the trace. It is shown under the `Start` event in the trace.
 
-The `functionToTrace` is called immediately, and it's return value is returned by `Monti.traceJob`.
+The `functionToTrace` is called immediately, and its return value is returned by `Monti.traceJob`.
 
 When `Monti.traceJob` is called inside a trace, it does nothing and simply runs `functionToTrace`.
 
