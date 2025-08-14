@@ -22,7 +22,7 @@ addTestWithRoundedTime('Database - Redis Oplog - Added', async function (test) {
   await TestData.insertAsync({ name: 'test6' });
   await TestData.insertAsync({ name: 'test7' });
 
-  await sleep(100);
+  await sleep(25);
 
   const metrics = FindMetricsForPub(pub);
 
@@ -33,8 +33,6 @@ addTestWithRoundedTime('Database - Redis Oplog - Added', async function (test) {
 
   sub.stop();
   await TestData.removeAsync({});
-
-  await sleep(100);
 });
 
 addTestWithRoundedTime('Database - Redis Oplog - Added with limit/skip', async function (test) {
@@ -51,7 +49,7 @@ addTestWithRoundedTime('Database - Redis Oplog - Added with limit/skip', async f
   test.equal(metrics.polledDocuments, 1);
 
   await TestData.insertAsync({ name: 'test' });
-  await sleep(100);
+  await sleep(25);
   // as the selector IS matched, redis-oplog triggers a requery
   metrics = FindMetricsForPub(pub);
   // 1 from initial subscription, 1 findOne + requery(2)
@@ -60,7 +58,7 @@ addTestWithRoundedTime('Database - Redis Oplog - Added with limit/skip', async f
   await TestData.insertAsync({ name: 'doesnt-match-cursor' });
   // as the selector IS NOT matched, redis-oplog does not trigger a requery
 
-  await sleep(100);
+  await sleep(25);
 
   metrics = FindMetricsForPub(pub);
 
@@ -74,8 +72,6 @@ addTestWithRoundedTime('Database - Redis Oplog - Added with limit/skip', async f
 
   sub.stop();
   await TestData.removeAsync({});
-
-  await sleep(100);
 });
 addTestWithRoundedTime('Database - Redis Oplog - With protect against race condition - Check Trace', async function (test) {
   // in this case, the mutator will refetch the doc when publishing it
@@ -87,15 +83,13 @@ addTestWithRoundedTime('Database - Redis Oplog - With protect against race condi
 
   const client = getMeteorClient();
   await client.callAsync(methodId);
-  Meteor._sleepForMs(1000);
+  Meteor._sleepForMs(250);
 
   let trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
   const dbEvents = trace.events.filter((o) => o[0] === 'db');
   test.equal(dbEvents.length, 2);
 
   await TestDataRedis.removeAsync({});
-
-  await sleep(100);
 });
 addTestWithRoundedTime('Database - Redis Oplog - With protect against race condition - check for finds after receiving the msg', async function (test) {
   // in this case, every subscriber will refetch the doc once when receiving it
@@ -114,12 +108,12 @@ addTestWithRoundedTime('Database - Redis Oplog - With protect against race condi
   test.equal(metrics.polledDocuments, 1);
 
   await TestDataRedis.insertAsync({ name: 'test' });
-  await sleep(100);
+  await sleep(25);
 
   metrics = FindMetricsForPub(pub);
   test.equal(metrics.polledDocuments, 2);
 
-  await sleep(100);
+  await sleep(25);
 
   metrics = FindMetricsForPub(pub);
 
@@ -133,8 +127,6 @@ addTestWithRoundedTime('Database - Redis Oplog - With protect against race condi
   sub.stop();
   sub2.stop();
   await TestDataRedis.removeAsync({});
-
-  await sleep(100);
 });
 
 addTestWithRoundedTime('Database - Redis Oplog - Without protect against race condition - no extraneous finds', async function (test) {
@@ -153,12 +145,12 @@ addTestWithRoundedTime('Database - Redis Oplog - Without protect against race co
   test.equal(metrics.polledDocuments, 1);
 
   await TestDataRedisNoRaceProtection.insertAsync({ name: 'test' });
-  await sleep(100);
+  await sleep(25);
 
   metrics = FindMetricsForPub(pub);
   test.equal(metrics.polledDocuments, 1);
 
-  await sleep(100);
+  await sleep(25);
 
   metrics = FindMetricsForPub(pub);
 
@@ -172,8 +164,6 @@ addTestWithRoundedTime('Database - Redis Oplog - Without protect against race co
   sub.stop();
   sub2.stop();
   await TestDataRedisNoRaceProtection.removeAsync({});
-
-  await sleep(100);
 });
 addTestWithRoundedTime('Database - Redis Oplog - Without protect against race condition - Check Trace', async function (test) {
   // in this case, the mutator will refetch the doc when publishing it
@@ -185,7 +175,7 @@ addTestWithRoundedTime('Database - Redis Oplog - Without protect against race co
 
   const client = getMeteorClient();
   await client.callAsync(methodId);
-  Meteor._sleepForMs(1000);
+  Meteor._sleepForMs(25);
 
   let trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
   const dbEvents = trace.events.filter((o) => o[0] === 'db');
@@ -193,8 +183,6 @@ addTestWithRoundedTime('Database - Redis Oplog - Without protect against race co
   test.equal(dbEvents[2][2].func, 'fetch');
 
   await TestDataRedisNoRaceProtection.removeAsync({});
-
-  await sleep(100);
 });
 
 addTestWithRoundedTime('Database - Redis Oplog - Removed', async function (test) {
@@ -209,11 +197,11 @@ addTestWithRoundedTime('Database - Redis Oplog - Removed', async function (test)
   await TestData.insertAsync({ name: 'test2' });
   await TestData.insertAsync({ name: 'test3' });
 
-  await sleep(100);
+  await sleep(25);
 
   await TestData.removeAsync({ name: 'test2' });
 
-  await sleep(100);
+  await sleep(25);
 
   let metrics = FindMetricsForPub(pub);
 
@@ -222,7 +210,7 @@ addTestWithRoundedTime('Database - Redis Oplog - Removed', async function (test)
 
   await TestData.removeAsync({});
 
-  await sleep(100);
+  await sleep(25);
 
   metrics = FindMetricsForPub(pub);
 
@@ -231,8 +219,6 @@ addTestWithRoundedTime('Database - Redis Oplog - Removed', async function (test)
 
   sub.stop();
   await TestData.removeAsync({});
-
-  await sleep(100);
 });
 
 addTestWithRoundedTime('Database - Redis Oplog - Changed', async function (test) {
@@ -247,11 +233,11 @@ addTestWithRoundedTime('Database - Redis Oplog - Changed', async function (test)
   await TestData.insertAsync({ name: 'test2' });
   await TestData.insertAsync({ name: 'test3' });
 
-  await sleep(100);
+  await sleep(25);
 
   TestData.update({ name: 'test2' }, { $set: { name: 'test4' } });
 
-  await sleep(100);
+  await sleep(25);
 
   let metrics = FindMetricsForPub(pub);
 
@@ -260,7 +246,7 @@ addTestWithRoundedTime('Database - Redis Oplog - Changed', async function (test)
 
   TestData.update({}, { $set: { name: 'test5' } }, { multi: true });
 
-  await sleep(100);
+  await sleep(25);
 
   metrics = FindMetricsForPub(pub);
 
@@ -269,8 +255,6 @@ addTestWithRoundedTime('Database - Redis Oplog - Changed', async function (test)
 
   sub.stop();
   await TestData.removeAsync({});
-
-  await sleep(100);
 });
 
 addTestWithRoundedTime('Database - Redis Oplog - Remove with limit', async function (test) {
@@ -284,10 +268,10 @@ addTestWithRoundedTime('Database - Redis Oplog - Remove with limit', async funct
   TestData.insert({ name: 'test2' });
   TestData.insert({ name: 'test3' });
 
-  await sleep(100);
+  await sleep(25);
   await TestData.removeAsync({ name: 'test2' });
 
-  await sleep(100);
+  await sleep(25);
 
   let metrics = FindMetricsForPub(pub);
 
@@ -296,7 +280,7 @@ addTestWithRoundedTime('Database - Redis Oplog - Remove with limit', async funct
 
   await TestData.removeAsync({});
 
-  await sleep(100);
+  await sleep(25);
 
   metrics = FindMetricsForPub(pub);
 
