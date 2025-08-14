@@ -766,7 +766,7 @@ addAsyncTest('Models - PubSub - Waited On - track wait time of queued messages',
 
   await waitForConnection(client);
 
-  const pubName = 'tinytest-waited-on';
+  const pubName = 'tinytest-waited-on-short';
 
   let promises = [];
   for (let i = 0; i < 10; i++) {
@@ -777,7 +777,7 @@ addAsyncTest('Models - PubSub - Waited On - track wait time of queued messages',
 
   const metrics = FindMetricsForPub(pubName);
 
-  test.isTrue(metrics.waitedOn > 500, `${metrics.waitedOn} should be greater than 500`);
+  test.isTrue(metrics.waitedOn > 150, `${metrics.waitedOn} should be greater than 150`);
   closeClient(client);
 });
 

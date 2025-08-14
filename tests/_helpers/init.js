@@ -75,6 +75,11 @@ Meteor.publish('tinytest-waited-on', async function () {
   return TestData.find();
 });
 
+Meteor.publish('tinytest-waited-on-short', async function () {
+  await sleep(25);
+  return TestData.find();
+});
+
 Meteor.publish('tinytest-waited-on2', async function () {
   await sleep(10);
   if (this.unblock) this.unblock();
