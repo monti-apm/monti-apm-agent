@@ -12,7 +12,9 @@ jobs:
       fail-fast: false
       matrix:
         meteorRelease:
-          - '--release 3.0.3'
+          - '--release 3.0'
+          # latest release
+          -
     env:
       REDIS_OPLOG_SETTINGS: '{"debug":true}'
     steps:
