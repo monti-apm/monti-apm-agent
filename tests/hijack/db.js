@@ -79,7 +79,7 @@ addAsyncTest(
       ['start',{userId: null, params: '[]'}],
       ['wait',{waitOn: []}],
       ... isRedisOplogEnabled ? [
-        ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docSize: 12, docsFetched: 1, limit: 1, projection: JSON.stringify({_id: 1})}],
+        ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docSize: 1, docsFetched: 1, limit: 1, projection: JSON.stringify({_id: 1})}],
         ['db',{coll: 'tinytest-data', func: 'updateAsync', selector: JSON.stringify({_id: { $in: ['aa']}}), updatedDocs: 1}]
       ] : [['db', {coll: 'tinytest-data', func: 'updateAsync', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}]],
       ['complete']
@@ -107,7 +107,7 @@ addAsyncTest(
       ['start',{userId: null, params: '[]'}],
       ['wait',{waitOn: []}],
       ...isRedisOplogEnabled ? [
-        ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docSize: 12, docsFetched: 1, projection: JSON.stringify({_id: 1})}],
+        ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docSize: 1, docsFetched: 1, projection: JSON.stringify({_id: 1})}],
         ['db',{coll: 'tinytest-data', func: 'removeAsync', selector: JSON.stringify({_id: 'aa'}), removedDocs: 1}]
       ] : [['db', {coll: 'tinytest-data', func: 'removeAsync', selector: JSON.stringify({_id: 'aa'}), removedDocs: 1}]],
       ['complete']
@@ -191,9 +191,9 @@ addAsyncTest(
       ...isRedisOplogEnabled ? [
         ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docsFetched: 0, docSize: 0, limit: 1, projection: JSON.stringify({_id: 1})}],
         ['db',{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: 'aa'}],
-        ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docsFetched: 1, docSize: 12, limit: 1, projection: JSON.stringify({_id: 1})}],
+        ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docsFetched: 1, docSize: 1, limit: 1, projection: JSON.stringify({_id: 1})}],
         ['db',{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: undefined}],
-        ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docsFetched: 1, docSize: 20 }]
+        ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docsFetched: 1, docSize: 1 }]
       ] : [
         ['db',{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: 'aa'}],
         ['db',{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: undefined}]
@@ -224,9 +224,9 @@ addAsyncTest(
       ...isRedisOplogEnabled ? [
         ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docsFetched: 0, docSize: 0, limit: 1, projection: JSON.stringify({_id: 1})}],
         ['db',{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: 'aa'}],
-        ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docsFetched: 1, docSize: 12, limit: 1, projection: JSON.stringify({_id: 1})}],
+        ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docsFetched: 1, docSize: 1, limit: 1, projection: JSON.stringify({_id: 1})}],
         ['db',{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1, insertedId: undefined}],
-        ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docsFetched: 1, docSize: 20 }]
+        ['db',{coll: 'tinytest-data', func: 'fetch', selector: JSON.stringify({_id: 'aa'}), cursor: true, docsFetched: 1, docSize: 1 }]
       ] : [
         ['db',{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}],
         ['db',{coll: 'tinytest-data', func: 'upsert', selector: JSON.stringify({_id: 'aa'}), updatedDocs: 1}]
