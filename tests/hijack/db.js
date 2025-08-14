@@ -11,7 +11,7 @@ import {
 import assert from 'assert';
 
 addAsyncTest(
-  'Database - insert',
+  'Database - basic - insert',
   async function (test) {
     const methodId = RegisterMethod(async function () {
       await TestData.insertAsync({aa: 10});
@@ -36,7 +36,7 @@ addAsyncTest(
 );
 
 addAsyncTest(
-  'Database - throw error and catch',
+  'Database - basic - throw error and catch',
   async function (test) {
     let methodId = registerMethod(async function () {
       try {
@@ -62,7 +62,7 @@ addAsyncTest(
 );
 
 addAsyncTest(
-  'Database - update',
+  'Database - basic - update',
   async function (test) {
     await TestData.insertAsync({_id: 'aa', dd: 10});
 
@@ -90,7 +90,7 @@ addAsyncTest(
 );
 
 addAsyncTest(
-  'Database - remove',
+  'Database - basic - remove',
   async function (test) {
     await TestData.insertAsync({_id: 'aa', dd: 10});
 
@@ -118,7 +118,7 @@ addAsyncTest(
 );
 
 addAsyncTest(
-  'Database - findOne',
+  'Database - basic - findOne',
   async function (test) {
     await TestData.insertAsync({_id: 'aa', dd: 10});
 
@@ -144,7 +144,7 @@ addAsyncTest(
 );
 
 addAsyncTest(
-  'Database - findOne with sort and fields',
+  'Database - basic - findOne with sort and fields',
   async function (test) {
     await TestData.insertAsync({_id: 'aa', dd: 10});
 
@@ -173,7 +173,7 @@ addAsyncTest(
 );
 
 addAsyncTest(
-  'Database - upsert',
+  'Database - basic - upsert',
   async function (test) {
     let methodId = registerMethod(async function () {
       await TestData.upsertAsync({_id: 'aa'}, {$set: {bb: 20}});
@@ -206,7 +206,7 @@ addAsyncTest(
 );
 
 addAsyncTest(
-  'Database - upsert with update',
+  'Database - basic - upsert with update',
   async function (test) {
     let methodId = registerMethod(async function () {
       await TestData.updateAsync({_id: 'aa'}, {$set: {bb: 20}}, {upsert: true});
@@ -239,7 +239,7 @@ addAsyncTest(
 );
 
 addAsyncTest(
-  'Database - indexes',
+  'Database - basic - indexes',
   async function (test) {
     let methodId = registerMethod(async function () {
       await TestData.createIndexAsync({aa: 1, bb: 1});
