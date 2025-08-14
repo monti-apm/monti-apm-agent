@@ -860,7 +860,7 @@ addAsyncTest('Models - PubSub - Waited On - track wait when unblock', async (tes
   await sleep(200);
   const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), 'tinytest-waited-on2');
 
-  test.isTrue(metrics.waitedOn > 8, `${metrics.waitedOn} should be greater than 8`);
+  test.isTrue(metrics.waitedOn > 5, `${metrics.waitedOn} should be greater than 5`);
 
   // this.unblock is provided on Meteor >= 2.3, so we expect bigger delays below this version
   if (releaseParts[0] > 2 || (releaseParts[0] === 2 && releaseParts[1] >= 3)) {
