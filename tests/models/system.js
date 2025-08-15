@@ -17,7 +17,6 @@ addAsyncTest(
     await sleep(500);
 
     let payload = model.buildPayload();
-    await sleep(500);
 
     payload = payload.systemMetrics[0];
 

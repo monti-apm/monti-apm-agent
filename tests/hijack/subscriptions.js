@@ -55,7 +55,7 @@ addAsyncTest(
     let pubName = `pub-${Random.id()}`;
 
     Meteor.publish(pubName, async function () {
-      await sleep(200);
+      await sleep(50);
       this.ready();
     });
 
@@ -63,7 +63,7 @@ addAsyncTest(
 
     let metrics = FindMetricsForPub(pubName);
 
-    test.isTrue(TestHelpers.compareNear(metrics.resTime, 200, 100));
+    test.isTrue(TestHelpers.compareNear(metrics.resTime, 50, 20));
 
     h1.stop();
   }

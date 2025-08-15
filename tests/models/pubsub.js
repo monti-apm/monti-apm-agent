@@ -425,7 +425,7 @@ addTestWithRoundedTime(
   async function (test, client) {
     let h1 = await subscribeAndWait(client, 'tinytest-data');
 
-    await sleep(200);
+    await waitForMetric('tinytest-data', 'createdObservers', 1);
 
     let payload = getPubSubPayload();
 
@@ -434,7 +434,7 @@ addTestWithRoundedTime(
 
     h1.stop();
 
-    await sleep(200);
+    await waitForMetric('tinytest-data', 'deletedObservers', 1);
 
     payload = getPubSubPayload();
 
@@ -450,8 +450,6 @@ addTestWithRoundedTime(
 
     await subscribeAndWait(client, 'tinytest-data');
 
-    await sleep(200);
-
     let payload = getPubSubPayload();
 
     test.equal(payload[0].pubs['tinytest-data'].polledDocuments, 2);
@@ -463,12 +461,10 @@ addTestWithRoundedTime(
   async function (test, client) {
     await subscribeAndWait(client, 'tinytest-data');
 
-    await sleep(50);
-
     await TestData.insertAsync({aa: 10});
     await TestData.insertAsync({aa: 20});
 
-    await sleep(100);
+    await waitForMetric('tinytest-data', 'oplogInsertedDocuments', 2);
 
     let payload = getPubSubPayload();
 
@@ -482,15 +478,12 @@ addTestWithRoundedTime(
     await TestData.insertAsync({aa: 10});
     await TestData.insertAsync({aa: 20});
 
-    await sleep(50);
-
     await subscribeAndWait(client, 'tinytest-data');
-
-    await sleep(200);
 
     await TestData.removeAsync({});
 
-    await sleep(100);
+    await waitForMetric('tinytest-data', 'oplogDeletedDocuments', 2);
+
 
     let payload = getPubSubPayload();
 
@@ -506,11 +499,10 @@ addTestWithRoundedTime(
 
     await subscribeAndWait(client, 'tinytest-data');
 
-    await sleep(200);
-
     await TestData.updateAsync({}, {$set: {kk: 20}}, {multi: true});
 
-    await sleep(100);
+    await waitForMetric('tinytest-data', 'oplogUpdatedDocuments', 2);
+
 
     let payload = getPubSubPayload();
 
@@ -526,7 +518,8 @@ addTestWithRoundedTime(
 
     await subscribeAndWait(client, 'tinytest-data-with-no-oplog');
 
-    await sleep(200);
+    await waitForMetric('tinytest-data-with-no-oplog', 'polledDocuments', 1);
+
 
     let payload = getPubSubPayload();
 
@@ -541,12 +534,11 @@ addTestWithRoundedTime(
     await TestData.insertAsync({aa: 10});
     await TestData.insertAsync({aa: 20});
 
-    await sleep(50);
-
     await subscribeAndWait(client, 'tinytest-data-random');
     await subscribeAndWait(client, 'tinytest-data-random');
 
-    await sleep(100);
+    await waitForMetric('tinytest-data-random', 'initiallyAddedDocuments', 4);
+
 
     let payload = getPubSubPayload();
 
@@ -561,12 +553,10 @@ addTestWithRoundedTime(
     await subscribeAndWait(client, 'tinytest-data-random');
     await subscribeAndWait(client, 'tinytest-data-random');
 
-    await sleep(50);
-
     await TestData.insertAsync({aa: 10});
     await TestData.insertAsync({aa: 20});
 
-    await sleep(100);
+    await waitForMetric('tinytest-data-random', 'liveAddedDocuments', 4);
 
     let payload = getPubSubPayload();
     test.equal(payload[0].pubs['tinytest-data-random'].liveAddedDocuments, 4);
@@ -580,16 +570,12 @@ addTestWithRoundedTime(
     await TestData.insertAsync({aa: 10});
     await TestData.insertAsync({aa: 20});
 
-    await sleep(50);
-
     await subscribeAndWait(client, 'tinytest-data-random');
     await subscribeAndWait(client, 'tinytest-data-random');
-
-    await sleep(100);
 
     await TestData.updateAsync({}, {$set: {kk: 20}}, {multi: true});
 
-    await sleep(50);
+    await waitForMetric('tinytest-data-random', 'liveChangedDocuments', 4);
 
     let payload = getPubSubPayload();
 
@@ -611,9 +597,9 @@ addTestWithRoundedTime(
     await subscribeAndWait(client, 'tinytest-data-random');
     await subscribeAndWait(client, 'tinytest-data-random');
 
-    await sleep(100);
     await TestData.removeAsync({});
-    await sleep(50);
+
+    await waitForMetric('tinytest-data-random', 'liveRemovedDocuments', 4);
 
     let payload = getPubSubPayload();
 
@@ -627,10 +613,9 @@ addTestWithRoundedTime(
     await TestData.insertAsync({aa: 10});
     await TestData.insertAsync({aa: 20});
 
-    await sleep(50);
     await subscribeAndWait(client, 'tinytest-data-random');
 
-    await sleep(100);
+    await waitForMetric('tinytest-data-random', 'initiallySentMsgSize', 1);
 
     let payload = getPubSubPayload();
 
@@ -646,12 +631,10 @@ addTestWithRoundedTime(
   async function (test, client) {
     await subscribeAndWait(client, 'tinytest-data-random');
 
-    await sleep(50);
-
     await TestData.insertAsync({aa: 10});
     await TestData.insertAsync({aa: 20});
 
-    await sleep(100);
+    await waitForMetric('tinytest-data-random', 'liveSentMsgSize', 4);
 
     let payload = getPubSubPayload();
 
@@ -667,11 +650,9 @@ addTestWithRoundedTime(
   async function (test, client) {
     await TestData.insertAsync({aa: 10});
     await TestData.insertAsync({aa: 20});
-    await sleep(100);
 
     await withDocCacheGetSize(async function () {
       await subscribeAndWait(client, 'tinytest-data-random');
-      await sleep(200);
     }, 30);
 
     let payload = getPubSubPayload();
@@ -684,10 +665,10 @@ addTestWithRoundedTime(
   async function (test, client) {
     await withDocCacheGetSize(async function () {
       await subscribeAndWait(client, 'tinytest-data-random');
-      await sleep(100);
       await TestData.insertAsync({aa: 10});
       await TestData.insertAsync({aa: 20});
-      await sleep(200);
+
+      await waitForMetric('tinytest-data-random', 'liveFetchedDocSize', 50);
     }, 25);
 
     let payload = getPubSubPayload();
@@ -703,7 +684,6 @@ addTestWithRoundedTime(
     await TestData.insertAsync({aa: 20});
     await withDocCacheGetSize(async function () {
       await subscribeAndWait(client, 'tinytest-data-cursor-fetch');
-      await sleep(200);
     }, 30);
     let payload = getPubSubPayload();
     test.equal(payload[0].pubs['tinytest-data-cursor-fetch'].fetchedDocSize, 60);
@@ -718,11 +698,8 @@ addTestWithRoundedTime(
     await TestData.insertAsync({aa: 10});
     await TestData.insertAsync({aa: 20});
 
-    await sleep(100);
-
     await withDocCacheGetSize(async function () {
       await subscribeAndWait(client, 'tinytest-data-with-no-oplog');
-      await sleep(200);
     }, 30);
 
     let payload = getPubSubPayload();
@@ -864,10 +841,27 @@ addAsyncTest('Models - PubSub - Waited On - track wait when unblock', async (tes
 
   // this.unblock is provided on Meteor >= 2.3, so we expect bigger delays below this version
   if (releaseParts[0] > 2 || (releaseParts[0] === 2 && releaseParts[1] >= 3)) {
-    test.isTrue(metrics.waitedOn <= 12, 'waitedOn should be less or equal than 12');
+    test.isTrue(metrics.waitedOn <= 12, `${metrics.waitedOn} should be less or equal than 12`);
   } else {
-    test.isTrue(metrics.waitedOn <= 150, 'waitedOn should be less or equal than 150');
+    test.isTrue(metrics.waitedOn <= 150, `${metrics.waitedOn} should be less or equal than 150`);
   }
 
   closeClient(client);
 });
+
+// Waits for a metric to be a value
+// Note: this should not be used in place of assertions - it continues
+// after timing out
+async function waitForMetric (pubName, metric, value) {
+  let timeoutTimestamp = Date.now() + 200;
+  while (Date.now() < timeoutTimestamp) {
+    let metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), pubName);
+    if (metrics[metric] >= value) {
+      return;
+    }
+
+    await sleep(5);
+  }
+
+  console.log('Wait For Metric timed out');
+}
