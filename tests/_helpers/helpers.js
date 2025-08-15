@@ -8,6 +8,7 @@ import { cleanTrailingNilValues, cloneDeep, isPlainObject, last, sleep } from '.
 import { isNumber } from '../../lib/common/utils';
 import { diffObjects } from './pretty-log';
 import util from 'util';
+import { Ntp } from '../../lib/ntp';
 
 const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
@@ -182,6 +183,24 @@ export function findMetricsForMethod (name) {
   return candidates[candidates.length - 1];
 }
 
+// Waits for a metric to be a value
+// Note: this should not be used in place of assertions - it continues
+// after timing out
+export async function waitForPubMetric (pubName, metric, value) {
+  let timeoutTimestamp = Date.now() + 200;
+  while (Date.now() < timeoutTimestamp) {
+    let metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), pubName);
+    if (metrics[metric] >= value) {
+      return;
+    }
+
+    await sleep(5);
+  }
+
+  console.log('Wait For Metric timed out');
+}
+
+
 export const Wait = function (time) {
   return new Promise((resolve) => {
     setTimeout(resolve, time);
@@ -203,6 +222,11 @@ export const subscribeAndWait = function (client, name, args) {
   return new Promise((resolve, reject) => {
     let sub = null;
 
+    let resolveStop;
+    let stopPromise = new Promise(_resolve => {
+      resolveStop = _resolve;
+    });
+
     args = Array.prototype.splice.call(arguments, 1);
 
     args.push({
@@ -211,10 +235,14 @@ export const subscribeAndWait = function (client, name, args) {
       },
       onReady () {
         resolve(sub);
+      },
+      onStop () {
+        resolveStop();
       }
     });
 
     sub = client.subscribe(...args);
+    sub.stopPromise = stopPromise;
   });
 };
 
