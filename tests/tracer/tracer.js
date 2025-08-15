@@ -801,12 +801,14 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
       // DB
       await Promise.all(ids.map(_id => TestData.findOneAsync({_id})));
 
-      await TestData.findOneAsync({ _id: 'a1'}).then(() => {
+      let prom = TestData.findOneAsync({ _id: 'a1'}).then(() => {
         // Try to avoid flaky offset for the last query
         doCompute(1);
         // Is this nested under the previous findOneAsync or is it a sibling?
         return TestData.findOneAsync({ _id: 'a2' });
       });
+
+      await prom;
 
       Kadira.endEvent(event);
     });
