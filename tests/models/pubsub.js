@@ -634,7 +634,7 @@ addTestWithRoundedTime(
     await TestData.insertAsync({aa: 10});
     await TestData.insertAsync({aa: 20});
 
-    await waitForMetric('tinytest-data-random', 'liveSentMsgSize', 4);
+    await waitForMetric('tinytest-data-random', 'liveSentMsgSize', 100);
 
     let payload = getPubSubPayload();
 
