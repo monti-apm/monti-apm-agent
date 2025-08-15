@@ -345,7 +345,7 @@ export function addTestWithRoundedTime (name, fn) {
   Tinytest.addAsync(name, withRoundedTime(fn));
 }
 
-addTestWithRoundedTime.only = function (name, fn) {
+addTestWithRoundedTime.only = (name, fn) => {
   Tinytest.onlyAsync(name, withRoundedTime(fn));
 };
 
@@ -441,10 +441,6 @@ export function deepFreeze (obj) {
 
   Object.freeze(obj);
 }
-
-addTestWithRoundedTime.only = (name, fn) => {
-  Tinytest.only(name, withRoundedTime(fn), true);
-};
 
 export const isRedisOplogEnabled = !!process.env.REDIS_OPLOG_SETTINGS;
 
