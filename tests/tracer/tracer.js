@@ -7,6 +7,7 @@ import {
   cleanTrace,
   deepFreeze,
   getLastMethodEvents,
+  getMethodEvents,
   registerMethod,
   subscribeAndWait
 } from '../_helpers/helpers';
@@ -816,6 +817,8 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   await callAsync(methodId);
 
   const events = getLastMethodEvents([0, 2, 3]);
+
+  console.log(JSON.stringify(getMethodEvents()));
 
   const expected = [
     ['start',{userId: null,params: '[]'}],
