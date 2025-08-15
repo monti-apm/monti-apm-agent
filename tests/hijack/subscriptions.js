@@ -9,7 +9,8 @@ import {
   registerPublication,
   subscribeAndWait,
   TestHelpers,
-  waitForConnection
+  waitForConnection,
+  waitForPubMetric
 } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
 
@@ -159,15 +160,15 @@ addAsyncTest(
 
     st = Date.now();
     h1.stop();
+
+    await waitForPubMetric('tinytest-data', 'observerLifetime', 50);
     elapsedTime += Date.now() - st;
     console.log('elapsed 2', Date.now() - st);
     console.log('elapsed total', Date.now() - start);
 
-    await sleep(100);
-
     let metrics = TestHelpers.findMetricsForPub('tinytest-data');
 
-    test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 100 + elapsedTime, 60));
+    test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 120, 60));
   }
 );
 
