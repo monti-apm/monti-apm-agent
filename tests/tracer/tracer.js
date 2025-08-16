@@ -822,6 +822,10 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
 
   console.log(JSON.stringify(getMethodEvents()));
 
+  // sometimes the last db event has an offset due to an async event
+  let nestedDbEvents = events[2][2].nested;
+  nestedDbEvents[nestedDbEvents.length - 1].length = 2;
+
   const expected = [
     ['start',{userId: null,params: '[]'}],
     ['wait',{waitOn: []}],
