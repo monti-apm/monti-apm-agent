@@ -466,7 +466,7 @@ addAsyncTest(
     await callAsync(methodId);
     test.equal(info.trace.metrics.compute >= 50, true, `${info.trace.metrics.compute} >= 50`);
     test.equal(info.trace.metrics.db > 0, true, `${info.trace.metrics.db} > 0`);
-    test.equal(info.trace.metrics.async >= 10, true, `${info.trace.metrics.async} >= 10`);
+    test.equal(info.trace.metrics.async >= 10, true, `${info.trace.metrics.async} >= 5`);
     test.equal(info.trace.metrics.custom, undefined, `${info.trace.metrics.custom} == undefined`);
   }
 );

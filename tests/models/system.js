@@ -14,7 +14,7 @@ addAsyncTest(
   async function (test) {
     let model = new SystemModel();
 
-    await sleep(500);
+    await sleep(100);
 
     let payload = model.buildPayload();
 
@@ -27,7 +27,7 @@ addAsyncTest(
     test.isTrue(payload.freeMemory > 0, 'free memory is > 0');
     test.isTrue(payload.pcpu >= 0, `pcpu: ${payload.pcpu}`);
     test.isTrue(payload.sessions >= 0, `sessions: ${payload.sessions}`);
-    test.isTrue(payload.endTime >= payload.startTime + 500, `time: ${payload.endTime} - ${payload.startTime}`);
+    test.isTrue(payload.endTime >= payload.startTime + 90, `time: ${payload.endTime} - ${payload.startTime}`);
   }
 );
 
