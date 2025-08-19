@@ -2,9 +2,9 @@ import { MethodsModel } from '../../lib/models/methods';
 import { Ntp } from '../../lib/ntp';
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
-import { CleanTestData, addAsyncTest, callAsync, clientCallAsync, closeClient, findMetricsForMethod, getMeteorClient, registerMethod, waitForConnection, withDocCacheGetSize } from '../_helpers/helpers';
+import { CleanTestData, addAsyncTest, addTestWithRoundedTime, callAsync, clientCallAsync, closeClient, findMetricsForMethod, getMeteorClient, registerMethod, waitForConnection, withDocCacheGetSize } from '../_helpers/helpers';
 
-addAsyncTest(
+addTestWithRoundedTime(
   'Models - Method - buildPayload simple',
   async function (test) {
     createMethodCompleted('aa', 'hello', 1, 100, 5);
@@ -55,7 +55,7 @@ addAsyncTest(
   }
 );
 
-addAsyncTest(
+addTestWithRoundedTime(
   'Models - Method - buildPayload with errors',
   async function (test) {
     createMethodCompleted('aa', 'hello', 1, 100, 5);
