@@ -1,20 +1,16 @@
 import { Meteor } from 'meteor/meteor';
-import { CleanTestData, EnableTrackingMethods, GetMeteorClient, RegisterMethod } from '../_helpers/helpers';
+import { addAsyncTest, callAsync, registerMethod } from '../_helpers/helpers';
 
-Tinytest.add(
+addAsyncTest(
   'Info - Meteor.EnvironmentVariable',
-  function (test) {
-    EnableTrackingMethods();
-    let methodId = RegisterMethod(testMethod);
-    let client = GetMeteorClient();
+  async function (test) {
+    let methodId = registerMethod(testMethod);
 
-    client.call(methodId, 10, 'abc');
-
-    CleanTestData();
+    await callAsync(methodId, 10, 'abc');
 
     function testMethod () {
       Meteor.setTimeout(function () {
-        let kadirainfo = Kadira._getInfo(null, true);
+        let kadirainfo = Kadira._getInfo();
         test.equal(!!kadirainfo, true);
       }, 0);
     }

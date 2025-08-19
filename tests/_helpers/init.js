@@ -1,18 +1,16 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { MethodStore, TestData } from './globals';
+import { sleep } from '../../lib/utils';
 
 Kadira.connect('foo', 'bar', {enableErrorTracking: true});
-let http = Npm.require('http');
-let Future = Npm.require('fibers/future');
 
-let server3301 = new Future();
-let server8808 = new Future();
+let http = require('http');
 
 http.createServer(function (req, res) {
   res.writeHead(200);
   res.end('hello');
-}).listen(3301, server3301.return.bind(server3301));
+}).listen(3301);
 
 http.createServer(function (req, res) {
   let data = '';
@@ -45,23 +43,20 @@ http.createServer(function (req, res) {
       res.end('internal-error-here');
     }
   });
-}).listen(8808, server8808.return.bind(server8808));
+}).listen(8808);
 
-server3301.wait();
-server8808.wait();
-
-// TODO use RegisterPublication instead of these
+// TODO use registerPublication instead of these
 
 Meteor.publish('tinytest-data', function () {
   return TestData.find();
 });
 
 Meteor.publish('tinytest-data-with-no-oplog', function () {
-  return TestData.find({}, {_disableOplog: true});
+  return TestData.find({}, { disableOplog: true });
 });
 
 Meteor.publish('tinytest-data-random', function () {
-  return TestData.find({aa: {$ne: Random.id()}});
+  return TestData.find({ aa: {$ne: Random.id()}});
 });
 
 Meteor.publish('tinytest-wait-time', function () {
@@ -70,29 +65,35 @@ Meteor.publish('tinytest-wait-time', function () {
 });
 
 
-Meteor.publish('tinytest-waited-on', function () {
-  Meteor._sleepForMs(25);
-  return TestData.find();
-});
-
-Meteor.publish('tinytest-waited-on2', function () {
-  Meteor._sleepForMs(10);
-  if (this.unblock) this.unblock();
-  Meteor._sleepForMs(40);
-  return TestData.find();
-});
-
-Meteor.publish('tinytest-data-cursor-fetch', function () {
-  TestData.find({}).fetch();
+Meteor.publish('tinytest-data-cursor-fetch', async function () {
+  await TestData.find({}).fetchAsync();
   this.ready();
 });
+
+Meteor.publish('tinytest-waited-on', async function () {
+  await sleep(100);
+  return TestData.find();
+});
+
+Meteor.publish('tinytest-waited-on-short', async function () {
+  await sleep(25);
+  return TestData.find();
+});
+
+Meteor.publish('tinytest-waited-on2', async function () {
+  await sleep(10);
+  if (this.unblock) this.unblock();
+  await sleep(40);
+  return TestData.find();
+});
+
 
 Meteor.publish('tinytest-data-2', function () {
   return TestData.find();
 });
 
 Meteor.publish('tinytest-data-delayed', function () {
-  Meteor._wrapAsync(function (done) {
+  Meteor.wrapAsync(function (done) {
     setTimeout(done, 200);
   })();
   return TestData.find();
@@ -102,7 +103,7 @@ Meteor.publish('tinytest-data-delayed', function () {
   let doneOnce = false;
   Meteor.publish('tinytest-data-multi', function () {
     let pub = this;
-    Meteor._wrapAsync(function () {
+    Meteor.wrapAsync(function () {
       setTimeout(function () {
         if (!doneOnce) {
           pub.ready();

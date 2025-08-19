@@ -2,15 +2,25 @@ import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { DDP } from 'meteor/ddp';
 import { MethodStore, TestData } from './globals';
+import { EJSON } from 'meteor/ejson';
+import { EventType } from '../../lib/constants';
+import { cleanTrailingNilValues, cloneDeep, isPlainObject, last, sleep } from '../../lib/utils';
+import { isNumber } from '../../lib/common/utils';
+import { diffObjects } from './pretty-log';
+import util from 'util';
+import { Ntp } from '../../lib/ntp';
 
-const Future = Npm.require('fibers/future');
+const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
-export const GetMeteorClient = function (_url) {
+export const callAsync = async (method, ...args) => _client.callAsync(method, ...args);
+export const clientCallAsync = async (client, method, ...args) => client.callAsync(method, ...args);
+
+export const getMeteorClient = function (_url) {
   const url = _url || Meteor.absoluteUrl();
   return DDP.connect(url, {retry: false, });
 };
 
-export const waitForConnection = function (client) {
+export const waitForConnection = async function (client) {
   let timeout = Date.now() + 1000;
   while (Date.now() < timeout) {
     let status = client.status();
@@ -18,7 +28,7 @@ export const waitForConnection = function (client) {
       return;
     }
 
-    Meteor._sleepForMs(50);
+    await sleep(50);
   }
 
   throw new Error('timed out waiting for connection');
@@ -32,9 +42,11 @@ export const RegisterMethod = function (F) {
   return id;
 };
 
-export const RegisterPublication = function (F) {
-  let id = `test_${Random.id()}`;
-  Meteor.publish(id, F);
+export const registerMethod = RegisterMethod;
+
+export const registerPublication = function (func) {
+  const id = `test_${Random.id()}`;
+  Meteor.publish(id, func);
   return id;
 };
 
@@ -46,31 +58,90 @@ export const EnableTrackingMethods = function () {
   // };
 };
 
-export const GetLastMethodEvents = function (_indices, ignore = []) {
+export const getLastMethodTrace = () => {
   if (MethodStore.length < 1) {
     return [];
   }
-  let indices = _indices || [0];
-  let events = MethodStore[MethodStore.length - 1].events;
+  return MethodStore[MethodStore.length - 1];
+};
+
+
+export const getMethodEvents = () => last(MethodStore).events;
+
+export function getLastMethodEvents (indices = [0], keysToPreserve = []) {
+  if (MethodStore.length < 1) {
+    return [];
+  }
+
+  let events = last(MethodStore).events;
+
   events = Array.prototype.slice.call(events, 0);
-  events = events.filter(isNotCompute);
+  events = events.filter(isNotCompute).filter(isNotEmptyAsync);
   events = events.map(filterFields);
+
   return events;
 
   function isNotCompute (event) {
-    return event[0] !== 'compute' && !ignore.includes(event[0]);
+    return event[0] !== EventType.Compute;
+  }
+
+  function isNotEmptyAsync (event) {
+    return event[0] !== EventType.Async || event[3]?.nested?.length > 0;
+  }
+
+  function clean (_data) {
+    if (isNumber(_data)) {
+      return 0;
+    }
+
+    if (!isPlainObject(_data)) {
+      return _data;
+    }
+
+    const data = cloneDeep(_data);
+
+    const rejectedKeys = [
+      'stack'
+    ];
+
+    for ( const [key, value] of Object.entries(data)) {
+      if (rejectedKeys.includes(key)) {
+        delete data[key];
+        continue;
+      }
+
+      if (key === 'nested' && value?.length) {
+        data[key] = value.filter(isNotCompute).filter(isNotEmptyAsync).map(filterFields);
+      }
+
+      if (key === 'err' && value?.startsWith('E11000')) {
+        data[key] = 'E11000';
+      }
+
+      // In tests, we can't use numbers like timestamps,
+      // but it is still useful to know if a number is positive or negative
+      // i.e. when an interval subtraction when awry
+      if (isNumber(value) && !keysToPreserve.includes(key)) {
+        if (value > 0) {
+          data[key] = 1;
+        } else if (value < 0) {
+          data[key] = -1;
+        } else {
+          data[key] = 0;
+        }
+      }
+    }
+
+    return data;
   }
 
   function filterFields (event) {
-    let filteredEvent = [];
-    indices.forEach(function (index) {
-      if (event[index]) {
-        filteredEvent[index] = event[index];
-      }
-    });
+    let filteredEvent = indices.map((index) => clean(event[index]));
+    cleanTrailingNilValues(filteredEvent);
+
     return filteredEvent;
   }
-};
+}
 
 export const GetPubSubMetrics = function () {
   let metricsArr = [];
@@ -94,7 +165,7 @@ export const FindMetricsForPub = function (pubname) {
   return candidates[candidates.length - 1];
 };
 
-export const GetPubSubPayload = function (detailInfoNeeded) {
+export const getPubSubPayload = function (detailInfoNeeded) {
   return Kadira.models.pubsub.buildPayload(detailInfoNeeded).pubMetrics;
 };
 
@@ -112,55 +183,66 @@ export function findMetricsForMethod (name) {
   return candidates[candidates.length - 1];
 }
 
+// Waits for a metric to be a value
+// Note: this should not be used in place of assertions - it continues
+// after timing out
+export async function waitForPubMetric (pubName, metric, value) {
+  let timeoutTimestamp = Date.now() + 200;
+  while (Date.now() < timeoutTimestamp) {
+    let metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), pubName);
+    if (metrics[metric] >= value) {
+      return;
+    }
+
+    await sleep(5);
+  }
+
+  console.log('Wait For Metric timed out');
+}
+
+
 export const Wait = function (time) {
-  let f = new Future();
-  Meteor.setTimeout(function () {
-    f.return();
-  }, time);
-  f.wait();
+  return new Promise((resolve) => {
+    setTimeout(resolve, time);
+  });
 };
 
-export const CleanTestData = function () {
+export const CleanTestData = async function () {
   MethodStore.length = 0;
-  TestData.remove({});
+  await TestData.removeAsync({});
   Kadira.models.pubsub.metricsByMinute = {};
   Kadira.models.pubsub.subscriptions = {};
   Kadira.models.jobs.jobMetricsByMinute = {};
   Kadira.models.jobs.activeJobCounts.clear();
 };
 
-export const SubscribeAndWait = function (client, name, args) {
-  let f = new Future();
-  args = Array.prototype.splice.call(arguments, 1);
-  args.push({
-    onError (err) {
-      f.return(err);
-    },
-    onReady () {
-      f.return();
-    }
-  });
+export const cleanTestData = CleanTestData;
 
-  // eslint-disable-next-line prefer-spread
-  let handler = client.subscribe.apply(client, args);
-  let error = f.wait();
-
-  if (error) {
-    throw error;
-  } else {
-    return handler;
-  }
-};
-
-export const callPromise = function (client, ...args) {
+export const subscribeAndWait = function (client, name, args) {
   return new Promise((resolve, reject) => {
-    client.call(...args, (err, result) => {
-      if (err) {
-        return reject(err);
-      }
+    let sub = null;
 
-      resolve(result);
+    let resolveStop;
+    let stopPromise = new Promise(_resolve => {
+      resolveStop = _resolve;
     });
+
+    args = Array.prototype.splice.call(arguments, 1);
+
+    args.push({
+      onError (err) {
+        reject(err);
+      },
+      onReady () {
+        resolve(sub);
+      },
+      onStop () {
+        resolveStop();
+      }
+    });
+
+    sub = client.subscribe(...args);
+    sub.stopPromise = stopPromise;
   });
 };
 
@@ -190,32 +272,39 @@ export function compareNear (v1, v2, maxDifference) {
   return isNear;
 }
 
-export const CloseClient = function (client) {
-  let sessionId = client._lastSessionId;
-  client.disconnect();
-  let f = new Future();
-  function checkClientExtence (_sessionId) {
-    let sessionExists;
-    if (Meteor.server.sessions instanceof Map) {
-      // Meteor 1.8.1 and newer
-      sessionExists = Meteor.server.sessions.has(_sessionId);
-    } else {
-      sessionExists = Meteor.server.sessions[_sessionId];
+export const closeClient = function (client) {
+  return new Promise((resolve) => {
+    let sessionId = client._lastSessionId;
+
+    Object.entries(client._subscriptions).forEach(([, sub]) => {
+      sub?.stop();
+    });
+
+    client.disconnect();
+
+    function checkClientExistence (_sessionId) {
+      let sessionExists;
+      if (Meteor.server.sessions instanceof Map) {
+        // Meteor 1.8.1 and newer
+        sessionExists = Meteor.server.sessions.has(_sessionId);
+      } else {
+        sessionExists = Meteor.server.sessions[_sessionId];
+      }
+
+      if (sessionExists) {
+        setTimeout(function () {
+          checkClientExistence(_sessionId);
+        }, 20);
+      } else {
+        resolve();
+      }
     }
 
-    if (sessionExists) {
-      setTimeout(function () {
-        checkClientExtence(_sessionId);
-      }, 20);
-    } else {
-      f.return();
-    }
-  }
-  checkClientExtence(sessionId);
-  return f.wait();
+    checkClientExistence(sessionId);
+  });
 };
 
-export const WithDocCacheGetSize = function (fn, patchedSize) {
+export const withDocCacheGetSize = async function (fn, patchedSize) {
   let original = Kadira.docSzCache.getSize;
 
   Kadira.docSzCache.getSize = function () {
@@ -223,7 +312,7 @@ export const WithDocCacheGetSize = function (fn, patchedSize) {
   };
 
   try {
-    fn();
+    await fn();
   } finally {
     Kadira.docSzCache.getSize = original;
   }
@@ -233,7 +322,38 @@ export const WithDocCacheGetSize = function (fn, patchedSize) {
 let release = Meteor.release === 'none' ? 'METEOR@2.5.0' : Meteor.release;
 export const releaseParts = release.split('METEOR@')[1].split('.').map(num => parseInt(num, 10));
 
-export const withRoundedTime = (fn) => (test) => {
+
+const asyncTest = fn => async (test, done) => {
+  await cleanTestData();
+
+  const client = getMeteorClient();
+
+  test.stableEqual = (a, b) => {
+    const _a = EJSON.parse(EJSON.stringify(a));
+    const _b = EJSON.parse(EJSON.stringify(b));
+
+    if (!util.isDeepStrictEqual(_a, _b)) {
+      dumpEvents(a);
+
+      diffObjects(a, b);
+    }
+
+    test.equal(_a, _b);
+  };
+
+  // Cleans stuff from the test engine.
+  Kadira._setInfo(null);
+
+  await fn(test, client);
+
+  await closeClient(client);
+
+  await cleanTestData();
+
+  done();
+};
+
+export const withRoundedTime = (fn) => async (test, done) => {
   const date = new Date();
   date.setSeconds(0,0);
   const timestamp = date.getTime();
@@ -242,38 +362,131 @@ export const withRoundedTime = (fn) => (test) => {
 
   Date.now = () => timestamp;
 
-  fn(test);
+  await asyncTest(fn)(test, () => {});
 
   Date.now = old;
+
+  done();
 };
 
 export function addTestWithRoundedTime (name, fn) {
-  Tinytest.add(name, withRoundedTime(fn));
+  Tinytest.addAsync(name, withRoundedTime(fn));
 }
 
 addTestWithRoundedTime.only = (name, fn) => {
-  Tinytest.only(name, withRoundedTime(fn), true);
+  Tinytest.onlyAsync(name, withRoundedTime(fn));
 };
+
+addTestWithRoundedTime.skip = function () {};
+
+export function addAsyncTest (name, fn) {
+  Tinytest.addAsync(name, asyncTest(fn));
+}
+
+addAsyncTest.only = function (name, fn) {
+  Tinytest.onlyAsync(name, asyncTest(fn));
+};
+
+addAsyncTest.skip = function () {};
+
+export function cleanTrace (trace) {
+  delete trace.rootAsyncId;
+
+  cleanEvents(trace.events);
+}
+
+export function cleanEvents (events) {
+  events?.forEach(function (event) {
+    if (event.endAt > event.at) {
+      event.endAt = 10;
+    } else if (event.endAt) {
+      delete event.endAt;
+    }
+
+    delete event.at;
+    delete event._id;
+    delete event.asyncId;
+    delete event.triggerAsyncId;
+    delete event.level;
+    delete event.duration;
+
+    if (event.nested?.length === 0) {
+      delete event.nested;
+    } else {
+      cleanEvents(event.nested);
+    }
+  });
+}
+
+export function cleanBuiltEvents (events, roundTo = 10) {
+  return events
+    .filter(event => event[0] !== 'compute' || event[1] > 5)
+    .map(event => {
+      let [, duration, , details] = event;
+      if (typeof duration === 'number') {
+        // round down to nearest 10
+        event[1] = Math.floor(duration / roundTo) * roundTo;
+      }
+
+      if (details) {
+        delete details.at;
+        delete details.endAt;
+        if (details.nested) {
+          details.nested = cleanBuiltEvents(details.nested, roundTo);
+        }
+
+        // We only care about the properties that survive being stringified
+        // (are not undefined)
+        event[3] = JSON.parse(JSON.stringify(details));
+        if (event[3].offset) {
+          // round down to nearest 10
+          event[3].offset = Math.floor(event[3].offset / roundTo) * roundTo;
+        }
+      }
+
+      return event;
+    });
+}
+
+export const dumpEvents = (events) => {
+  console.log(JSON.stringify(events));
+};
+
+export function deepFreeze (obj) {
+  if (Array.isArray(obj)) {
+    obj.forEach(val => {
+      if (!Object.isFrozen(val)) {
+        deepFreeze(val);
+      }
+    });
+  } else {
+    Object.values(obj).forEach(val => {
+      if (!Object.isFrozen(val)) {
+        deepFreeze(val);
+      }
+    });
+  }
+
+  Object.freeze(obj);
+}
 
 export const isRedisOplogEnabled = !!process.env.REDIS_OPLOG_SETTINGS;
 
 export const TestHelpers = {
   methodStore: MethodStore,
   getLatestEventsFromMethodStore: () => MethodStore[MethodStore.length - 1].events,
-  getMeteorClient: GetMeteorClient,
+  getMeteorClient,
   registerMethod: RegisterMethod,
-  registerPublication: RegisterPublication,
+  registerPublication,
   enableTrackingMethods: EnableTrackingMethods,
-  getLastMethodEvents: GetLastMethodEvents,
   getPubSubMetrics: GetPubSubMetrics,
   findMetricsForPub: FindMetricsForPub,
-  getPubSubPayload: GetPubSubPayload,
+  getPubSubPayload,
   wait: Wait,
   cleanTestData: CleanTestData,
-  subscribeAndWait: SubscribeAndWait,
+  subscribeAndWait,
   compareNear,
-  closeClient: CloseClient,
-  withDocCacheGetSize: WithDocCacheGetSize,
+  closeClient,
   withRoundedTime,
   addTestWithRoundedTime,
 };

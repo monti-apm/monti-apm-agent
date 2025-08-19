@@ -1,14 +1,14 @@
-import { EJSON } from 'meteor/ejson';
 import { MethodsModel } from '../../lib/models/methods';
+import { Ntp } from '../../lib/ntp';
+import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
-import { CleanTestData, CloseClient, GetMeteorClient, RegisterMethod, Wait, WithDocCacheGetSize, callPromise, findMetricsForMethod, waitForConnection } from '../_helpers/helpers';
-import { Meteor } from 'meteor/meteor';
+import { CleanTestData, addAsyncTest, addTestWithRoundedTime, callAsync, clientCallAsync, closeClient, findMetricsForMethod, getMeteorClient, registerMethod, waitForConnection, withDocCacheGetSize } from '../_helpers/helpers';
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - Method - buildPayload simple',
-  function (test) {
-    CreateMethodCompleted('aa', 'hello', 1, 100, 5);
-    CreateMethodCompleted('aa', 'hello', 2, 800 , 10);
+  async function (test) {
+    createMethodCompleted('aa', 'hello', 1, 100, 5);
+    createMethodCompleted('aa', 'hello', 2, 800 , 10);
 
     let payload = model.buildPayload();
     payload.methodRequests = [];
@@ -49,19 +49,17 @@ Tinytest.add(
       methodRequests: []
     };
 
-    let startTime = expected.methodMetrics[0].startTime;
-    expected.methodMetrics[0].startTime = Kadira.syncedDate.syncTime(startTime);
-    // TODO comparing without parsing and stringifing fails
-    test.equal(EJSON.parse(EJSON.stringify(payload)), EJSON.parse(EJSON.stringify(expected)));
-    CleanTestData();
+    expected.methodMetrics[0].startTime = payload.methodMetrics[0].startTime;
+
+    test.stableEqual(payload, expected);
   }
 );
 
-Tinytest.add(
+addTestWithRoundedTime(
   'Models - Method - buildPayload with errors',
-  function (test) {
-    CreateMethodCompleted('aa', 'hello', 1, 100, 5);
-    CreateMethodErrored('aa', 'hello', 2, 'the-error', 800, 10);
+  async function (test) {
+    createMethodCompleted('aa', 'hello', 1, 100, 5);
+    createMethodErrored('aa', 'hello', 2, 'the-error', 800, 10);
     let payload = model.buildPayload();
     let expected = [{
       startTime: 100,
@@ -93,97 +91,95 @@ Tinytest.add(
         }
       }
     }];
-    // TODO comparing without stringify fails
-    expected[0].startTime = Kadira.syncedDate.syncTime(expected[0].startTime);
-    test.equal(EJSON.parse(EJSON.stringify(payload.methodMetrics)), EJSON.parse(EJSON.stringify(expected)));
-    CleanTestData();
+    expected[0].startTime = payload.methodMetrics[0].startTime;
+    test.stableEqual(payload.methodMetrics,expected);
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Models - Method - Metrics - fetchedDocSize',
-  function (test) {
+  async function (test) {
     let docs = [{data: 'data1'}, {data: 'data2'}];
-    docs.forEach(function (doc) {
-      TestData.insert(doc);
+
+    for (const doc of docs) {
+      await TestData.insertAsync(doc);
+    }
+
+    let methodId = registerMethod(async function () {
+      return TestData.find({}).fetchAsync();
     });
 
-    let methodId = RegisterMethod(function () {
-      TestData.find({}).fetch();
-    });
-
-    let client = GetMeteorClient();
-    WithDocCacheGetSize(function () {
-      client.call(methodId);
+    await withDocCacheGetSize(async function () {
+      await callAsync(methodId);
     }, 30);
-    Wait(100);
+
 
     let payload = Kadira.models.methods.buildPayload();
+
     let index = payload.methodMetrics.findIndex(methodMetrics => methodId in methodMetrics.methods);
 
     test.equal(payload.methodMetrics[index].methods[methodId].fetchedDocSize, 60);
-    CleanTestData();
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Models - Method - Metrics - sentMsgSize',
-  function (test) {
+  async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}];
-    docs.forEach(function (doc) {
-      TestData.insert(doc);
-    });
 
-    let returnValue = 'Some return value';
-    let methodId = RegisterMethod(function () {
-      TestData.find({}).fetch();
+    for (const doc of docs) {
+      await TestData.insertAsync(doc);
+    }
+
+    const returnValue = 'Some return value';
+
+    const methodId = registerMethod(async function () {
+      await TestData.find({}).fetchAsync();
       return returnValue;
     });
 
-    let client = GetMeteorClient();
-    client.call(methodId);
+    // Needs to call a client isolated from other tests for reliability
+    await clientCallAsync(client, methodId);
+    await sleep(100);
 
     let payload = Kadira.models.methods.buildPayload();
 
     let expected = (JSON.stringify({ msg: 'updated', methods: ['1'] }) +
         JSON.stringify({ msg: 'result', id: '1', result: returnValue })).length;
-
     test.equal(payload.methodMetrics[0].methods[methodId].sentMsgSize, expected);
-    CleanTestData();
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Models - Method - Trace - filter params',
-  function (test) {
+  async function (test) {
     Kadira.tracer.redactField('__test1');
-    let methodId = RegisterMethod(function () {
-    });
 
-    let client = GetMeteorClient();
-    client.call(methodId, { __test1: 'value', abc: true }, { xyz: false, __test1: 'value2' });
+    let methodId = registerMethod(function () {});
+
+    await callAsync(methodId, { __test1: 'value', abc: true }, { xyz: false, __test1: 'value2' });
 
     let trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
 
     let expected = JSON.stringify([{ __test1: 'Monti: redacted', abc: true }, { xyz: false, __test1: 'Monti: redacted'}]);
+
     test.equal(trace.events[0][2].params, expected);
-    CleanTestData();
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Models - Method - Trace - filter params with null',
-  function (test) {
+  async function (test) {
     Kadira.tracer.redactField('__test1');
-    let methodId = RegisterMethod(function () {
-    });
 
-    let client = GetMeteorClient();
-    client.call(methodId, { __test1: 'value', abc: true }, null, { xyz: false, __test1: 'value2' });
+    let methodId = registerMethod(function () {});
+
+    await callAsync(methodId, { __test1: 'value', abc: true }, null, { xyz: false, __test1: 'value2' });
 
     let trace = Kadira.models.methods.tracerStore.currentMaxTrace[`method::${methodId}`];
 
     let expected = JSON.stringify([{ __test1: 'Monti: redacted', abc: true }, null, { xyz: false, __test1: 'Monti: redacted' }]);
+
     test.equal(trace.events[0][2].params, expected);
     CleanTestData();
   }
@@ -191,16 +187,16 @@ Tinytest.add(
 
 
 Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messages', async (test, done) => {
-  let methodId = RegisterMethod( function (id) {
-    Meteor._sleepForMs(25);
+  let methodId = registerMethod( async function (id) {
+    await sleep(25);
     return id;
   });
 
-  let client = GetMeteorClient();
+  let client = getMeteorClient();
 
   let promises = [];
   for (let i = 0; i < 10; i++) {
-    promises.push(callPromise(client, methodId, i));
+    promises.push(clientCallAsync(client, methodId, i));
   }
 
   await Promise.all(promises);
@@ -217,25 +213,25 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of queued messa
 Tinytest.addAsync('Models - Method - Waited On - track waitedOn without wait time', async (test, done) => {
   CleanTestData();
 
-  let slowMethod = RegisterMethod(function () {
+  let slowMethod = registerMethod(async function () {
     console.log('slow method start');
-    Meteor._sleepForMs(100);
+    await sleep(100);
     console.log('slow method end');
   });
-  let unblockedMethod = RegisterMethod(function () {
+  let unblockedMethod = registerMethod(async function () {
     this.unblock();
-    Meteor._sleepForMs(100);
+    await sleep(100);
     console.log('slow method end');
   });
-  let fastMethod = RegisterMethod(function () {
+  let fastMethod = registerMethod(function () {
     console.log('fastMethod');
   });
 
 
-  let client = GetMeteorClient();
+  let client = getMeteorClient();
 
   // subscriptions and method calls made before connected are not run in order
-  waitForConnection(client);
+  await waitForConnection(client);
 
   client.call(slowMethod, () => {});
   client.call(unblockedMethod, () => {});
@@ -244,22 +240,22 @@ Tinytest.addAsync('Models - Method - Waited On - track waitedOn without wait tim
   const metrics = findMetricsForMethod(unblockedMethod);
 
   test.isTrue(metrics.waitedOn < 10, `${metrics.waitedOn} should be less than 10`);
-  CloseClient(client);
+  closeClient(client);
 
   done();
 });
 Tinytest.addAsync('Models - Method - Waited On - check unblock time', async (test, done) => {
-  let methodId = RegisterMethod( function (id) {
+  let methodId = registerMethod( async function (id) {
     this.unblock();
-    Meteor._sleepForMs(25);
+    await sleep(25);
     return id;
   });
 
-  let client = GetMeteorClient();
+  let client = getMeteorClient();
 
   let promises = [];
   for (let i = 0; i < 10; i++) {
-    promises.push(callPromise(client, methodId, i));
+    promises.push(clientCallAsync(client, methodId, i));
   }
 
   await Promise.all(promises);
@@ -272,16 +268,16 @@ Tinytest.addAsync('Models - Method - Waited On - check unblock time', async (tes
 });
 
 Tinytest.addAsync('Models - Method - Waited On - track wait time of next message', async (test, done) => {
-  let slowMethod = RegisterMethod( function () {
-    Meteor._sleepForMs(25);
+  let slowMethod = registerMethod( async function () {
+    await sleep(25);
   });
-  let fastMethod = RegisterMethod( function () {});
+  let fastMethod = registerMethod( function () {});
 
-  let client = GetMeteorClient();
+  let client = getMeteorClient();
 
   await Promise.all([
-    callPromise(client, slowMethod),
-    callPromise(client, fastMethod),
+    clientCallAsync(client, slowMethod),
+    clientCallAsync(client, fastMethod),
   ]);
 
   const metrics = findMetricsForMethod(slowMethod);
@@ -292,20 +288,23 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of next message
 
 export const model = new MethodsModel();
 
-function CreateMethodCompleted (sessionName, methodName, methodId, startTime, methodDelay) {
+function createMethodCompleted (sessionName, methodName, methodId, startTime, methodDelay) {
   methodDelay = methodDelay || 5;
   let method = {session: sessionName, name: methodName, id: methodId, events: []};
-  method.events.push({type: 'start', at: startTime});
-  method.events.push({type: 'complete', at: startTime + methodDelay});
+  method.events.push({type: 'start', at: Ntp._now() - startTime});
+  method.events.push({type: 'complete', at: Ntp._now() - startTime + methodDelay});
   method = Kadira.tracer.buildTrace(method);
   model.processMethod(method);
 }
 
-function CreateMethodErrored (sessionName, methodName, methodId, errorMessage, startTime, methodDelay) {
+function createMethodErrored (sessionName, methodName, methodId, errorMessage, startTime, methodDelay) {
   methodDelay = methodDelay || 5;
   let method = {session: sessionName, name: methodName, id: methodId, events: []};
-  method.events.push({type: 'start', at: startTime});
-  method.events.push({type: 'error', at: startTime + methodDelay, data: {error: errorMessage}});
+  method.events.push({type: 'start', at: Ntp._now() - startTime});
+  method.events.push({type: 'error',
+    at: Ntp._now() - startTime + methodDelay,
+    endAt: Ntp._now() - startTime + methodDelay,
+    data: {error: errorMessage}});
   method = Kadira.tracer.buildTrace(method);
   model.processMethod(method);
 }

@@ -1,25 +1,28 @@
 import { PubsubModel } from '../../lib/models/pubsub';
+import { Ntp } from '../../lib/ntp';
+import { sleep } from '../../lib/utils';
 import {
+  addAsyncTest,
   addTestWithRoundedTime,
+  cleanTestData,
   CleanTestData,
-  CloseClient,
+  closeClient,
   FindMetricsForPub,
-  GetMeteorClient,
-  GetPubSubPayload,
-  RegisterMethod,
+  getMeteorClient,
+  getPubSubPayload,
+  registerMethod,
   releaseParts,
-  SubscribeAndWait,
+  subscribeAndWait,
   subscribePromise,
-  Wait,
   waitForConnection,
-  WithDocCacheGetSize
+  withDocCacheGetSize,
+  waitForPubMetric
 } from '../_helpers/helpers';
 import { TestData } from '../_helpers/globals';
-import { Meteor } from 'meteor/meteor';
 
 addTestWithRoundedTime(
   'Models - PubSub - Metrics - same date',
-  function (test) {
+  async function (test) {
     let pub = 'postsList';
     let d = new Date('2013 Dec 10 20:30').getTime();
     let model = new PubsubModel();
@@ -32,7 +35,7 @@ addTestWithRoundedTime(
 
 addTestWithRoundedTime(
   'Models - PubSub - Metrics - multi date',
-  function (test) {
+  async function (test) {
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let d2 = new Date('2013 Dec 11 20:31:10').getTime();
@@ -71,7 +74,7 @@ addTestWithRoundedTime(
 
 addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - subs',
-  function (test) {
+  async function (test) {
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let model = new PubsubModel();
@@ -89,7 +92,7 @@ addTestWithRoundedTime(
 
 addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - routes',
-  function (test) {
+  async function (test) {
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let route = 'route1';
@@ -110,7 +113,7 @@ addTestWithRoundedTime(
 
 addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - response time',
-  function (test) {
+  async function (test) {
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let model = new PubsubModel();
@@ -128,7 +131,7 @@ addTestWithRoundedTime(
 
 addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - lifetime',
-  function (test) {
+  async function (test) {
     let pub = 'postsList';
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let model = new PubsubModel();
@@ -163,7 +166,7 @@ addTestWithRoundedTime(
 
 addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - multiple dates',
-  function (test) {
+  async function (test) {
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let d2 = new Date('2013 Dec 11 20:31:12').getTime();
     let model = new PubsubModel();
@@ -181,7 +184,7 @@ addTestWithRoundedTime(
 
 addTestWithRoundedTime(
   'Models - PubSub - BuildPayload - multiple subscriptions and dates',
-  function (test) {
+  async function (test) {
     let d1 = new Date('2013 Dec 10 20:31:12').getTime();
     let d2 = new Date('2013 Dec 11 20:31:12').getTime();
     let model = new PubsubModel();
@@ -199,7 +202,7 @@ addTestWithRoundedTime(
 
 addTestWithRoundedTime(
   'Models - PubSub - Observer Cache - no cache',
-  function (test) {
+  async function (test) {
     let original = Kadira.syncedDate.getTime;
     let dates = [
       new Date('2013 Dec 10 20:31:12').getTime(),
@@ -223,7 +226,7 @@ addTestWithRoundedTime(
 
 addTestWithRoundedTime(
   'Models - PubSub - Observer Cache - single cache',
-  function (test) {
+  async function (test) {
     let original = Kadira.syncedDate.getTime;
     let dates = [
       new Date('2013 Dec 10 20:31:12').getTime(),
@@ -247,7 +250,7 @@ addTestWithRoundedTime(
 
 addTestWithRoundedTime(
   'Models - PubSub - Observer Cache - multiple dates',
-  function (test) {
+  async function (test) {
     let original = Date.now;
     let dates = [
       new Date('2013 Dec 10 20:31:12').getTime(),
@@ -273,498 +276,475 @@ addTestWithRoundedTime(
 
 addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Single Sub - simple',
-  function (test) {
-    CleanTestData();
+  async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
 
-    docs.forEach(function (doc) {
-      TestData.insert(doc);
-    });
+    for (const doc of docs) {
+      await TestData.insertAsync(doc);
+    }
 
-    let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    Wait(200);
-    let payload = GetPubSubPayload();
+    await subscribeAndWait(client, 'tinytest-data');
+
+    await sleep(200);
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].activeDocs, 3);
-    h1.stop();
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Single Sub - docs added',
-  function (test) {
-    CleanTestData();
+  async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
 
-    docs.forEach(function (doc) {
-      TestData.insert(doc);
-    });
+    for (const doc of docs) {
+      await TestData.insertAsync(doc);
+    }
 
-    let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    TestData.insert({data: 'data4'});
-    Wait(200);
-    let payload = GetPubSubPayload();
+    await subscribeAndWait(client, 'tinytest-data');
+
+    await TestData.insertAsync({data: 'data4'});
+
+    await sleep(200);
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].activeDocs, 4);
-    h1.stop();
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Single Sub - docs removed',
-  function (test) {
-    CleanTestData();
+  async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
-    docs.forEach(function (doc) {
-      TestData.insert(doc);
-    });
-    let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    TestData.remove({data: 'data3'});
-    Wait(200);
-    let payload = GetPubSubPayload();
+
+    for (const doc of docs) {
+      await TestData.insertAsync(doc);
+    }
+
+    await subscribeAndWait(client, 'tinytest-data');
+
+    await TestData.removeAsync({data: 'data3'});
+
+    await sleep(200);
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].activeDocs, 2);
-    h1.stop();
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Single Sub - unsub before payload',
-  function (test) {
-    CleanTestData();
+  async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
-    docs.forEach(function (doc) {
-      TestData.insert(doc);
-    });
-    let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    h1.stop();
-    Wait(200);
-    let payload = GetPubSubPayload();
+
+    for (const doc of docs) {
+      await TestData.insertAsync(doc);
+    }
+
+    const sub = await subscribeAndWait(client, 'tinytest-data');
+
+    sub.stop();
+
+    await sleep(200);
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].activeDocs, 0);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Single Sub - close before payload',
-  function (test) {
-    CleanTestData();
+  async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
-    docs.forEach(function (doc) {
-      TestData.insert(doc);
-    });
-    let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    CloseClient(client);
-    Wait(200);
-    let payload = GetPubSubPayload();
+
+    for (const doc of docs) {
+      await TestData.insertAsync(doc);
+    }
+
+    const sub = await subscribeAndWait(client, 'tinytest-data');
+    sub.stop();
+
+    await sleep(200);
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].activeDocs, 0);
-    h1.stop();
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Multiple Subs - simple',
-  function (test) {
-    CleanTestData();
+  async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
-    docs.forEach(function (doc) {
-      TestData.insert(doc);
-    });
-    let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    let h2 = SubscribeAndWait(client, 'tinytest-data');
-    let h3 = SubscribeAndWait(client, 'tinytest-data');
-    Wait(200);
-    let payload = GetPubSubPayload();
+
+    for (const doc of docs) {
+      await TestData.insertAsync(doc);
+    }
+
+    await subscribeAndWait(client, 'tinytest-data');
+    await subscribeAndWait(client, 'tinytest-data');
+    await subscribeAndWait(client, 'tinytest-data');
+
+    await sleep(200);
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].activeDocs, 9);
-    h1.stop();
-    h2.stop();
-    h3.stop();
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - ActiveDocs - Multiple Subs - sub and unsub',
-  function (test) {
-    CleanTestData();
+  async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
-    docs.forEach(function (doc) {
-      TestData.insert(doc);
-    });
-    let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    let h2 = SubscribeAndWait(client, 'tinytest-data');
-    let h3 = SubscribeAndWait(client, 'tinytest-data');
+
+    for (const doc of docs) {
+      await TestData.insertAsync(doc);
+    }
+
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+    await subscribeAndWait(client, 'tinytest-data');
+    await subscribeAndWait(client, 'tinytest-data');
+
+    // Stop early
     h1.stop();
-    Wait(200);
-    let payload = GetPubSubPayload();
+
+    await sleep(200);
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].activeDocs, 6);
-    h2.stop();
-    h3.stop();
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - simple',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    Wait(200);
-    let payload = GetPubSubPayload();
+  async function (test, client) {
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+
+    await waitForPubMetric('tinytest-data', 'createdObservers', 1);
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].createdObservers, 1);
     test.equal(payload[0].pubs['tinytest-data'].deletedObservers, 0);
+
     h1.stop();
-    Wait(200);
-    payload = GetPubSubPayload();
+
+    await waitForPubMetric('tinytest-data', 'deletedObservers', 1);
+
+    payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].deletedObservers, 1);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - polledDocuments with oplog',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-    SubscribeAndWait(client, 'tinytest-data');
-    Wait(200);
-    let payload = GetPubSubPayload();
+  async function (test, client) {
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
+
+    await subscribeAndWait(client, 'tinytest-data');
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].polledDocuments, 2);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - oplogInsertedDocuments with oplog',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
+  async function (test, client) {
+    await subscribeAndWait(client, 'tinytest-data');
 
-    SubscribeAndWait(client, 'tinytest-data');
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
 
-    Wait(50);
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-    Wait(100);
-    let payload = GetPubSubPayload();
+    await waitForPubMetric('tinytest-data', 'oplogInsertedDocuments', 2);
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].oplogInsertedDocuments, 2);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - oplogDeletedDocuments with oplog',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-    Wait(50);
+  async function (test, client) {
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
 
-    SubscribeAndWait(client, 'tinytest-data');
+    await subscribeAndWait(client, 'tinytest-data');
 
-    Wait(200);
-    TestData.remove({});
-    Wait(100);
-    let payload = GetPubSubPayload();
+    await TestData.removeAsync({});
+
+    await waitForPubMetric('tinytest-data', 'oplogDeletedDocuments', 2);
+
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].oplogDeletedDocuments, 2);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - oplogUpdatedDocuments with oplog',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-    SubscribeAndWait(client, 'tinytest-data');
-    Wait(200);
-    TestData.update({}, {$set: {kk: 20}}, {multi: true});
-    Wait(100);
-    let payload = GetPubSubPayload();
+  async function (test, client) {
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
+
+    await subscribeAndWait(client, 'tinytest-data');
+
+    await TestData.updateAsync({}, {$set: {kk: 20}}, {multi: true});
+
+    await waitForPubMetric('tinytest-data', 'oplogUpdatedDocuments', 2);
+
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data'].oplogUpdatedDocuments, 2);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - polledDocuments with no oplog',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-    let h1 = SubscribeAndWait(client, 'tinytest-data-with-no-oplog');
-    Wait(200);
-    let payload = GetPubSubPayload();
+  async function (test, client) {
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
+
+    await subscribeAndWait(client, 'tinytest-data-with-no-oplog');
+
+    await waitForPubMetric('tinytest-data-with-no-oplog', 'polledDocuments', 1);
+
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data-with-no-oplog'].polledDocuments, 2);
-    h1.stop();
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - initiallyAddedDocuments',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
+  async function (test, client) {
     // This will create two observers
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-    Wait(50);
-    SubscribeAndWait(client, 'tinytest-data-random');
-    SubscribeAndWait(client, 'tinytest-data-random');
-    Wait(100);
-    let payload = GetPubSubPayload();
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
+
+    await subscribeAndWait(client, 'tinytest-data-random');
+    await subscribeAndWait(client, 'tinytest-data-random');
+
+    await waitForPubMetric('tinytest-data-random', 'initiallyAddedDocuments', 4);
+
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data-random'].initiallyAddedDocuments, 4);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - liveAddedDocuments',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
+  async function (test, client) {
     // This will create two observers
-    SubscribeAndWait(client, 'tinytest-data-random');
-    SubscribeAndWait(client, 'tinytest-data-random');
-    Wait(50);
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-    Wait(100);
-    let payload = GetPubSubPayload();
+    await subscribeAndWait(client, 'tinytest-data-random');
+    await subscribeAndWait(client, 'tinytest-data-random');
+
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
+
+    await waitForPubMetric('tinytest-data-random', 'liveAddedDocuments', 4);
+
+    let payload = getPubSubPayload();
     test.equal(payload[0].pubs['tinytest-data-random'].liveAddedDocuments, 4);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - liveChangedDocuments',
-  function (test) {
-    CleanTestData();
-
-    let client = GetMeteorClient();
-
+  async function (test, client) {
     // This will create two observers
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
 
-    Wait(50);
+    await subscribeAndWait(client, 'tinytest-data-random');
+    await subscribeAndWait(client, 'tinytest-data-random');
 
-    SubscribeAndWait(client, 'tinytest-data-random');
-    SubscribeAndWait(client, 'tinytest-data-random');
+    await TestData.updateAsync({}, {$set: {kk: 20}}, {multi: true});
 
-    Wait(100);
+    await waitForPubMetric('tinytest-data-random', 'liveChangedDocuments', 4);
 
-    TestData.update({}, {$set: {kk: 20}}, {multi: true});
-
-    Wait(50);
-
-    let payload = GetPubSubPayload();
+    let payload = getPubSubPayload();
 
     if (!payload[0].pubs['tinytest-data-random']) {
       console.log(JSON.stringify(payload, null, 2));
     }
 
     test.equal(payload[0].pubs['tinytest-data-random'].liveChangedDocuments, 4);
-
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - liveRemovedDocuments',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
+  async function (test, client) {
     // This will create two observers
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-    SubscribeAndWait(client, 'tinytest-data-random');
-    SubscribeAndWait(client, 'tinytest-data-random');
-    Wait(100);
-    TestData.remove({});
-    Wait(50);
-    let payload = GetPubSubPayload();
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
+
+    await subscribeAndWait(client, 'tinytest-data-random');
+    await subscribeAndWait(client, 'tinytest-data-random');
+
+    await TestData.removeAsync({});
+
+    await waitForPubMetric('tinytest-data-random', 'liveRemovedDocuments', 4);
+
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data-random'].liveRemovedDocuments, 4);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - initiallySentMsgSize',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-    Wait(50);
-    SubscribeAndWait(client, 'tinytest-data-random');
-    Wait(100);
-    let payload = GetPubSubPayload();
+  async function (test, client) {
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
+
+    await subscribeAndWait(client, 'tinytest-data-random');
+
+    await waitForPubMetric('tinytest-data-random', 'initiallySentMsgSize', 1);
+
+    let payload = getPubSubPayload();
 
     let templateMsg = '{"msg":"added","collection":"tinytest-data","id":"17digitslongidxxx","fields":{"aa":10}}';
     let expectedMsgSize = templateMsg.length * 2;
 
     test.equal(payload[0].pubs['tinytest-data-random'].initiallySentMsgSize, expectedMsgSize);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - liveSentMsgSize',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
-    SubscribeAndWait(client, 'tinytest-data-random');
-    Wait(50);
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-    Wait(100);
-    let payload = GetPubSubPayload();
+  async function (test, client) {
+    await subscribeAndWait(client, 'tinytest-data-random');
+
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
+
+    await waitForPubMetric('tinytest-data-random', 'liveSentMsgSize', 100);
+
+    let payload = getPubSubPayload();
 
     let templateMsg = '{"msg":"added","collection":"tinytest-data","id":"17digitslongidxxx","fields":{"aa":10}}';
     let expectedMsgSize = templateMsg.length * 2;
 
     test.equal(payload[0].pubs['tinytest-data-random'].liveSentMsgSize, expectedMsgSize);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - initiallyFetchedDocSize',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-    Wait(100);
+  async function (test, client) {
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
 
-    WithDocCacheGetSize(function () {
-      SubscribeAndWait(client, 'tinytest-data-random');
-      Wait(200);
+    await withDocCacheGetSize(async function () {
+      await subscribeAndWait(client, 'tinytest-data-random');
     }, 30);
 
-    let payload = GetPubSubPayload();
+    let payload = getPubSubPayload();
     test.equal(payload[0].pubs['tinytest-data-random'].initiallyFetchedDocSize, 60);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - liveFetchedDocSize',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
+  async function (test, client) {
+    await withDocCacheGetSize(async function () {
+      await subscribeAndWait(client, 'tinytest-data-random');
+      await TestData.insertAsync({aa: 10});
+      await TestData.insertAsync({aa: 20});
 
-    WithDocCacheGetSize(function () {
-      SubscribeAndWait(client, 'tinytest-data-random');
-      Wait(100);
-      TestData.insert({aa: 10});
-      TestData.insert({aa: 20});
-      Wait(200);
+      await waitForPubMetric('tinytest-data-random', 'liveFetchedDocSize', 50);
     }, 25);
 
-    let payload = GetPubSubPayload();
+    let payload = getPubSubPayload();
 
     test.equal(payload[0].pubs['tinytest-data-random'].liveFetchedDocSize, 50);
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - fetchedDocSize',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-
-    let h1;
-    WithDocCacheGetSize(function () {
-      h1 = SubscribeAndWait(client, 'tinytest-data-cursor-fetch');
-      Wait(200);
+  async function (test, client) {
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
+    await withDocCacheGetSize(async function () {
+      await subscribeAndWait(client, 'tinytest-data-cursor-fetch');
     }, 30);
-
-    let payload = GetPubSubPayload();
+    let payload = getPubSubPayload();
     test.equal(payload[0].pubs['tinytest-data-cursor-fetch'].fetchedDocSize, 60);
-    h1.stop();
-    CloseClient(client);
   }
 );
 
 addTestWithRoundedTime(
   'Models - PubSub - Observers - polledDocSize',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
-    TestData.insert({aa: 10});
-    TestData.insert({aa: 20});
-    Wait(100);
+  async function (test, client) {
+    await cleanTestData();
 
-    let h1;
-    WithDocCacheGetSize(function () {
-      h1 = SubscribeAndWait(client, 'tinytest-data-with-no-oplog');
-      Wait(200);
+    await TestData.insertAsync({aa: 10});
+    await TestData.insertAsync({aa: 20});
+
+    await withDocCacheGetSize(async function () {
+      await subscribeAndWait(client, 'tinytest-data-with-no-oplog');
     }, 30);
 
-    let payload = GetPubSubPayload();
+    let payload = getPubSubPayload();
+
     test.equal(payload[0].pubs['tinytest-data-with-no-oplog'].polledDocSize, 60);
-    h1.stop();
-    CloseClient(client);
+    closeClient(client);
   }
 );
 
-Tinytest.addAsync('Models - PubSub - Wait Time - track wait time', async (test, done) => {
+
+addAsyncTest('Models - PubSub - Wait Time - track wait time', async (test, client) => {
   CleanTestData();
 
-  TestData.insert({aa: 10});
-  TestData.insert({aa: 20});
+  await TestData.insertAsync({aa: 10});
+  await TestData.insertAsync({aa: 20});
 
-  let client = GetMeteorClient();
-  waitForConnection(client);
+  await waitForConnection(client);
 
-  let slowMethod = RegisterMethod(function () {
-    Meteor._sleepForMs(50);
+  let slowMethod = registerMethod(async function () {
+    await sleep(50);
   });
 
   client.call(slowMethod, () => {});
 
   const pubName = 'tinytest-waited-on';
-  SubscribeAndWait(client, pubName);
+  await subscribeAndWait(client, pubName);
 
-  Meteor._sleepForMs(100);
+  await sleep(100);
 
   const metrics = FindMetricsForPub(pubName);
 
   test.isTrue(metrics.waitTime > 0, `${metrics.waitTime} should be greater than 0`);
-  CloseClient(client);
-
-  done();
+  closeClient(client);
 });
 
-Tinytest.addAsync('Models - PubSub - Waited On - track wait time of queued messages', async (test, done) => {
+addAsyncTest('Models - PubSub - Waited On - track wait time of queued messages', async (test, client) => {
   CleanTestData();
 
-  TestData.insert({aa: 10});
-  TestData.insert({aa: 20});
+  await TestData.insertAsync({aa: 10});
+  await TestData.insertAsync({aa: 20});
 
-  let client = GetMeteorClient();
+  await waitForConnection(client);
 
-  const pubName = 'tinytest-waited-on';
+  const pubName = 'tinytest-waited-on-short';
 
   let promises = [];
   for (let i = 0; i < 10; i++) {
@@ -775,10 +755,8 @@ Tinytest.addAsync('Models - PubSub - Waited On - track wait time of queued messa
 
   const metrics = FindMetricsForPub(pubName);
 
-  test.isTrue(metrics.waitedOn > 500, `${metrics.waitedOn} should be greater than 500`);
-  CloseClient(client);
-
-  done();
+  test.isTrue(metrics.waitedOn > 150, `${metrics.waitedOn} should be greater than 150`);
+  closeClient(client);
 });
 
 Meteor.publish('tinytest-unblock-fast', function () {
@@ -789,22 +767,22 @@ Meteor.publish('tinytest-unblock-fast', function () {
 });
 
 Tinytest.addAsync('Models - PubSub - Waited On - track waitedOn without wait time', async (test, done) => {
-  CleanTestData();
+  await CleanTestData();
 
-  let slowMethod = RegisterMethod(function () {
+  let slowMethod = registerMethod(async function () {
     console.log('slow method start');
-    Meteor._sleepForMs(100);
+    await sleep(100);
     console.log('slow method end');
   });
-  let fastMethod = RegisterMethod(function () {
+  let fastMethod = registerMethod(function async () {
     console.log('fastMethod');
   });
 
 
-  let client = GetMeteorClient();
+  let client = getMeteorClient();
 
   // subscriptions and method calls made before connected are not run in order
-  waitForConnection(client);
+  await waitForConnection(client);
 
   const pubName = 'tinytest-unblock-fast';
   client.call(slowMethod, () => {});
@@ -814,25 +792,24 @@ Tinytest.addAsync('Models - PubSub - Waited On - track waitedOn without wait tim
   const metrics = FindMetricsForPub(pubName);
 
   test.isTrue(metrics.waitedOn < 10 && metrics.waitedOn >= 0, `${metrics.waitedOn} should be less than 10`);
-  CloseClient(client);
+  closeClient(client);
 
   done();
 });
 
-Tinytest.addAsync('Models - PubSub - Waited On - track waited on time of next message', async (test, done) => {
+Tinytest.addAsync('Models - PubSub - Waited On - track waited on time of next message', async (test) => {
   CleanTestData();
-  let fastMethod = RegisterMethod(function () {
+  let fastMethod = registerMethod(function () {
     console.log('fastMethod');
   });
-
-  let client = GetMeteorClient();
+  let client = getMeteorClient();
 
   // If we subscribe and call before connected
   // Meteor sends the messages in the wrong order
-  waitForConnection(client);
+  await waitForConnection(client);
 
   client.subscribe('tinytest-waited-on');
-  client.call(fastMethod);
+  await client.callAsync(fastMethod);
 
   const metrics = FindMetricsForPub('tinytest-waited-on');
 
@@ -841,38 +818,34 @@ Tinytest.addAsync('Models - PubSub - Waited On - track waited on time of next me
   }
 
   test.isTrue(metrics.waitedOn > 10, `${metrics.waitedOn} should be greater than 10`);
-  CloseClient(client);
-
-  done();
+  closeClient(client);
 });
 
-Tinytest.addAsync('Models - PubSub - Waited On - track wait when unblock', async (test, done) => {
+addAsyncTest('Models - PubSub - Waited On - track wait when unblock', async (test, client) => {
   CleanTestData();
-  let fastMethod = RegisterMethod(function () {
+  let fastMethod = registerMethod(function () {
     console.log('fastMethod');
   });
 
-  let client = GetMeteorClient();
 
   // If we subscribe and call before connected
   // Meteor sends the messages in the wrong order
-  waitForConnection(client);
+  await waitForConnection(client);
 
   client.subscribe('tinytest-waited-on2');
   client.call(fastMethod);
 
-  const metrics = FindMetricsForPub('tinytest-waited-on2');
+  await sleep(200);
+  const metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), 'tinytest-waited-on2');
 
-  test.isTrue(metrics.waitedOn > 8, `${metrics.waitedOn} should be greater than 8`);
+  test.isTrue(metrics.waitedOn > 5, `${metrics.waitedOn} should be greater than 5`);
 
   // this.unblock is provided on Meteor >= 2.3, so we expect bigger delays below this version
   if (releaseParts[0] > 2 || (releaseParts[0] === 2 && releaseParts[1] >= 3)) {
-    test.isTrue(metrics.waitedOn <= 12, 'waitedOn should be less or equal than 12');
+    test.isTrue(metrics.waitedOn <= 12, `${metrics.waitedOn} should be less or equal than 12`);
   } else {
-    test.isTrue(metrics.waitedOn <= 150, 'waitedOn should be less or equal than 150');
+    test.isTrue(metrics.waitedOn <= 150, `${metrics.waitedOn} should be less or equal than 150`);
   }
 
-  CloseClient(client);
-
-  done();
+  closeClient(client);
 });

@@ -1,5 +1,11 @@
 # Changelog
 
+## Next
+* Support Meteor 3
+* Add `Monti.event`
+* Tracer supports parallel events
+* Improve support for proxies
+
 ## v2.50.1
 
 February 3, 2025
@@ -9,7 +15,6 @@ February 3, 2025
 * Metrics for bullmq jobs will now be grouped by the combination of the queue name and job name
 
 ## v2.50.0
-
 December 30, 2024
 
 * Create custom traces with `Monti.traceJob`
