@@ -3,6 +3,7 @@ import { MethodsModel } from '../../lib/models/methods';
 import { TestData } from '../_helpers/globals';
 import { CleanTestData, CloseClient, GetMeteorClient, RegisterMethod, Wait, WithDocCacheGetSize, callPromise, findMetricsForMethod, waitForConnection } from '../_helpers/helpers';
 import { Meteor } from 'meteor/meteor';
+import TraceAggregator from '../../lib/tracer/trace_aggregator';
 
 Tinytest.add(
   'Models - Method - buildPayload simple',
@@ -11,7 +12,6 @@ Tinytest.add(
     CreateMethodCompleted('aa', 'hello', 2, 800 , 10);
 
     let payload = model.buildPayload();
-    payload.methodRequests = [];
 
     let expected = {
       methodMetrics: [
@@ -45,14 +45,14 @@ Tinytest.add(
             }
           }
         }
-      ],
-      methodRequests: []
+      ]
     };
 
     let startTime = expected.methodMetrics[0].startTime;
     expected.methodMetrics[0].startTime = Kadira.syncedDate.syncTime(startTime);
     // TODO comparing without parsing and stringifing fails
     test.equal(EJSON.parse(EJSON.stringify(payload)), EJSON.parse(EJSON.stringify(expected)));
+
     CleanTestData();
   }
 );
@@ -96,6 +96,11 @@ Tinytest.add(
     // TODO comparing without stringify fails
     expected[0].startTime = Kadira.syncedDate.syncTime(expected[0].startTime);
     test.equal(EJSON.parse(EJSON.stringify(payload.methodMetrics)), EJSON.parse(EJSON.stringify(expected)));
+
+
+    let tracePayload = traceAggregator.buildPayload();
+    test.equal(tracePayload.methodRequests.length, 1);
+
     CleanTestData();
   }
 );
@@ -291,6 +296,8 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of next message
 });
 
 export const model = new MethodsModel();
+export const traceAggregator = new TraceAggregator();
+traceAggregator.registerModel(model, 'methodRequests');
 
 function CreateMethodCompleted (sessionName, methodName, methodId, startTime, methodDelay) {
   methodDelay = methodDelay || 5;
