@@ -201,6 +201,28 @@ addTestWithRoundedTime(
 );
 
 addTestWithRoundedTime(
+  'Models - PubSub - trackError - deactivated subscription',
+  async function (test) {
+    let model = new PubsubModel();
+    let trace = {
+      type: 'pubsub',
+      name: 'postsList',
+      metrics: {total: 25},
+      events: [],
+    };
+
+    test.equal(
+      model._trackError(null, {_subscriptionId: 'sub-1', _name: 'postsList'}, trace),
+      undefined
+    );
+
+    let payload = model.buildPayload();
+    test.equal(payload.pubMetrics, []);
+    test.equal(payload.pubRequests, []);
+  }
+);
+
+addTestWithRoundedTime(
   'Models - PubSub - Observer Cache - no cache',
   async function (test) {
     let original = Kadira.syncedDate.getTime;
