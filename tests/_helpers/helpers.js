@@ -246,6 +246,25 @@ export const subscribeAndWait = function (client, name, args) {
   });
 };
 
+export const subscribeAndWaitForError = function (client, name, args) {
+  return new Promise((resolve, reject) => {
+    let sub = null;
+
+    args = Array.prototype.splice.call(arguments, 1);
+
+    args.push({
+      onError(err) {
+        resolve(err);
+      },
+      onStop() {
+        resolve(null);
+      }
+    });
+
+    sub = client.subscribe(...args);
+  });
+};
+
 export const subscribePromise = function (client, ...args) {
   return new Promise((resolve, reject) => {
     client.subscribe(...args, {

@@ -16,7 +16,9 @@ import {
   subscribePromise,
   waitForConnection,
   withDocCacheGetSize,
-  waitForPubMetric
+  waitForPubMetric,
+  registerPublication,
+  subscribeAndWaitForError
 } from '../_helpers/helpers';
 import { TestData } from '../_helpers/globals';
 
@@ -179,6 +181,61 @@ addTestWithRoundedTime(
     test.equal(metrics[0].pubMetrics[0].pubs.postsList.subs, 2);
     test.equal(metrics[0].pubMetrics[1].pubs.postsList.subs, 1);
     test.equal(metrics[1], {});
+  }
+);
+
+addTestWithRoundedTime(
+  'Models - PubSub - trackError - synchronous handle error after stop',
+  async function (test, client) {
+    let pub = registerPublication(function () {
+      this.stop();
+      throw new Error('error after stop');
+    });
+
+    let err = await subscribeAndWaitForError(client, pub);
+    await sleep(200);
+
+    let payload = getPubSubPayload();
+    console.dir(payload[0].pubs[pub]);
+
+    test.equal(payload[0].pubs[pub].errors, 1);
+  }
+);
+
+// Test fails due to a bug in Meteor 3 - this error is not caught
+// addTestWithRoundedTime(
+//   'Models - PubSub - trackError - handle sync stop, async error after stop',
+//   async function (test, client) {
+//     let pub = registerPublication(async function () {
+//       this.stop();
+//       await 0;
+//       throw new Error('error after stop');
+//     });
+
+//     let err = await subscribeAndWaitForError(client, pub);
+//     await sleep(200);
+
+//     let payload = getPubSubPayload();
+
+//     test.equal(payload[0].pubs[pub].errors, 1);
+//   }
+// );
+
+addTestWithRoundedTime(
+  'Models - PubSub - trackError - handle async error after async stop',
+  async function (test, client) {
+    let pub = registerPublication(async function () {
+      await 0;
+      this.stop();
+      throw new Error('error after stop');
+    });
+
+    await subscribeAndWaitForError(client, pub);
+    await sleep(200);
+
+    let payload = getPubSubPayload();
+
+    test.equal(payload[0].pubs[pub].errors, 1);
   }
 );
 
