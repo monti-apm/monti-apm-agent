@@ -1,5 +1,10 @@
 # Changelog
 
+## Next
+
+- Improves support for remote heap snapshots
+- Improves support for larger quantity or size of traces
+
 ## v2.50.1
 
 February 3, 2025
