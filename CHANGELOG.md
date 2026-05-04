@@ -2,8 +2,8 @@
 
 ## Next
 
-- Improves support for remote heap snapshots
-- Improves support for larger quantity or size of traces
+- Able to detect when a heap snapshot failed due to the server restarting
+- Much better support for apps that have a very large number of traces or have traces that are very large
 
 ## v2.50.1
 
