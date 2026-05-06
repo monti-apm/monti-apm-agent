@@ -6,6 +6,11 @@
 * Tracer supports parallel events
 * Improve support for proxies
 
+## v2.50.2
+
+- Much better support for apps that have a very large number of traces or have traces that are very large
+- Able to detect when a heap snapshot failed due to the server restarting
+
 ## v2.50.1
 
 February 3, 2025

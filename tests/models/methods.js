@@ -3,6 +3,7 @@ import { Ntp } from '../../lib/ntp';
 import { sleep } from '../../lib/utils';
 import { TestData } from '../_helpers/globals';
 import { CleanTestData, addAsyncTest, addTestWithRoundedTime, callAsync, clientCallAsync, closeClient, findMetricsForMethod, getMeteorClient, registerMethod, waitForConnection, withDocCacheGetSize } from '../_helpers/helpers';
+import TraceAggregator from '../../lib/tracer/trace_aggregator';
 
 addTestWithRoundedTime(
   'Models - Method - buildPayload simple',
@@ -11,7 +12,6 @@ addTestWithRoundedTime(
     createMethodCompleted('aa', 'hello', 2, 800 , 10);
 
     let payload = model.buildPayload();
-    payload.methodRequests = [];
 
     let expected = {
       methodMetrics: [
@@ -45,8 +45,7 @@ addTestWithRoundedTime(
             }
           }
         }
-      ],
-      methodRequests: []
+      ]
     };
 
     expected.methodMetrics[0].startTime = payload.methodMetrics[0].startTime;
@@ -93,6 +92,9 @@ addTestWithRoundedTime(
     }];
     expected[0].startTime = payload.methodMetrics[0].startTime;
     test.stableEqual(payload.methodMetrics,expected);
+
+    let tracePayload = traceAggregator.buildPayload();
+    test.equal(tracePayload.methodRequests.length, 1);
   }
 );
 
@@ -287,6 +289,8 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of next message
 });
 
 export const model = new MethodsModel();
+export const traceAggregator = new TraceAggregator();
+traceAggregator.registerModel(model, 'methodRequests');
 
 function createMethodCompleted (sessionName, methodName, methodId, startTime, methodDelay) {
   methodDelay = methodDelay || 5;

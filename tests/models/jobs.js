@@ -13,7 +13,6 @@ Tinytest.addAsync(
     createCompletedJob('hello', 800, 10);
 
     let payload = model.buildPayload();
-    payload.jobRequests = [];
 
     let expected = {
       jobMetrics: [
@@ -46,8 +45,7 @@ Tinytest.addAsync(
             }
           }
         }
-      ],
-      jobRequests: []
+      ]
     };
 
     let startTime = expected.jobMetrics[0].startTime;
