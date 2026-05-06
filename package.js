@@ -13,6 +13,8 @@ let npmModules = {
   'lru-cache': '5.1.1',
   'json-stringify-safe': '5.0.1',
   'monti-apm-sketches-js': '0.0.3',
+  'web-vitals': '3.5.2',
+  'ua-parser-js': '1.0.37',
 
   // parseurl is also used by WebApp.
   // Since it caches the parsed url on
