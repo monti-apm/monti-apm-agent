@@ -81,7 +81,6 @@ if (releaseParts[0] > 1 || (releaseParts[0] === 1 && releaseParts[1] > 8) ) {
         callback(null,
           { toString: () => `MemTotal:        2097152 kB
         MemFree:         2085696 kB
-        MemAvailable:    2085828 kB
         Buffers:               0 kB
         Cached:              132 kB
         SwapCached:            0 kB
@@ -138,6 +137,29 @@ if (releaseParts[0] > 1 || (releaseParts[0] === 1 && releaseParts[1] > 8) ) {
       sinon.restore();
     }
   );
+
+  Tinytest.addAsync(
+    'Models - System - freeMemory prefers MemAvailable on linux',
+    async function (test) {
+      sinon.stub(process, 'platform').value('linux');
+      const model = new SystemModel();
+
+      sinon.replace(fs, 'readFile', (_, callback) => {
+        callback(null, {
+          toString: () => `MemTotal:        2097152 kB
+MemFree:          100000 kB
+MemAvailable:    1500000 kB
+Buffers:          200000 kB
+Cached:           300000 kB`
+        });
+      });
+
+      await model.getFreeMemory();
+      test.equal(model.freeMemory, 1500000 * 1024);
+      sinon.restore();
+    }
+  );
+
   Tinytest.add(
     'Models - System - cpuUsage calculates system cpu from elapsed time',
     function (test) {
