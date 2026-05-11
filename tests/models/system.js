@@ -138,6 +138,30 @@ if (releaseParts[0] > 1 || (releaseParts[0] === 1 && releaseParts[1] > 8) ) {
       sinon.restore();
     }
   );
+  Tinytest.add(
+    'Models - System - cpuUsage calculates system cpu from elapsed time',
+    function (test) {
+      const model = new SystemModel();
+
+      model.cpuTime = [0, 0];
+      model.previousCpuUsage = { user: 0, system: 0 };
+
+      sinon.replace(process, 'hrtime', () => [1, 0]);
+      sinon.replace(process, 'cpuUsage', () => ({
+        user: 250000,
+        system: 750000,
+      }));
+
+      model.cpuUsage();
+
+      const lastEntry = model.cpuHistory[model.cpuHistory.length - 1];
+      test.equal(lastEntry.usage, 1);
+      test.equal(lastEntry.user, 0.25);
+      test.equal(lastEntry.sys, 0.75);
+      sinon.restore();
+    }
+  );
+
   Tinytest.addAsync(
     'Models - System - freeMemory silent error',
     async function (test) {
