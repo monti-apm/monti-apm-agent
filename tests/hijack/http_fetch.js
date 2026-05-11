@@ -1,69 +1,62 @@
 import { fetch } from 'meteor/fetch';
-import { CleanTestData, GetLastMethodEvents, GetMeteorClient, RegisterMethod } from '../_helpers/helpers';
-const Future = Npm.require('fibers/future');
+import { addAsyncTest, callAsync, getLastMethodEvents, registerMethod, } from '../_helpers/helpers';
 
-Tinytest.add('HTTP - meteor/fetch - async call', function (test) {
-  const methodId = RegisterMethod(function () {
-    const f = new Future();
-    let result;
-    fetch('http://localhost:3301/').then(function (res) {
-      result = res;
-      f.return();
-    });
-    f.wait();
+addAsyncTest('HTTP - meteor/fetch - async call', async function (test) {
+  const methodId = registerMethod(async function () {
+    const result = await fetch('http://127.0.0.1:3301/');
+
     return result.status;
   });
-  const client = GetMeteorClient();
-  const result = client.call(methodId);
-  const events = GetLastMethodEvents([0, 2]);
+
+  const result = await callAsync(methodId);
+
+  const events = getLastMethodEvents([0, 2]);
+
   const expected = [
-    ['start', undefined, { userId: null, params: '[]' }],
-    ['wait', undefined, { waitOn: [] }],
-    ['http', undefined, { method: 'GET', url: 'http://localhost:3301/', library: 'meteor/fetch' }],
+    ['start', { userId: null, params: '[]' }],
+    ['wait', { waitOn: [] }],
+    ['http', { method: 'GET', url: 'http://127.0.0.1:3301/', library: 'meteor/fetch' }],
     ['complete']
   ];
-  test.equal(events, expected);
-  test.equal(result, 200);
-  CleanTestData();
-}
-);
 
-Tinytest.add('HTTP - meteor/fetch - trace error', function (test) {
-  const methodId = RegisterMethod(function () {
-    const f = new Future();
-    let error;
-    fetch('http://localhost:9999/').catch(function (err) {
-      error = err;
-      f.return();
-    });
-    f.wait();
-    return error;
+  test.stableEqual(events, expected);
+  test.equal(result, 200);
+});
+
+addAsyncTest('HTTP - meteor/fetch - trace error', async function (test) {
+  const methodId = registerMethod(async function () {
+    try {
+      await fetch('http://127.0.0.1:9999/');
+    } catch (error) {
+      return error;
+    }
   });
-  const client = GetMeteorClient();
-  const result = client.call(methodId);
-  const events = GetLastMethodEvents([0, 2]);
+
+  const result = await callAsync(methodId);
+  const events = getLastMethodEvents([0, 2]);
+
   const expected = [
-    ['start', undefined, { userId: null, params: '[]' }],
-    ['wait', undefined, { waitOn: [] }],
+    ['start', { userId: null, params: '[]' }],
+    ['wait', { waitOn: [] }],
     [
-      'http',undefined,
+      'http',
       {
         method: 'GET',
-        url: 'http://localhost:9999/',
+        url: 'http://127.0.0.1:9999/',
         library: 'meteor/fetch',
-        err: 'request to http://localhost:9999/ failed, reason: connect ECONNREFUSED 127.0.0.1:9999',
+        err: 'request to http://127.0.0.1:9999/ failed, reason: connect ECONNREFUSED 127.0.0.1:9999',
       },
     ],
     ['complete'],
   ];
-  test.equal(events, expected);
-  test.equal(result, {
+
+  test.stableEqual(events, expected);
+
+  test.stableEqual(result, {
     message:
-        'request to http://localhost:9999/ failed, reason: connect ECONNREFUSED 127.0.0.1:9999',
+        'request to http://127.0.0.1:9999/ failed, reason: connect ECONNREFUSED 127.0.0.1:9999',
     type: 'system',
     errno: 'ECONNREFUSED',
     code: 'ECONNREFUSED',
   });
-  CleanTestData();
-}
-);
+});

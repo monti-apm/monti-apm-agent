@@ -1,3 +1,4 @@
+import { addAsyncTest } from './_helpers/helpers';
 
 Tinytest.add(
   'Errors - enableErrorTracking',
@@ -19,31 +20,41 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Errors - Custom Errors - simple',
-  function (test) {
+  async function (test) {
     let originalTrackError = Kadira.models.error.trackError;
+
     let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+
     Kadira.enableErrorTracking();
+
     Kadira.models.error.trackError = function (err, trace) {
       test.equal(err.message, 'msg');
-      test.equal(err.stack.includes('tinytest.js'), true);
+      test.equal(err.stack.includes('error_tracking.js'), true);
+
       delete trace.at;
-      test.equal(trace, {
+
+      const expected = {
         type: 'type',
         subType: 'server',
         name: 'msg',
         errored: true,
         // at: 123,
         events: [
-          ['start', 0, {}],
+          ['start'],
           ['error', 0, {error: {message: 'msg', stack: err.stack}}]
         ],
         metrics: {total: 0}
-      });
+      };
+
+      test.equal(trace, expected);
     };
+
     Kadira.trackError('type', 'msg');
+
     Kadira.models.error.trackError = originalTrackError;
+
     _resetErrorTracking(originalErrorTrackingStatus);
   }
 );
@@ -64,7 +75,7 @@ Tinytest.add(
         errored: true,
         // at: 123,
         events: [
-          ['start', 0, {}],
+          ['start'],
           ['error', 0, {error: {message: 'msg', stack: 's'}}]
         ],
         metrics: {total: 0}
@@ -76,7 +87,7 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Errors - Custom Errors - error object',
   function (test) {
     let originalTrackError = Kadira.models.error.trackError;
@@ -86,18 +97,21 @@ Tinytest.add(
     Kadira.models.error.trackError = function (err, trace) {
       test.equal(err, {message: 'test', stack: error.stack});
       delete trace.at;
-      test.equal(trace, {
+
+      const expected = {
         type: 'server-internal',
         subType: 'server',
         name: 'test',
         errored: true,
         // at: 123,
         events: [
-          ['start', 0, {}],
+          ['start'],
           ['error', 0, {error: {message: 'test', stack: error.stack}}]
         ],
         metrics: {total: 0}
-      });
+      };
+
+      test.equal(trace, expected);
     };
     Kadira.trackError(error);
     Kadira.models.error.trackError = originalTrackError;
@@ -122,7 +136,7 @@ Tinytest.add(
         errored: true,
         // at: 123,
         events: [
-          ['start', 0, {}],
+          ['start'],
           ['error', 0, {error: {message: 'error-message', stack: error.stack}}]
         ],
         metrics: {total: 0}
@@ -151,7 +165,7 @@ Tinytest.add(
         errored: true,
         // at: 123,
         events: [
-          ['start', 0, {}],
+          ['start'],
           ['error', 0, {error: {message: 'error-message', stack: err.stack}}]
         ],
         metrics: {total: 0}
@@ -180,7 +194,7 @@ Tinytest.add(
         errored: true,
         // at: 123,
         events: [
-          ['start', 0, {}],
+          ['start'],
           ['error', 0, {error: {message: 'error-message', stack: err.stack}}]
         ],
         metrics: {total: 0}

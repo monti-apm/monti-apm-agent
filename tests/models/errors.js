@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { ErrorModel } from '../../lib/models/errors';
+import { addAsyncTest } from '../_helpers/helpers';
 
 Tinytest.add(
   'Models - Errors - empty',
@@ -60,9 +61,9 @@ Tinytest.add(
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Models - Errors - buildPayload',
-  function (test) {
+  async function (test) {
     let model = new ErrorModel('_appId');
     let error = {name: '_name', message: '_message', stack: '_stack'};
     let trace = {type: '_type', subType: '_subType', name: '_name'};
@@ -83,6 +84,7 @@ Tinytest.add(
     };
     test.equal(typeof payload.startTime, 'number');
     delete payload.startTime;
+
     test.equal(payload, expected);
   }
 );
