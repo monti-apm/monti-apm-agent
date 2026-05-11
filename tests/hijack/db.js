@@ -450,6 +450,29 @@ addAsyncTest(
   }
 );
 
+addAsyncTest(
+  'Database - Cursor - observeChanges preserves nonMutatingCallbacks',
+  async function (test) {
+    await TestData.insertAsync({_id: 'aa'});
+
+    let methodId = registerMethod(async function () {
+      let handle = await TestData.find({}).observeChanges({
+        added () {}
+      }, {
+        nonMutatingCallbacks: true
+      });
+
+      let result = handle.nonMutatingCallbacks;
+      handle.stop();
+      return result;
+    });
+
+    let result = await callAsync(methodId);
+
+    test.equal(result, true);
+  }
+);
+
 
 /**
  * @warning `wasMultiplexerReady` is true for both when it should be false for the first one. Which might be an issue in Meteor code, so let's not test that.
