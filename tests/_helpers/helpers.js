@@ -247,21 +247,19 @@ export const subscribeAndWait = function (client, name, args) {
 };
 
 export const subscribeAndWaitForError = function (client, name, args) {
-  return new Promise((resolve, reject) => {
-    let sub = null;
-
+  return new Promise((resolve) => {
     args = Array.prototype.splice.call(arguments, 1);
 
     args.push({
-      onError(err) {
+      onError (err) {
         resolve(err);
       },
-      onStop() {
+      onStop () {
         resolve(null);
       }
     });
 
-    sub = client.subscribe(...args);
+    client.subscribe(...args);
   });
 };
 

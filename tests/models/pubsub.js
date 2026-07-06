@@ -192,11 +192,10 @@ addTestWithRoundedTime(
       throw new Error('error after stop');
     });
 
-    let err = await subscribeAndWaitForError(client, pub);
+    await subscribeAndWaitForError(client, pub);
     await sleep(200);
 
     let payload = getPubSubPayload();
-    console.dir(payload[0].pubs[pub]);
 
     test.equal(payload[0].pubs[pub].errors, 1);
   }
