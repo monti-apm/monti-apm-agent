@@ -217,6 +217,46 @@ addAsyncTest(
 );
 
 addAsyncTest(
+  'Subscriptions - _trackUnsub - redundant deactivation does not double count',
+  async function (test, client) {
+    let serverSub = null;
+    let resolveStopped;
+    let stopped = new Promise((resolve) => {
+      resolveStopped = resolve;
+    });
+
+    let pubId = registerPublication(function () {
+      serverSub = this;
+      this.onStop(() => resolveStopped());
+      this.ready();
+    });
+
+    let handle = await subscribeAndWait(client, pubId);
+
+    // Stop the sub to trigger _deactivate
+    handle.stop();
+    await stopped;
+
+    // Trigger deactivate a second time.
+    // Meteor can in rare situations can call it twice
+    // The second time should not throw (such as from session being null)
+    // and should not count as a second unsub
+    let error = null;
+    try {
+      serverSub._deactivate();
+    } catch (e) {
+      error = e;
+    }
+
+    let metrics = FindMetricsForPub(pubId);
+
+    test.equal(error, null, error && `redundant deactivation threw: ${error.message}`);
+    test.equal(metrics.subs, 1);
+    test.equal(metrics.unsubs, 1);
+  }
+);
+
+addAsyncTest(
   'Subscriptions - Observer Cache - single publication and single subscription',
   async function (test, client) {
     let h1 = await subscribeAndWait(client, 'tinytest-data');
