@@ -450,28 +450,30 @@ addAsyncTest(
   }
 );
 
-addAsyncTest(
-  'Database - Cursor - observeChanges preserves nonMutatingCallbacks',
-  async function (test) {
-    await TestData.insertAsync({_id: 'aa'});
+// Redis-oplog 3.0.1 doesn't preserve nonMutatingCallbacks
+if (!process.env.REDIS_OPLOG_SETTINGS) {
+  addAsyncTest(
+    'Database - Cursor - observeChanges preserves nonMutatingCallbacks',
+    async function (test) {
+      await TestData.insertAsync({_id: 'aa'});
 
-    let methodId = registerMethod(async function () {
-      let handle = await TestData.find({}).observeChanges({
-        added () {}
-      }, {
-        nonMutatingCallbacks: true
+      let methodId = registerMethod(async function () {
+        let handle = await TestData.find({}).observeChanges({
+          added () {}
+        }, {
+          nonMutatingCallbacks: true
+        });
+
+        let result = handle.nonMutatingCallbacks;
+        handle.stop();
+        return result;
       });
 
-      let result = handle.nonMutatingCallbacks;
-      handle.stop();
-      return result;
-    });
-
-    let result = await callAsync(methodId);
-
-    test.equal(result, true);
-  }
-);
+      let result = await callAsync(methodId);
+      test.equal(result, true);
+    }
+  );
+}
 
 
 /**
