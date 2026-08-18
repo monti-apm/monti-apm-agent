@@ -303,6 +303,37 @@ addAsyncTest(
 );
 
 addAsyncTest(
+  'Tracer - Monti.event - preserves nested async events',
+  async function (test) {
+    let info;
+
+    const methodId = registerMethod(async function () {
+      await Monti.event('with-async', async () => {
+        await sleep(30);
+      });
+
+      info = getInfo();
+    });
+
+    await callAsync(methodId);
+
+    let customEvent = cleanBuiltEvents(info.trace.events)
+      .find(event => event[0] === 'custom');
+
+    let nested = customEvent[3] && customEvent[3].nested || [];
+
+    test.isTrue(
+      nested.some(event => event[0] === EventType.Async),
+      `async events inside a custom event should be preserved: ${JSON.stringify(customEvent)}`
+    );
+    test.isFalse(
+      nested.some(event => event[0] === EventType.Compute && event[1] >= 20),
+      `time awaited inside a custom event should not be recorded as compute: ${JSON.stringify(customEvent)}`
+    );
+  }
+);
+
+addAsyncTest(
   'Tracer - Build Trace - simple',
   async function (test) {
     let now = Ntp._now();
