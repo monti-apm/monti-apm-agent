@@ -288,6 +288,31 @@ Tinytest.addAsync('Models - Method - Waited On - track wait time of next message
   done();
 });
 
+addAsyncTest(
+  'Models - Method - Metrics - sentMsgSize is not double counted',
+  async function (test) {
+    let tracked = [];
+    let original = Kadira.models.methods.trackMsgSize;
+
+    Kadira.models.methods.trackMsgSize = function (method) {
+      tracked.push(method);
+    };
+
+    try {
+      // stringifyDDP runs synchronously, so no other messages can be
+      // tracked while trackMsgSize is replaced
+      MontiAsyncStorage.run(createStore(), () => {
+        Kadira._setInfo({ trace: { type: 'method', name: 'methodX' } });
+        DDPCommon.stringifyDDP({ msg: 'result', id: '1' });
+      });
+    } finally {
+      Kadira.models.methods.trackMsgSize = original;
+    }
+
+    test.stableEqual(tracked, ['methodX']);
+  }
+);
+
 export const model = new MethodsModel();
 export const traceAggregator = new TraceAggregator();
 traceAggregator.registerModel(model, 'methodRequests');
