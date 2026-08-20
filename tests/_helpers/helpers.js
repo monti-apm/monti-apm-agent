@@ -187,8 +187,7 @@ export function findMetricsForMethod (name) {
 // Note: this should not be used in place of assertions - it continues
 // after timing out
 export async function waitForPubMetric (pubName, metric, value) {
-  let timeoutTimestamp = Date.now() + 200;
-  while (Date.now() < timeoutTimestamp) {
+  for (let attempt = 0; attempt < 40; attempt++) {
     let metrics = Kadira.models.pubsub._getMetrics(Ntp._now(), pubName);
     if (metrics[metric] >= value) {
       return;
@@ -379,9 +378,11 @@ export const withRoundedTime = (fn) => async (test, done) => {
 
   Date.now = () => timestamp;
 
-  await asyncTest(fn)(test, () => {});
-
-  Date.now = old;
+  try {
+    await asyncTest(fn)(test, () => {});
+  } finally {
+    Date.now = old;
+  }
 
   done();
 };
