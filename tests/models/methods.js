@@ -57,6 +57,7 @@ addTestWithRoundedTime(
 addTestWithRoundedTime(
   'Models - Method - buildPayload with errors',
   async function (test) {
+    model.tracerStore._reset();
     // This method call is shorter, but it still should be saved
     // since it errored
     createMethodErrored('aa', 'hello', 2, 'the-error', 800, 5);
