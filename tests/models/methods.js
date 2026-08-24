@@ -57,8 +57,11 @@ addTestWithRoundedTime(
 addTestWithRoundedTime(
   'Models - Method - buildPayload with errors',
   async function (test) {
-    createMethodCompleted('aa', 'hello', 1, 100, 5);
-    createMethodErrored('aa', 'hello', 2, 'the-error', 800, 10);
+    // This method call is shorter, but it still should be saved
+    // since it errored
+    createMethodErrored('aa', 'hello', 2, 'the-error', 800, 5);
+    createMethodCompleted('aa', 'hello', 1, 100, 10);
+
     let payload = model.buildPayload();
     let expected = [{
       startTime: 100,
@@ -93,8 +96,9 @@ addTestWithRoundedTime(
     expected[0].startTime = payload.methodMetrics[0].startTime;
     test.stableEqual(payload.methodMetrics,expected);
 
+    model.tracerStore.processTraces();
     let tracePayload = traceAggregator.buildPayload();
-    test.equal(tracePayload.methodRequests.length, 1);
+    test.equal(tracePayload.methodRequests.length, 2);
   }
 );
 
