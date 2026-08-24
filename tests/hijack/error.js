@@ -342,6 +342,51 @@ addAsyncTest(
   }
 );
 
+addAsyncTest(
+  'Errors - method error - track NodeJs Error thrown in async method',
+  async function (test) {
+    let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+
+    let methodId = RegisterMethod(async function () {
+      throw new Error('async-the-message');
+    });
+
+    let hadError = false;
+
+    try {
+      await callAsync(methodId);
+    } catch (ex) {
+      hadError = true;
+      test.isTrue(ex.message.match(/Internal server error/), `client should see the sanitized error: ${ex.message}`);
+    }
+
+    test.isTrue(hadError, 'the method should have thrown');
+
+    let payload = Kadira.models.error.buildPayload();
+
+    let trackedErrors = payload.errors.map(e => [e.type, e.subType, e.name]);
+    test.equal(payload.errors.length, 1, `the error should be tracked exactly once: ${JSON.stringify(trackedErrors)}`);
+
+    let error = payload.errors[0];
+    test.equal(error.type, 'method');
+    test.equal(error.subType, methodId);
+    test.isTrue(error.name.indexOf('async-the-message') >= 0, `error name should have the real message: ${error.name}`);
+    test.isTrue(error.stacks[0].stack.indexOf('async-the-message') >= 0, 'error stack should be the real stack');
+
+    let lastEvent = error.trace.events[error.trace.events.length - 1];
+    test.isTrue(
+      lastEvent[2].error.message.indexOf('async-the-message') >= 0,
+      `trace error event should have the real message: ${JSON.stringify(lastEvent[2])}`
+    );
+
+    _resetErrorTracking(originalErrorTrackingStatus);
+  }
+);
+
+
 function _resetErrorTracking (status) {
   if (status) {
     Kadira.enableErrorTracking();
