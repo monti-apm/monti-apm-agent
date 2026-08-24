@@ -4,6 +4,7 @@ import {
   callAsync,
   dumpEvents,
   getLastMethodEvents,
+  getMethodEvents,
   isRedisOplogEnabled,
   registerMethod,
   RegisterMethod
@@ -601,6 +602,27 @@ addAsyncTest('Database - AsynchronousCursor - _nextObjectPromise', async functio
   test.stableEqual(result, [{_id: 'aa'}, {_id: 'bb'}]);
   test.stableEqual(events, expected);
 });
+addAsyncTest(
+  'Database - basic - countDocuments and estimatedDocumentCount',
+  async function (test) {
+    await TestData.insertAsync({_id: 'aa'});
+
+    let methodId = RegisterMethod(async function () {
+      let count = await TestData.countDocuments({_id: {$exists: true}});
+      let estimated = await TestData.estimatedDocumentCount();
+      return { count, estimated };
+    });
+
+    let result = await callAsync(methodId);
+
+    test.equal(result.count, 1);
+
+    let events = getMethodEvents();
+
+    test.equal(findDbEvents(events, 'countDocuments').length, 1, 'countDocuments should be tracked as a db event');
+    test.equal(findDbEvents(events, 'estimatedDocumentCount').length, 1, 'estimatedDocumentCount should be tracked as a db event');
+  }
+);
 
 function clearAdditionalObserverInfo (info) {
   delete info.queueLength;
