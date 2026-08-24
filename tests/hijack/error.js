@@ -386,6 +386,32 @@ addAsyncTest(
   }
 );
 
+addAsyncTest(
+  'Errors - unhandledRejection - null reason',
+  async function (test) {
+    let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+
+    let threw = false;
+
+    try {
+      process.emit('unhandledRejection', null, Promise.resolve());
+    } catch (ex) {
+      threw = true;
+    }
+
+    test.equal(threw, false);
+
+    let payload = Kadira.models.error.buildPayload();
+
+    test.equal(payload.errors.length, 1);
+    test.equal(payload.errors[0] && payload.errors[0].subType, 'unhandledRejection');
+
+    _resetErrorTracking(originalErrorTrackingStatus);
+  }
+);
 
 function _resetErrorTracking (status) {
   if (status) {
