@@ -8,11 +8,26 @@ import {
   getPubSubPayload,
   registerPublication,
   subscribeAndWait,
+  subscribeAndWaitForError,
   TestHelpers,
   waitForConnection,
   waitForPubMetric
 } from '../_helpers/helpers';
 import { sleep } from '../../lib/utils';
+
+addAsyncTest(
+  'Subscriptions - Sub/Unsub - subs for non-existent pubs are cleaned up',
+  async function (test, client) {
+    await subscribeAndWaitForError(client, 'this-publication-does-not-exist');
+
+    let timeout = Date.now() + 1000;
+    let retained;
+
+    retained = Object.values(Kadira.models.pubsub.subscriptions)
+      .filter((sub) => sub.publication === 'this-publication-does-not-exist');
+    test.equal(retained.length, 0);
+  }
+);
 
 addAsyncTest(
   'Subscriptions - Sub/Unsub - subscribe only',
