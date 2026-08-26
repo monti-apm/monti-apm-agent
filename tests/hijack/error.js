@@ -343,6 +343,26 @@ addAsyncTest(
 );
 
 addAsyncTest(
+  'Errors - method error - preserve async method promise',
+  async function (test) {
+    let methodPromise;
+
+    let methodId = RegisterMethod(function () {
+      methodPromise = Promise.resolve('result');
+      return methodPromise;
+    });
+
+    let returnedPromise = Meteor.server.method_handlers[methodId]();
+
+    test.isTrue(
+      returnedPromise === methodPromise,
+      'the method wrapper should return the original promise'
+    );
+    test.equal(await returnedPromise, 'result');
+  }
+);
+
+addAsyncTest(
   'Errors - method error - track NodeJs Error thrown in async method',
   async function (test) {
     let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
@@ -351,6 +371,7 @@ addAsyncTest(
     Kadira.models.error = new ErrorModel('foo');
 
     let methodId = RegisterMethod(async function () {
+      await Promise.resolve();
       throw new Error('async-the-message');
     });
 
