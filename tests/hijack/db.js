@@ -602,6 +602,35 @@ addAsyncTest('Database - AsynchronousCursor - _nextObjectPromise', async functio
   test.stableEqual(result, [{_id: 'aa'}, {_id: 'bb'}]);
   test.stableEqual(events, expected);
 });
+
+addAsyncTest(
+  'Database - Cursor - fetch after forEach does not track per-document events',
+  async function (test) {
+    await TestData.insertAsync({_id: 'aa'});
+    await TestData.insertAsync({_id: 'bb'});
+
+    let methodId = RegisterMethod(async function () {
+      await TestData.find({_id: {$exists: true}}).forEachAsync(function () {});
+      await TestData.find({_id: {$exists: true}}).fetchAsync();
+      return 'done';
+    });
+
+    await callAsync(methodId);
+
+    let events = getMethodEvents();
+
+    let forEachEvents = findDbEvents(events, 'forEach');
+    test.equal(forEachEvents.length, 1);
+    let forEachPerDoc = findDbEvents((forEachEvents[0][3] && forEachEvents[0][3].nested) || [], '_nextObjectPromise');
+    test.isTrue(forEachPerDoc.length > 0, 'per-document events should be tracked during forEach');
+
+    let fetchEvents = findDbEvents(events, 'fetch');
+    test.equal(fetchEvents.length, 1);
+    let fetchPerDoc = findDbEvents((fetchEvents[0][3] && fetchEvents[0][3].nested) || [], '_nextObjectPromise');
+    test.equal(fetchPerDoc.length, 0, 'fetch should not track per-document events after a forEach in the same trace');
+  }
+);
+
 addAsyncTest(
   'Database - basic - countDocuments and estimatedDocumentCount',
   async function (test) {
@@ -629,4 +658,22 @@ function clearAdditionalObserverInfo (info) {
   delete info.initialPollingTime;
   delete info.elapsedPollingTime;
   delete info.wasMultiplexerReady;
+}
+
+// Recursively finds built db events with the given func in the
+// events and their nested events
+function findDbEvents(events, func, acc = []) {
+  events.forEach((event) => {
+    if (!Array.isArray(event)) {
+      return;
+    }
+
+    if (event[0] === 'db' && event[2] && event[2].func === func) {
+      acc.push(event);
+    }
+
+    findDbEvents((event[3] && event[3].nested) || [], func, acc);
+  });
+
+  return acc;
 }
