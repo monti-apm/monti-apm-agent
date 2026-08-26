@@ -1,4 +1,5 @@
 import { Random } from 'meteor/random';
+import { ErrorModel } from '../../../lib/client/models/errors';
 
 Tinytest.addAsync(
   'Client Side - Error Manager - Reporters - window.onerror - with all args',
@@ -43,6 +44,43 @@ Tinytest.addAsync(
       restoreKadiraSendErrors();
       next();
     }
+  })
+);
+
+Tinytest.addAsync(
+  'Client Side - Error Manager - Reporters - window.onerror - respects disableClientErrorTracking',
+  TestWithErrorTrackingAsync(function (test, next) {
+    let prevEnabled = Kadira.options.enableErrorTracking;
+    let prevClientDisable = Kadira.options.disableClientErrorTracking;
+    let prevErrors = Kadira.errors;
+
+    Kadira.options.disableClientErrorTracking = true;
+    Kadira._initializeErrorTracking();
+
+    // Use a fresh model so the rate limit and ntp-sync deferral
+    // from previous tests don't delay sending past this test
+    Kadira.errors = new ErrorModel({ waitForNtpSyncInterval: 0 });
+
+    // Mock below sendError so this works no matter where
+    // disableClientErrorTracking is checked
+    let sendCalled = false;
+    let originalSend = Kadira.send;
+    Kadira.send = function () {
+      sendCalled = true;
+    };
+
+    window.onerror(Random.id(), '_url', 1, 1, new Error('test-error'));
+
+    setTimeout(function () {
+      Kadira.send = originalSend;
+      Kadira.errors.close();
+      Kadira.errors = prevErrors;
+      Kadira.options.enableErrorTracking = prevEnabled;
+      Kadira.options.disableClientErrorTracking = prevClientDisable;
+
+      test.equal(sendCalled, false, 'client errors should not be sent when disableClientErrorTracking is enabled');
+      next();
+    }, 100);
   })
 );
 

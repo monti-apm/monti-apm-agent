@@ -1,5 +1,5 @@
 ---
-parser: '@babel/eslint-parser'
+parser: '@typescript-eslint/parser'
 extends:
   - es/2015/server
 plugins:
@@ -24,7 +24,25 @@ parserOptions:
   requireConfigFile: false
   sourceType: 'module'
   ecmaVersion: 2017
+overrides:
+  - files: ['**/tests/**/*.{js,cjs,mjs}']
+    rules:
+      no-console: 0
+  - files: ['*.ts', '*.tsx']
+    extends: ['plugin:@typescript-eslint/recommended']
+    rules:
+      '@typescript-eslint/no-non-null-assertion': 0
+      '@typescript-eslint/no-explicit-any': 0
+      '@typescript-eslint/no-empty-interface': 0
+      '@typescript-eslint/explicit-module-boundary-types': 0
+      '@typescript-eslint/no-unused-vars': 0
+      '@typescript-eslint/no-this-alias': 0
+      '@typescript-eslint/ban-ts-comment': 0
+      '@typescript-eslint/no-namespace': 0
+      '@typescript-eslint/no-empty-function': 0
+      '@typescript-eslint/no-extra-semi': 0
 rules:
+  arrow-body-style: 0
   arrow-parens: 0
   prefer-arrow-callback: 0
   newline-before-return: 0
@@ -277,7 +295,3 @@ rules:
   prefer-rest-params: 0
   symbol-description: 1
   callback-return: 0
-overrides:
-  - files: ['**/tests/**/*.{js,cjs,mjs}']
-    rules:
-      no-console: 0

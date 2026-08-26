@@ -1,74 +1,87 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import {
-  CleanTestData,
-  CloseClient,
-  EnableTrackingMethods,
+  addAsyncTest,
   FindMetricsForPub,
-  GetMeteorClient,
+  getMeteorClient,
   GetPubSubMetrics,
-  GetPubSubPayload,
-  RegisterPublication,
-  SubscribeAndWait,
-  TestHelpers, Wait, waitForConnection
+  getPubSubPayload,
+  registerPublication,
+  subscribeAndWait,
+  subscribeAndWaitForError,
+  TestHelpers,
+  waitForConnection,
+  waitForPubMetric
 } from '../_helpers/helpers';
+import { sleep } from '../../lib/utils';
 
-Tinytest.add(
+addAsyncTest(
+  'Subscriptions - Sub/Unsub - subs for non-existent pubs are cleaned up',
+  async function (test, client) {
+    await subscribeAndWaitForError(client, 'this-publication-does-not-exist');
+
+    let timeout = Date.now() + 1000;
+    let retained;
+
+    retained = Object.values(Kadira.models.pubsub.subscriptions)
+      .filter((sub) => sub.publication === 'this-publication-does-not-exist');
+    test.equal(retained.length, 0);
+  }
+);
+
+addAsyncTest(
   'Subscriptions - Sub/Unsub - subscribe only',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = GetMeteorClient();
-
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    let h2 = SubscribeAndWait(client, 'tinytest-data');
+  async function (test, client) {
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+    let h2 = await subscribeAndWait(client, 'tinytest-data');
 
     let metrics = GetPubSubMetrics();
+
     test.equal(metrics.length, 1);
     test.equal(metrics[0].pubs['tinytest-data'].subs, 2);
+
     h1.stop();
     h2.stop();
-    CloseClient(client);
   }
 );
 
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - Sub/Unsub - subscribe and unsubscribe',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = GetMeteorClient();
+  async function (test, client) {
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+    let h2 = await subscribeAndWait(client, 'tinytest-data');
 
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    let h2 = SubscribeAndWait(client, 'tinytest-data');
     h1.stop();
     h2.stop();
-    Wait(100);
+
+    await sleep(100);
 
     let metrics = GetPubSubMetrics();
+
     test.equal(metrics.length, 1);
     test.equal(metrics[0].pubs['tinytest-data'].subs, 2);
     test.equal(metrics[0].pubs['tinytest-data'].unsubs, 2);
-    CloseClient(client);
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - Response Time - single',
-  function (test) {
-    CleanTestData();
-    let client = GetMeteorClient();
+  async function (test, client) {
     let pubName = `pub-${Random.id()}`;
-    Meteor.publish(pubName, function () {
-      Wait(200);
+
+    Meteor.publish(pubName, async function () {
+      await sleep(50);
       this.ready();
     });
-    let h1 = SubscribeAndWait(client, pubName);
+
+    let h1 = await subscribeAndWait(client, pubName);
+
     let metrics = FindMetricsForPub(pubName);
-    test.isTrue(TestHelpers.compareNear(metrics.resTime, 200, 100));
+
+    test.isTrue(TestHelpers.compareNear(metrics.resTime, 50, 20));
+
     h1.stop();
-    CloseClient(client);
   }
 );
 
@@ -76,8 +89,8 @@ Tinytest.add(
 //   'Subscriptions - Response Time - multiple',
 //   function (test) {
 //     EnableTrackingMethods();
-//     var client = GetMeteorClient();
-//     var Future = Npm.require('fibers/future');
+//     var client = getMeteorClient();
+//     var Future = require('fibers/future');
 //     var f = new Future();
 //     var h1, h2;
 //     h1 = client.subscribe('tinytest-data-multi', function() {
@@ -85,13 +98,13 @@ Tinytest.add(
 //       f.return();
 //     });
 //     f.wait();
-//     var metrics = GetPubSubPayload();
+//     var metrics = getPubSubPayload();
 //     var resTimeOne = metrics[0].pubs['tinytest-data-multi'].resTime;
 //     Wait(700);
 //     var H2_SUB;
 //     h2 = client.subscribe('tinytest-data-multi');
 //     Wait(300);
-//     var metrics2 = GetPubSubPayload();
+//     var metrics2 = getPubSubPayload();
 //     var resTimeTwo = metrics2[0].pubs['tinytest-data-multi'].resTime;
 //     test.isTrue(resTimeTwo == 0);
 //     h1.stop();
@@ -101,23 +114,18 @@ Tinytest.add(
 //   }
 // );
 
-/**
- * The `lifeTime` metric seems flaky on Meteor v2.8.2 specifically,
- * shouldn't be something worry about but leaving this comment just in case.
- */
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - Lifetime - sub',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = GetMeteorClient();
-    waitForConnection(client);
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    Wait(50);
+  async function (test, client) {
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+
+    await sleep(50);
+
     h1.stop();
-    CloseClient(client);
+
     let metrics = FindMetricsForPub('tinytest-data');
-    test.isTrue(TestHelpers.compareNear(metrics.lifeTime, 50, 200));
+
+    test.isTrue(TestHelpers.compareNear(metrics.lifeTime, 50, 75));
   }
 );
 
@@ -126,8 +134,8 @@ Tinytest.add(
 // //   function (test) {
 // //     // test.fail('no pubs for null(autopublish)');
 // //     // EnableTrackingMethods();
-// //     // var client = GetMeteorClient();
-// //     // var Future = Npm.require('fibers/future');
+// //     // var client = getMeteorClient();
+// //     // var Future = require('fibers/future');
 // //     // var f = new Future();
 // //     // var interval = setInterval(function () {
 // //     //   if (client.status().connected) {
@@ -144,144 +152,170 @@ Tinytest.add(
 // //   }
 // // );
 
-/**
- * @flaky
- */
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - ObserverLifetime - sub',
-  function (test) {
+  async function (test) {
     TestHelpers.cleanTestData();
 
     TestHelpers.enableTrackingMethods();
 
     let client = TestHelpers.getMeteorClient();
 
-    waitForConnection(client);
+    await waitForConnection(client);
 
     let start = Date.now();
     let st = Date.now();
-    let h1 = TestHelpers.subscribeAndWait(client, 'tinytest-data');
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
     let elapsedTime = Date.now() - st;
     console.log('elapsed 1', elapsedTime);
 
-    TestHelpers.wait(100);
+    await sleep(100);
 
     Kadira.EventBus.once('pubsub', 'observerDeleted', (ownerInfo) => console.log('on sub stop:', Date.now(), JSON.stringify(ownerInfo)));
 
     st = Date.now();
     h1.stop();
+
+    await waitForPubMetric('tinytest-data', 'observerLifetime', 50);
     elapsedTime += Date.now() - st;
     console.log('elapsed 2', Date.now() - st);
     console.log('elapsed total', Date.now() - start);
 
-    TestHelpers.wait(100);
-
     let metrics = TestHelpers.findMetricsForPub('tinytest-data');
-    console.dir(metrics);
-    console.log({elapsedTime});
-    test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 100, 60));
-    TestHelpers.closeClient(client);
+
+    test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 120, 60));
   }
 );
 
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - active subs',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = GetMeteorClient();
+  async function (test, client) {
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+    let h2 = await subscribeAndWait(client, 'tinytest-data');
+    let h3 = await subscribeAndWait(client, 'tinytest-data-2');
 
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    let h2 = SubscribeAndWait(client, 'tinytest-data');
-    let h3 = SubscribeAndWait(client, 'tinytest-data-2');
+    let payload = getPubSubPayload();
 
-    let payload = GetPubSubPayload();
     test.equal(payload[0].pubs['tinytest-data'].activeSubs === 2, true);
     test.equal(payload[0].pubs['tinytest-data-2'].activeSubs === 1, true);
+
     h1.stop();
     h2.stop();
     h3.stop();
-    CloseClient(client);
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - avoiding multiple ready',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
+  async function (test, client) {
     let ReadyCounts = 0;
-    let pubId = RegisterPublication(function () {
+
+    let pubId = registerPublication(function () {
       this.ready();
       this.ready();
     });
+
     let original = Kadira.models.pubsub._trackReady;
+
     Kadira.models.pubsub._trackReady = function (session, sub) {
       if (sub._name === pubId) {
         ReadyCounts++;
       }
     };
-    let client = GetMeteorClient();
-    SubscribeAndWait(client, pubId);
+
+    await subscribeAndWait(client, pubId);
 
     test.equal(ReadyCounts, 1);
     Kadira.models.pubsub._trackReady = original;
-    CloseClient(client);
   }
 );
 
-Tinytest.add(
-  'Subscriptions - Observer Cache - single publication and single subscription',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
+addAsyncTest(
+  'Subscriptions - _trackUnsub - redundant deactivation does not double count',
+  async function (test, client) {
+    let serverSub = null;
+    let resolveStopped;
+    let stopped = new Promise((resolve) => {
+      resolveStopped = resolve;
+    });
 
-    Wait(100);
-    let metrics = GetPubSubPayload();
+    let pubId = registerPublication(function () {
+      serverSub = this;
+      this.onStop(() => resolveStopped());
+      this.ready();
+    });
+
+    let handle = await subscribeAndWait(client, pubId);
+
+    // Stop the sub to trigger _deactivate
+    handle.stop();
+    await stopped;
+
+    // Trigger deactivate a second time.
+    // Meteor can in rare situations can call it twice
+    // The second time should not throw (such as from session being null)
+    // and should not count as a second unsub
+    let error = null;
+    try {
+      serverSub._deactivate();
+    } catch (e) {
+      error = e;
+    }
+
+    let metrics = FindMetricsForPub(pubId);
+
+    test.equal(error, null, error && `redundant deactivation threw: ${error.message}`);
+    test.equal(metrics.subs, 1);
+    test.equal(metrics.unsubs, 1);
+  }
+);
+
+addAsyncTest(
+  'Subscriptions - Observer Cache - single publication and single subscription',
+  async function (test, client) {
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+
+    await sleep(100);
+
+    let metrics = getPubSubPayload();
+
     test.equal(metrics[0].pubs['tinytest-data'].totalObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data'].cachedObservers, 0);
     test.equal(metrics[0].pubs['tinytest-data'].avgObserverReuse, 0);
 
     h1.stop();
-    CloseClient(client);
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - Observer Cache - single publication and multiple subscriptions',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = GetMeteorClient();
+  async function (test, client) {
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+    let h2 = await subscribeAndWait(client, 'tinytest-data');
 
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    let h2 = SubscribeAndWait(client, 'tinytest-data');
+    await sleep(100);
 
-    Wait(100);
-    let metrics = GetPubSubPayload();
+    let metrics = getPubSubPayload();
     test.equal(metrics[0].pubs['tinytest-data'].totalObservers, 2);
     test.equal(metrics[0].pubs['tinytest-data'].cachedObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data'].avgObserverReuse, 0.5);
     h1.stop();
     h2.stop();
-    CloseClient(client);
   }
 );
 
-Tinytest.add(
+addAsyncTest(
   'Subscriptions - Observer Cache - multiple publication and multiple subscriptions',
-  function (test) {
-    CleanTestData();
-    EnableTrackingMethods();
-    let client = GetMeteorClient();
-    let h1 = SubscribeAndWait(client, 'tinytest-data');
-    let h2 = SubscribeAndWait(client, 'tinytest-data-2');
+  async function (test) {
+    let client = getMeteorClient();
+    let h1 = await subscribeAndWait(client, 'tinytest-data');
+    let h2 = await subscribeAndWait(client, 'tinytest-data-2');
 
-    Wait(100);
-    let metrics = GetPubSubPayload();
+    await sleep(100);
+
+    let metrics = getPubSubPayload();
+
     test.equal(metrics[0].pubs['tinytest-data'].totalObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data'].cachedObservers, 0);
     test.equal(metrics[0].pubs['tinytest-data'].avgObserverReuse, 0);
@@ -289,8 +323,8 @@ Tinytest.add(
     test.equal(metrics[0].pubs['tinytest-data-2'].totalObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data-2'].cachedObservers, 1);
     test.equal(metrics[0].pubs['tinytest-data-2'].avgObserverReuse, 1);
+
     h1.stop();
     h2.stop();
-    CloseClient(client);
   }
 );

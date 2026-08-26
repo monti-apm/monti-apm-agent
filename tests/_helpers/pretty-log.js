@@ -3,6 +3,9 @@ import highlight from 'cli-highlight';
 import { stringify } from 'yaml';
 import Diff from 'diff';
 
+// Force color
+chalk.level = 1;
+
 export function diffStrings (a, b) {
   const diff = Diff.diffLines(b, a);
 
