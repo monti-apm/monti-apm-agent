@@ -704,6 +704,99 @@ addTestWithRoundedTime(
 );
 
 addTestWithRoundedTime(
+  'Models - PubSub - Observers - ready sent from a method starts liveSentMsgSize',
+  async function (test, client) {
+    let serverSub;
+    let markPublicationStarted;
+    let publicationStarted = new Promise((resolve) => {
+      markPublicationStarted = resolve;
+    });
+    let pubName = registerPublication(function () {
+      serverSub = this;
+      markPublicationStarted();
+    });
+    let methodName = registerMethod(function () {
+      serverSub.ready();
+    });
+    let ready = new Promise((resolve, reject) => {
+      client.subscribe(pubName, {
+        onReady: resolve,
+        onError: reject,
+      });
+    });
+
+    await publicationStarted;
+    await clientCallAsync(client, methodName);
+    await ready;
+
+    serverSub.added('tinytest-data', 'doc1', {aa: 10});
+    await waitForPubMetric(pubName, 'liveSentMsgSize', 1);
+
+    let payload = getPubSubPayload();
+    let expectedMsg = JSON.stringify({
+      msg: 'added',
+      collection: 'tinytest-data',
+      id: 'doc1',
+      fields: {aa: 10},
+    });
+
+    test.equal(
+      payload[0].pubs[pubName].liveSentMsgSize,
+      Buffer.byteLength(expectedMsg, 'utf8')
+    );
+  }
+);
+
+addTestWithRoundedTime(
+  'Models - PubSub - Observers - liveSentMsgSize for changed',
+  async function (test, client) {
+    let id = await TestData.insertAsync({aa: 10});
+
+    await subscribeAndWait(client, 'tinytest-data-random');
+    await TestData.updateAsync(id, {$set: {aa: 20}});
+
+    await waitForPubMetric('tinytest-data-random', 'liveSentMsgSize', 1);
+
+    let payload = getPubSubPayload();
+    let expectedMsg = JSON.stringify({
+      msg: 'changed',
+      collection: 'tinytest-data',
+      id,
+      fields: {aa: 20},
+    });
+
+    test.equal(
+      payload[0].pubs['tinytest-data-random'].liveSentMsgSize,
+      Buffer.byteLength(expectedMsg, 'utf8')
+    );
+  }
+);
+
+addTestWithRoundedTime(
+  'Models - PubSub - Observers - liveSentMsgSize for removed',
+  async function (test, client) {
+    let id = await TestData.insertAsync({aa: 10});
+
+    await subscribeAndWait(client, 'tinytest-data-random');
+    await TestData.removeAsync(id);
+
+    await waitForPubMetric('tinytest-data-random', 'liveSentMsgSize', 1);
+
+    let payload = getPubSubPayload();
+    let expectedMsg = JSON.stringify({
+      msg: 'removed',
+      collection: 'tinytest-data',
+      id,
+    });
+
+    test.equal(
+      payload[0].pubs['tinytest-data-random'].liveSentMsgSize,
+      Buffer.byteLength(expectedMsg, 'utf8')
+    );
+  }
+);
+
+addTestWithRoundedTime(
   'Models - PubSub - Observers - initiallyFetchedDocSize',
   async function (test, client) {
     await TestData.insertAsync({aa: 10});

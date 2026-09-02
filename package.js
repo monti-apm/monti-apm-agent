@@ -62,6 +62,8 @@ Package.onTest(function (api) {
     'tests/hijack/http.js',
     'tests/hijack/db.js',
     'tests/hijack/subscriptions.js',
+    'tests/hijack/wrap_ddp_stringify.js',
+    'tests/hijack/wrap_session.js',
     'tests/hijack/error.js',
     'tests/hijack/mongo_driver_events.js',
     'tests/models/methods.js',

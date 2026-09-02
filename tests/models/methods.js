@@ -306,10 +306,12 @@ addAsyncTest(
     try {
       // stringifyDDP runs synchronously, so no other messages can be
       // tracked while trackMsgSize is replaced
-      MontiAsyncStorage.run(createStore(), () => {
+      let result = MontiAsyncStorage.run(createStore(), () => {
         Kadira._setInfo({ trace: { type: 'method', name: 'methodX' } });
-        DDPCommon.stringifyDDP({ msg: 'result', id: '1' });
+        return DDPCommon.stringifyDDP({ msg: 'result', id: '1' });
       });
+
+      test.equal(typeof result, 'string');
     } finally {
       Kadira.models.methods.trackMsgSize = original;
     }
