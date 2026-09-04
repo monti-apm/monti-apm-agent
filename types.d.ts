@@ -10,6 +10,9 @@ export type ConnectOptions = {
     eventStackTrace?: boolean
     disableNtp?: boolean
     stalledTimeout?: number
+    liveQueryPollingWindowMs?: number
+    liveQueryPollingMinCycles?: number
+    liveQueryPollingDocumentBudget?: number
 }
 
 export type TrackErrorOptions = {
