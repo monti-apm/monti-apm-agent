@@ -22,6 +22,192 @@ import {
 } from '../_helpers/helpers';
 import { TestData } from '../_helpers/globals';
 
+function withLiveQueryPollingTest (options, run) {
+  const originalOptions = Kadira.options;
+  const originalTrackError = Monti.trackError;
+  const originalCheckWhyNoOplog = Kadira.checkWhyNoOplog;
+  const originalCpuUsage = Kadira.models.system.currentCpuUsage;
+  const reports = [];
+  const model = new PubsubModel();
+
+  Kadira.options = {
+    ...originalOptions,
+    enableErrorTracking: true,
+    liveQueryPollingWindowMs: 900000,
+    liveQueryPollingMinCycles: 3,
+    liveQueryPollingDocumentBudget: 25000,
+    ...options,
+  };
+  Monti.trackError = (...args) => reports.push(args);
+  Kadira.checkWhyNoOplog = () => ({ code: 'DISABLE_OPLOG' });
+
+  try {
+    run({ model, reports });
+  } finally {
+    model.tracerStore.stop();
+    Kadira.options = originalOptions;
+    Monti.trackError = originalTrackError;
+    Kadira.checkWhyNoOplog = originalCheckWhyNoOplog;
+    Kadira.models.system.currentCpuUsage = originalCpuUsage;
+  }
+}
+
+function createPollingObserver (publication = 'catalogIcons') {
+  return {
+    _ownerInfo: { name: publication, type: 'sub' },
+    _cursorDescription: {
+      collectionName: 'products',
+      selector: { internalReference: 'not-reported' },
+      options: { disableOplog: true, pollingIntervalMs: 300000 },
+    },
+  };
+}
+
+function trackPollingCycle (model, observer, timestamp, documents = 10000) {
+  model.trackLiveQueryPolling(observer, {
+    timestamp,
+    documents,
+    bytes: documents * 25,
+    duration: 40,
+  });
+}
+
+Tinytest.add(
+  'Models - PubSub - repeated polling - one large fetch does not report',
+  function (test) {
+    withLiveQueryPollingTest({}, ({ model, reports }) => {
+      trackPollingCycle(model, createPollingObserver('largeCatalog'), 60000, 30000);
+
+      test.equal(reports.length, 0);
+    });
+  }
+);
+
+Tinytest.add(
+  'Models - PubSub - repeated polling - both thresholds trigger when CPU is zero',
+  function (test) {
+    withLiveQueryPollingTest({}, ({ model, reports }) => {
+      const observer = createPollingObserver();
+      Kadira.models.system.currentCpuUsage = 0;
+
+      trackPollingCycle(model, observer, 60000, 15000);
+      trackPollingCycle(model, observer, 120000, 15000);
+      test.equal(reports.length, 0, 'two expensive polls are below the cycle threshold');
+
+      trackPollingCycle(model, observer, 180000, 0);
+      test.equal(reports.length, 1);
+      test.equal(reports[0][0].message, 'Repeated live-query polling detected: catalogIcons / products');
+      test.equal(reports[0][1], {
+        type: 'server-internal',
+        subType: 'live-query-polling',
+        kadiraInfo: null,
+      });
+
+      const marker = 'Live-query polling context: ';
+      const context = JSON.parse(reports[0][0].stack.split(marker)[1]);
+      test.equal(context, {
+        publication: 'catalogIcons',
+        collection: 'products',
+        pollingIntervalMs: 300000,
+        windowMs: 900000,
+        pollCount: 3,
+        fetchedDocuments: 30000,
+        approximateFetchedBytes: 750000,
+        cumulativePollDurationMs: 120,
+        maximumPollDurationMs: 40,
+        nonOplogReason: 'DISABLE_OPLOG',
+        cpuUsage: 0,
+      });
+      test.isFalse(reports[0][0].stack.includes('internalReference'));
+      test.isFalse(reports[0][0].stack.includes('not-reported'));
+    });
+  }
+);
+
+Tinytest.add(
+  'Models - PubSub - repeated polling - expired buckets are excluded',
+  function (test) {
+    withLiveQueryPollingTest({ liveQueryPollingWindowMs: 120000 }, ({ model, reports }) => {
+      const observer = createPollingObserver();
+
+      trackPollingCycle(model, observer, 0, 30000);
+      trackPollingCycle(model, observer, 180000, 10000);
+      trackPollingCycle(model, observer, 180001, 10000);
+
+      test.equal(reports.length, 0);
+    });
+  }
+);
+
+Tinytest.add(
+  'Models - PubSub - repeated polling - reports are rate limited by name',
+  function (test) {
+    withLiveQueryPollingTest({
+      liveQueryPollingMinCycles: 1,
+      liveQueryPollingDocumentBudget: 1,
+    }, ({ model, reports }) => {
+      trackPollingCycle(model, createPollingObserver(), 0, 1);
+      trackPollingCycle(model, createPollingObserver(), 1000, 1);
+      test.equal(reports.length, 1);
+
+      trackPollingCycle(model, createPollingObserver(), 3600000, 1);
+      test.equal(reports.length, 2);
+    });
+  }
+);
+
+Tinytest.add(
+  'Models - PubSub - repeated polling - zero document budget disables detection',
+  function (test) {
+    withLiveQueryPollingTest({
+      liveQueryPollingMinCycles: 1,
+      liveQueryPollingDocumentBudget: 0,
+    }, ({ model, reports }) => {
+      trackPollingCycle(model, createPollingObserver(), 0, 50000);
+
+      test.equal(reports.length, 0);
+    });
+  }
+);
+
+Tinytest.add(
+  'Models - PubSub - repeated polling - reporting never affects the observer',
+  function (test) {
+    withLiveQueryPollingTest({
+      liveQueryPollingMinCycles: 1,
+      liveQueryPollingDocumentBudget: 1,
+    }, ({ model }) => {
+      const observer = createPollingObserver();
+      Monti.trackError = () => {
+        throw new Error('simulated reporting failure');
+      };
+
+      trackPollingCycle(model, observer, 0, 1);
+      test.equal(observer._ownerInfo.name, 'catalogIcons');
+    });
+  }
+);
+
+Tinytest.add(
+  'Models - PubSub - repeated polling - observer history remains bounded',
+  function (test) {
+    withLiveQueryPollingTest({
+      liveQueryPollingMinCycles: 100,
+    }, ({ model }) => {
+      const observer = createPollingObserver();
+
+      for (let minute = 0; minute < 30; minute++) {
+        trackPollingCycle(model, observer, minute * 60000, 1);
+      }
+
+      const stateKey = Reflect.ownKeys(observer)
+        .find(key => typeof key === 'symbol' && key.description === 'liveQueryPollingState');
+      test.isTrue(!!stateKey);
+      test.isTrue(observer[stateKey].buckets.length <= 16);
+    });
+  }
+);
+
 addTestWithRoundedTime(
   'Models - PubSub - Metrics - same date',
   async function (test) {

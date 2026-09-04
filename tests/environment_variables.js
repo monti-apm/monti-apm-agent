@@ -16,6 +16,9 @@ Tinytest.add(
       KADIRA_OPTIONS_HOSTNAME: 'my-hostname',
       KADIRA_OPTIONS_PAYLOAD_TIMEOUT: '456',
       KADIRA_OPTIONS_PROXY: 'http://localhost:3128',
+      KADIRA_OPTIONS_LIVE_QUERY_POLLING_WINDOW_MS: '600000',
+      KADIRA_OPTIONS_LIVE_QUERY_POLLING_MIN_CYCLES: '4',
+      KADIRA_OPTIONS_LIVE_QUERY_POLLING_DOCUMENT_BUDGET: '30000',
     };
 
     let connectArgs;
@@ -39,9 +42,21 @@ Tinytest.add(
       hostname: 'my-hostname',
       payloadTimeout: 456,
       proxy: 'http://localhost:3128',
+      liveQueryPollingWindowMs: 600000,
+      liveQueryPollingMinCycles: 4,
+      liveQueryPollingDocumentBudget: 30000,
     });
 
     process.env = originalEnv;
     Kadira.connect = originalConnect;
+  }
+);
+
+Tinytest.add(
+  'Agent options - repeated polling defaults',
+  function (test) {
+    test.equal(Kadira.options.liveQueryPollingWindowMs, 900000);
+    test.equal(Kadira.options.liveQueryPollingMinCycles, 3);
+    test.equal(Kadira.options.liveQueryPollingDocumentBudget, 25000);
   }
 );
