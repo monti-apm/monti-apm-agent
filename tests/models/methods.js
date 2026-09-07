@@ -322,6 +322,53 @@ addAsyncTest(
   }
 );
 
+addTestWithRoundedTime(
+  'Models - Method - buildPayload with zero completed methods',
+  async function (test) {
+    // flush leftovers from other tests
+    model.buildPayload();
+
+    model.trackMsgSize('hello-msg-only', 150);
+
+    let payload = model.buildPayload();
+    let bucket = payload.methodMetrics[0];
+    let entry = bucket.methods['hello-msg-only'];
+
+    test.equal(entry.sentMsgSize, 150);
+
+    ['wait', 'db', 'http', 'email', 'async', 'compute', 'total'].forEach((field) => {
+      test.isFalse(Number.isNaN(entry[field]), `${field} should not be NaN when no methods completed in the minute`);
+    });
+
+    test.isFalse(Number.isNaN(bucket.startTime), 'startTime should not be NaN');
+  }
+);
+
+addTestWithRoundedTime(
+  'Models - Method - buildPayload uses the first tracked time as startTime when no methods completed',
+  async function (test) {
+    // flush leftovers from other tests
+    model.buildPayload();
+
+    // Date.now is frozen at the start of the minute by withRoundedTime
+    const minuteStart = Date.now();
+    const trackedAt = minuteStart + 15000;
+
+    const originalNow = Ntp._now;
+    Ntp._now = () => trackedAt;
+    try {
+      model.trackDocSize('start-time-only', 100);
+    } finally {
+      Ntp._now = originalNow;
+    }
+
+    let payload = model.buildPayload();
+    let bucket = payload.methodMetrics[0];
+
+    test.equal(bucket.startTime, Kadira.syncedDate.syncTime(trackedAt));
+  }
+);
+
 export const model = new MethodsModel();
 export const traceAggregator = new TraceAggregator();
 traceAggregator.registerModel(model, 'methodRequests');
