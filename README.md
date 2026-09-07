@@ -78,6 +78,18 @@ try {
 
 Monti APM can use source maps to show where in the original code the error occurred. Learn more in our [docs](https://docs.montiapm.com/source-maps).
 
+By default, uncaught exceptions are reported and then the process exits with code 7. To report an uncaught exception without exiting, stamp the error from `uncaughtExceptionMonitor` (Node emits the monitor before `uncaughtException` listeners):
+
+```js
+process.on('uncaughtExceptionMonitor', (error) => {
+  if (isRetryableIdleTcp(error)) {
+    Monti.keepProcessAlive(error);
+  }
+});
+```
+
+`Monti.ignoreErrorTracking(error)` skips sending that error to Monti APM. For uncaught exceptions it also prevents `process.exit(7)`. Previously the 10 second kill timer could still fire after a skip.
+
 ### Options
 
 The Monti APM agent can be configured by
@@ -95,6 +107,7 @@ You should use the same method that you used to give the agent the app id and se
 | appId                      | APP_ID                                | none                        |                                                                                                                                                                                                         |
 | appSecret                  | APP_SECRET                            | none                        |                                                                                                                                                                                                         |
 | enableErrorTracking        | OPTIONS_ENABLE_ERROR_TRACKING         | true                        | Enable sending errors to Monti APM                                                                                                                                                                      |
+| exitOnUncaughtException    | OPTIONS_EXIT_ON_UNCAUGHT_EXCEPTION    | true                        | Exit with code 7 after an uncaught exception. Errors are still reported when error tracking is enabled. Set to false to never exit on uncaught exceptions.                                              |
 | disableClientErrorTracking | OPTIONS_DISABLE_CLIENT_ERROR_TRACKING | false                       | Disable sending client errors to Monti APM                                                                                                                                                              |
 | endpoint                   | OPTIONS_ENDPOINT                      | https://engine.montiapm.com | Monti / Kadira engine url                                                                                                                                                                               |
 | hostname                   | OPTIONS_HOSTNAME                      | Server's hostname           | What the instance is named in Monti APM                                                                                                                                                                 |
