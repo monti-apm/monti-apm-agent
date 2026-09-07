@@ -4,6 +4,7 @@ import { sleep } from '../../lib/utils';
 import {
   addAsyncTest,
   addTestWithRoundedTime,
+  clientCallAsync,
   cleanTestData,
   CleanTestData,
   closeClient,
