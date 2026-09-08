@@ -458,11 +458,9 @@ addAsyncTest(
   'Errors - uncaughtException - exits with code 7',
   async function (test) {
     const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
-    const originalExitOn = Kadira.options.exitOnUncaughtException;
     const originalSendPayload = Kadira._sendPayload;
     const originalError = console.error;
     Kadira.enableErrorTracking();
-    Kadira.options.exitOnUncaughtException = true;
     Kadira.models.error = new ErrorModel('foo');
     Kadira._sendPayload = function () {
       return Promise.resolve();
@@ -477,7 +475,6 @@ addAsyncTest(
       exitStub.restore();
       Kadira._sendPayload = originalSendPayload;
       console.error = originalError;
-      Kadira.options.exitOnUncaughtException = originalExitOn;
       _resetErrorTracking(originalErrorTrackingStatus);
     }
   }
@@ -487,11 +484,9 @@ addAsyncTest(
   'Errors - uncaughtException - keepProcessAlive tracks and does not exit',
   async function (test) {
     const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
-    const originalExitOn = Kadira.options.exitOnUncaughtException;
     const originalSendPayload = Kadira._sendPayload;
     const originalError = console.error;
     Kadira.enableErrorTracking();
-    Kadira.options.exitOnUncaughtException = true;
     Kadira.models.error = new ErrorModel('foo');
     Kadira._sendPayload = function () {
       return Promise.resolve();
@@ -512,7 +507,6 @@ addAsyncTest(
       exitStub.restore();
       Kadira._sendPayload = originalSendPayload;
       console.error = originalError;
-      Kadira.options.exitOnUncaughtException = originalExitOn;
       _resetErrorTracking(originalErrorTrackingStatus);
     }
   }
@@ -522,10 +516,8 @@ addAsyncTest(
   'Errors - uncaughtException - ignoreErrorTracking skips track and exit',
   async function (test) {
     const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
-    const originalExitOn = Kadira.options.exitOnUncaughtException;
     const originalError = console.error;
     Kadira.enableErrorTracking();
-    Kadira.options.exitOnUncaughtException = true;
     Kadira.models.error = new ErrorModel('foo');
     console.error = function () {};
     const exitStub = sinon.stub(process, 'exit');
@@ -539,39 +531,6 @@ addAsyncTest(
     } finally {
       exitStub.restore();
       console.error = originalError;
-      Kadira.options.exitOnUncaughtException = originalExitOn;
-      _resetErrorTracking(originalErrorTrackingStatus);
-    }
-  }
-);
-
-addAsyncTest(
-  'Errors - uncaughtException - exitOnUncaughtException false tracks and does not exit',
-  async function (test) {
-    const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
-    const originalExitOn = Kadira.options.exitOnUncaughtException;
-    const originalSendPayload = Kadira._sendPayload;
-    const originalError = console.error;
-    Kadira.enableErrorTracking();
-    Kadira.options.exitOnUncaughtException = false;
-    Kadira.models.error = new ErrorModel('foo');
-    Kadira._sendPayload = function () {
-      return Promise.resolve();
-    };
-    console.error = function () {};
-    const exitStub = sinon.stub(process, 'exit');
-    try {
-      emitKadiraUncaughtException(new Error('uncaught-no-exit-option'));
-      await waitForUncaughtHandler();
-      test.isFalse(exitStub.called);
-      const error = Kadira.models.error.buildPayload().errors[0];
-      test.equal(error.type, 'server-crash');
-      test.equal(error.subType, 'uncaughtException');
-    } finally {
-      exitStub.restore();
-      Kadira._sendPayload = originalSendPayload;
-      console.error = originalError;
-      Kadira.options.exitOnUncaughtException = originalExitOn;
       _resetErrorTracking(originalErrorTrackingStatus);
     }
   }
@@ -581,10 +540,8 @@ addAsyncTest(
   'Errors - uncaughtException - ignoreErrorTracking clears kill timer',
   async function (test) {
     const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
-    const originalExitOn = Kadira.options.exitOnUncaughtException;
     const originalError = console.error;
     Kadira.enableErrorTracking();
-    Kadira.options.exitOnUncaughtException = true;
     Kadira.models.error = new ErrorModel('foo');
     console.error = function () {};
     const exitStub = sinon.stub(process, 'exit');
@@ -600,7 +557,6 @@ addAsyncTest(
       clock.restore();
       exitStub.restore();
       console.error = originalError;
-      Kadira.options.exitOnUncaughtException = originalExitOn;
       _resetErrorTracking(originalErrorTrackingStatus);
     }
   }
