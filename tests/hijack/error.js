@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import sinon from 'sinon';
 import { ErrorModel } from '../../lib/models/errors';
 import {
   addAsyncTest,
@@ -441,3 +442,122 @@ function _resetErrorTracking (status) {
     Kadira.disableErrorTracking();
   }
 }
+
+function emitKadiraUncaughtException (err) {
+  process.listeners('uncaughtException')
+    .filter(listener => listener.name === 'handleUncaughtException')
+    .forEach(listener => listener(err));
+}
+
+async function waitForUncaughtHandler () {
+  await Promise.resolve();
+  await new Promise(resolve => process.nextTick(resolve));
+}
+
+addAsyncTest(
+  'Errors - uncaughtException - exits with code 7',
+  async function (test) {
+    const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    const originalSendPayload = Kadira._sendPayload;
+    const originalError = console.error;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+    Kadira._sendPayload = function () {
+      return Promise.resolve();
+    };
+    console.error = function () {};
+    const exitStub = sinon.stub(process, 'exit');
+    try {
+      emitKadiraUncaughtException(new Error('uncaught-default'));
+      await waitForUncaughtHandler();
+      test.isTrue(exitStub.calledWith(7));
+    } finally {
+      exitStub.restore();
+      Kadira._sendPayload = originalSendPayload;
+      console.error = originalError;
+      _resetErrorTracking(originalErrorTrackingStatus);
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - keepProcessAlive tracks and does not exit',
+  async function (test) {
+    const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    const originalSendPayload = Kadira._sendPayload;
+    const originalError = console.error;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+    Kadira._sendPayload = function () {
+      return Promise.resolve();
+    };
+    console.error = function () {};
+    const exitStub = sinon.stub(process, 'exit');
+    try {
+      const err = new Error('uncaught-keep-alive');
+      Monti.keepProcessAlive(err);
+      emitKadiraUncaughtException(err);
+      await waitForUncaughtHandler();
+      test.isFalse(exitStub.called);
+      const error = Kadira.models.error.buildPayload().errors[0];
+      test.equal(error.type, 'server-crash');
+      test.equal(error.subType, 'uncaughtException');
+      test.equal(error.name, 'uncaught-keep-alive');
+    } finally {
+      exitStub.restore();
+      Kadira._sendPayload = originalSendPayload;
+      console.error = originalError;
+      _resetErrorTracking(originalErrorTrackingStatus);
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - ignoreErrorTracking skips track and exit',
+  async function (test) {
+    const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    const originalError = console.error;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+    console.error = function () {};
+    const exitStub = sinon.stub(process, 'exit');
+    try {
+      const err = new Error('uncaught-ignored');
+      Monti.ignoreErrorTracking(err);
+      emitKadiraUncaughtException(err);
+      await waitForUncaughtHandler();
+      test.isFalse(exitStub.called);
+      test.equal(Kadira.models.error.buildPayload().errors.length, 0);
+    } finally {
+      exitStub.restore();
+      console.error = originalError;
+      _resetErrorTracking(originalErrorTrackingStatus);
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - ignoreErrorTracking clears kill timer',
+  async function (test) {
+    const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    const originalError = console.error;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+    console.error = function () {};
+    const exitStub = sinon.stub(process, 'exit');
+    const clock = sinon.useFakeTimers();
+    try {
+      const err = new Error('uncaught-ignored-timer');
+      Monti.ignoreErrorTracking(err);
+      emitKadiraUncaughtException(err);
+      clock.tick(10000);
+      test.isFalse(exitStub.called);
+      test.equal(Kadira.models.error.buildPayload().errors.length, 0);
+    } finally {
+      clock.restore();
+      exitStub.restore();
+      console.error = originalError;
+      _resetErrorTracking(originalErrorTrackingStatus);
+    }
+  }
+);

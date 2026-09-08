@@ -78,6 +78,18 @@ try {
 
 Monti APM can use source maps to show where in the original code the error occurred. Learn more in our [docs](https://docs.montiapm.com/source-maps).
 
+By default, uncaught exceptions are reported and then the process exits with code 7. To report an uncaught exception without exiting, stamp the error from `uncaughtExceptionMonitor` (Node emits the monitor before `uncaughtException` listeners):
+
+```js
+process.on('uncaughtExceptionMonitor', (error) => {
+  if (isRetryableIdleTcp(error)) {
+    Monti.keepProcessAlive(error);
+  }
+});
+```
+
+`Monti.ignoreErrorTracking(error)` skips sending that error to Monti APM. For uncaught exceptions it also prevents `process.exit(7)`. Previously the 10 second kill timer could still fire after a skip.
+
 ### Options
 
 The Monti APM agent can be configured by
