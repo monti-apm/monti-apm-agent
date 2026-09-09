@@ -20,7 +20,6 @@ addAsyncTest(
   async function (test, client) {
     await subscribeAndWaitForError(client, 'this-publication-does-not-exist');
 
-    let timeout = Date.now() + 1000;
     let retained;
 
     retained = Object.values(Kadira.models.pubsub.subscriptions)
@@ -29,7 +28,7 @@ addAsyncTest(
   }
 );
 
-addAsyncTest(
+addAsyncTest.eachDriver(
   'Subscriptions - Sub/Unsub - subscribe only',
   async function (test, client) {
     let h1 = await subscribeAndWait(client, 'tinytest-data');
@@ -46,7 +45,7 @@ addAsyncTest(
 );
 
 
-addAsyncTest(
+addAsyncTest.eachDriver(
   'Subscriptions - Sub/Unsub - subscribe and unsubscribe',
   async function (test, client) {
     let h1 = await subscribeAndWait(client, 'tinytest-data');
@@ -114,7 +113,7 @@ addAsyncTest(
 //   }
 // );
 
-addAsyncTest(
+addAsyncTest.eachDriver(
   'Subscriptions - Lifetime - sub',
   async function (test, client) {
     let h1 = await subscribeAndWait(client, 'tinytest-data');
@@ -152,7 +151,7 @@ addAsyncTest(
 // //   }
 // // );
 
-addAsyncTest(
+addAsyncTest.eachDriver(
   'Subscriptions - ObserverLifetime - sub',
   async function (test) {
     TestHelpers.cleanTestData();
@@ -188,7 +187,7 @@ addAsyncTest(
 );
 
 
-addAsyncTest(
+addAsyncTest.eachDriver(
   'Subscriptions - active subs',
   async function (test, client) {
     let h1 = await subscribeAndWait(client, 'tinytest-data');
@@ -271,7 +270,7 @@ addAsyncTest(
   }
 );
 
-addAsyncTest(
+addAsyncTest.eachDriver(
   'Subscriptions - Observer Cache - single publication and single subscription',
   async function (test, client) {
     let h1 = await subscribeAndWait(client, 'tinytest-data');
@@ -288,7 +287,7 @@ addAsyncTest(
   }
 );
 
-addAsyncTest(
+addAsyncTest.eachDriver(
   'Subscriptions - Observer Cache - single publication and multiple subscriptions',
   async function (test, client) {
     let h1 = await subscribeAndWait(client, 'tinytest-data');
@@ -305,7 +304,7 @@ addAsyncTest(
   }
 );
 
-addAsyncTest(
+addAsyncTest.eachDriver(
   'Subscriptions - Observer Cache - multiple publication and multiple subscriptions',
   async function (test) {
     let client = getMeteorClient();

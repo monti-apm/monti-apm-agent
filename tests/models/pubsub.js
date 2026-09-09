@@ -332,7 +332,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.eachDriver(
   'Models - PubSub - ActiveDocs - Single Sub - simple',
   async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
@@ -351,7 +351,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.eachDriver(
   'Models - PubSub - ActiveDocs - Single Sub - docs added',
   async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
@@ -372,7 +372,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.eachDriver(
   'Models - PubSub - ActiveDocs - Single Sub - docs removed',
   async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
@@ -393,7 +393,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.eachDriver(
   'Models - PubSub - ActiveDocs - Single Sub - unsub before payload',
   async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
@@ -414,7 +414,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.eachDriver(
   'Models - PubSub - ActiveDocs - Single Sub - close before payload',
   async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
@@ -434,7 +434,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.eachDriver(
   'Models - PubSub - ActiveDocs - Multiple Subs - simple',
   async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
@@ -455,7 +455,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.eachDriver(
   'Models - PubSub - ActiveDocs - Multiple Subs - sub and unsub',
   async function (test, client) {
     let docs = [{data: 'data1'}, {data: 'data2'}, {data: 'data3'}];
@@ -479,7 +479,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.eachDriver(
   'Models - PubSub - Observers - simple',
   async function (test, client) {
     let h1 = await subscribeAndWait(client, 'tinytest-data');
@@ -501,7 +501,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.withDriver('oplog',
   'Models - PubSub - Observers - polledDocuments with oplog',
   async function (test, client) {
     await TestData.insertAsync({aa: 10});
@@ -515,7 +515,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.withDriver('oplog',
   'Models - PubSub - Observers - oplogInsertedDocuments with oplog',
   async function (test, client) {
     await subscribeAndWait(client, 'tinytest-data');
@@ -531,7 +531,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.withDriver('oplog',
   'Models - PubSub - Observers - oplogDeletedDocuments with oplog',
   async function (test, client) {
     await TestData.insertAsync({aa: 10});
@@ -550,7 +550,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.withDriver('oplog',
   'Models - PubSub - Observers - oplogUpdatedDocuments with oplog',
   async function (test, client) {
     await TestData.insertAsync({aa: 10});
@@ -569,7 +569,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.withDriver('polling',
   'Models - PubSub - Observers - polledDocuments with no oplog',
   async function (test, client) {
     await TestData.insertAsync({aa: 10});
@@ -586,7 +586,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.withDrivers(['oplog', 'changeStreams', 'redis'],
   'Models - PubSub - Observers - initiallyAddedDocuments',
   async function (test, client) {
     // This will create two observers
@@ -605,7 +605,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.withDrivers(['oplog', 'changeStreams', 'redis'],
   'Models - PubSub - Observers - liveAddedDocuments',
   async function (test, client) {
     // This will create two observers
@@ -622,7 +622,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.withDrivers(['oplog', 'changeStreams', 'redis'],
   'Models - PubSub - Observers - liveChangedDocuments',
   async function (test, client) {
     // This will create two observers
@@ -646,7 +646,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.withDrivers(['oplog', 'changeStreams', 'redis'],
   'Models - PubSub - Observers - liveRemovedDocuments',
   async function (test, client) {
     // This will create two observers
@@ -666,7 +666,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.eachDriver(
   'Models - PubSub - Observers - initiallySentMsgSize',
   async function (test, client) {
     await TestData.insertAsync({aa: 10});
@@ -685,7 +685,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.eachDriver(
   'Models - PubSub - Observers - liveSentMsgSize',
   async function (test, client) {
     await subscribeAndWait(client, 'tinytest-data-random');
@@ -748,7 +748,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.eachDriver(
   'Models - PubSub - Observers - liveSentMsgSize for changed',
   async function (test, client) {
     let id = await TestData.insertAsync({aa: 10});
@@ -773,7 +773,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.eachDriver(
   'Models - PubSub - Observers - liveSentMsgSize for removed',
   async function (test, client) {
     let id = await TestData.insertAsync({aa: 10});
@@ -797,7 +797,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.withDrivers(['oplog', 'changeStreams', 'redis'],
   'Models - PubSub - Observers - initiallyFetchedDocSize',
   async function (test, client) {
     await TestData.insertAsync({aa: 10});
@@ -812,7 +812,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.withDrivers(['oplog', 'changeStreams', 'redis'],
   'Models - PubSub - Observers - liveFetchedDocSize',
   async function (test, client) {
     await withDocCacheGetSize(async function () {
@@ -842,7 +842,7 @@ addTestWithRoundedTime(
   }
 );
 
-addTestWithRoundedTime(
+addAsyncTest.withDriver('polling',
   'Models - PubSub - Observers - polledDocSize',
   async function (test, client) {
     await cleanTestData();

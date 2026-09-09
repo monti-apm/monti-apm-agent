@@ -9,6 +9,7 @@ import { isNumber } from '../../lib/common/utils';
 import { diffObjects } from './pretty-log';
 import util from 'util';
 import { Ntp } from '../../lib/ntp';
+import { addObserverDriverTests, checkPublicationObserverDrivers } from './observer_drivers';
 
 const _client = DDP.connect(Meteor.absoluteUrl(), {retry: false});
 
@@ -233,6 +234,7 @@ export const subscribeAndWait = function (client, name, args) {
         reject(err);
       },
       onReady () {
+        checkPublicationObserverDrivers();
         resolve(sub);
       },
       onStop () {
@@ -360,11 +362,12 @@ const asyncTest = fn => async (test, done) => {
   // Cleans stuff from the test engine.
   Kadira._setInfo(null);
 
-  await fn(test, client);
-
-  await closeClient(client);
-
-  await cleanTestData();
+  try {
+    await fn(test, client);
+  } finally {
+    await closeClient(client);
+    await cleanTestData();
+  }
 
   done();
 };
@@ -406,6 +409,9 @@ addAsyncTest.only = function (name, fn) {
 };
 
 addAsyncTest.skip = function () {};
+
+addObserverDriverTests(addAsyncTest, asyncTest);
+addObserverDriverTests(addTestWithRoundedTime, withRoundedTime);
 
 export function cleanTrace (trace) {
   delete trace.rootAsyncId;

@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { MethodStore, TestData } from './globals';
 import { sleep } from '../../lib/utils';
+import { observerOptions } from './observer_drivers';
 
 Kadira.connect('foo', 'bar', {enableErrorTracking: true});
 
@@ -48,20 +49,20 @@ http.createServer(function (req, res) {
 // TODO use registerPublication instead of these
 
 Meteor.publish('tinytest-data', function () {
-  return TestData.find();
+  return TestData.find({}, observerOptions());
 });
 
 Meteor.publish('tinytest-data-with-no-oplog', function () {
-  return TestData.find({}, { disableOplog: true });
+  return TestData.find({}, { ...observerOptions(), disableOplog: true });
 });
 
 Meteor.publish('tinytest-data-random', function () {
-  return TestData.find({ aa: {$ne: Random.id()}});
+  return TestData.find({ aa: {$ne: Random.id()}}, observerOptions());
 });
 
 Meteor.publish('tinytest-wait-time', function () {
   Meteor._sleepForMs(1);
-  return TestData.find();
+  return TestData.find({}, observerOptions());
 });
 
 
@@ -72,31 +73,31 @@ Meteor.publish('tinytest-data-cursor-fetch', async function () {
 
 Meteor.publish('tinytest-waited-on', async function () {
   await sleep(100);
-  return TestData.find();
+  return TestData.find({}, observerOptions());
 });
 
 Meteor.publish('tinytest-waited-on-short', async function () {
   await sleep(25);
-  return TestData.find();
+  return TestData.find({}, observerOptions());
 });
 
 Meteor.publish('tinytest-waited-on2', async function () {
   await sleep(10);
   if (this.unblock) this.unblock();
   await sleep(40);
-  return TestData.find();
+  return TestData.find({}, observerOptions());
 });
 
 
 Meteor.publish('tinytest-data-2', function () {
-  return TestData.find();
+  return TestData.find({}, observerOptions());
 });
 
 Meteor.publish('tinytest-data-delayed', function () {
   Meteor.wrapAsync(function (done) {
     setTimeout(done, 200);
   })();
-  return TestData.find();
+  return TestData.find({}, observerOptions());
 });
 
 (function () {

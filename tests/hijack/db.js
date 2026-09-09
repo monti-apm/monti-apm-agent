@@ -1,3 +1,4 @@
+import { observerOptions, assertObserverDriver } from '../_helpers/observer_drivers';
 import { TestData } from '../_helpers/globals';
 import {
   addAsyncTest,
@@ -409,23 +410,24 @@ addAsyncTest(
   }
 );
 
-addAsyncTest(
+addAsyncTest.eachDriver(
   'Database - Cursor - observeChanges',
-  async function (test) {
+  async function (test, client, driver) {
     await TestData.insertAsync({_id: 'aa'});
     await TestData.insertAsync({_id: 'bb'});
 
     let methodId = registerMethod(async function () {
       let data = [];
 
-      let handle = await TestData.find({}).observeChanges({
+      let handle = await TestData.find({}, observerOptions()).observeChanges({
         added (id, fields) {
           fields._id = id;
           data.push(fields);
         }
       });
 
-      handle.stop();
+      assertObserverDriver(test, handle, driver);
+      await handle.stop();
 
       return data;
     });
@@ -434,12 +436,10 @@ addAsyncTest(
 
     let events = getLastMethodEvents([0, 2], ['noOfCachedDocs']);
 
-    events[2][1].oplog = false;
-
     let expected = [
       ['start',{userId: null, params: '[]'}],
       ['wait',{waitOn: []}],
-      ['db',{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2}],
+      ['db',{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), ...expectedObserverInfo(driver), noOfCachedDocs: 2}],
       ['complete']
     ];
 
@@ -453,20 +453,21 @@ addAsyncTest(
 
 // Redis-oplog 3.0.1 doesn't preserve nonMutatingCallbacks
 if (!process.env.REDIS_OPLOG_SETTINGS) {
-  addAsyncTest(
+  addAsyncTest.eachDriver(
     'Database - Cursor - observeChanges preserves nonMutatingCallbacks',
-    async function (test) {
+    async function (test, client, driver) {
       await TestData.insertAsync({_id: 'aa'});
 
       let methodId = registerMethod(async function () {
-        let handle = await TestData.find({}).observeChanges({
+        let handle = await TestData.find({}, observerOptions()).observeChanges({
           added () {}
         }, {
           nonMutatingCallbacks: true
         });
 
         let result = handle.nonMutatingCallbacks;
-        handle.stop();
+        assertObserverDriver(test, handle, driver);
+        await handle.stop();
         return result;
       });
 
@@ -480,23 +481,23 @@ if (!process.env.REDIS_OPLOG_SETTINGS) {
 /**
  * @warning `wasMultiplexerReady` is true for both when it should be false for the first one. Which might be an issue in Meteor code, so let's not test that.
  */
-addAsyncTest(
+addAsyncTest.eachDriver(
   'Database - Cursor - observeChanges:re-using-multiplexer',
-  async function (test) {
+  async function (test, client, driver) {
     await TestData.insertAsync({_id: 'aa'});
     await TestData.insertAsync({_id: 'bb'});
 
     let methodId = registerMethod(async function () {
       let data = [];
 
-      let handle1 = await TestData.find({}).observeChanges({
+      let handle1 = await TestData.find({}, observerOptions()).observeChanges({
         added (id, fields) {
           fields._id = id;
           data.push(fields);
         }
       });
 
-      let handle2 = await TestData.find({}).observeChanges({
+      let handle2 = await TestData.find({}, observerOptions()).observeChanges({
         added () {
           // body
         }
@@ -504,22 +505,21 @@ addAsyncTest(
 
       assert.strictEqual(handle1._multiplexer, handle2._multiplexer, 'Multiplexer should be the same for both handles');
 
-      handle1.stop();
-      handle2.stop();
+      assertObserverDriver(test, handle1, driver);
+      assertObserverDriver(test, handle2, driver);
+      await handle1.stop();
+      await handle2.stop();
       return data;
     });
 
     let result = await callAsync(methodId);
     let events = getLastMethodEvents([0, 2], ['noOfCachedDocs']);
 
-    events[2][1].oplog = false;
-    events[3][1].oplog = false;
-
     let expected = [
       ['start',{userId: null, params: '[]'}],
       ['wait',{waitOn: []}],
-      ['db',{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2 }],
-      ['db',{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2 }],
+      ['db',{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), ...expectedObserverInfo(driver), noOfCachedDocs: 2 }],
+      ['db',{coll: 'tinytest-data', cursor: true, func: 'observeChanges', selector: JSON.stringify({}), ...expectedObserverInfo(driver), noOfCachedDocs: 2 }],
       ['complete']
     ];
 
@@ -532,32 +532,31 @@ addAsyncTest(
   }
 );
 
-addAsyncTest(
+addAsyncTest.eachDriver(
   'Database - Cursor - observe',
-  async function (test) {
+  async function (test, client, driver) {
     await TestData.insertAsync({_id: 'aa'});
     await TestData.insertAsync({_id: 'bb'});
 
     let methodId = registerMethod(async function () {
       let data = [];
-      let handle = await TestData.find({}).observe({
+      let handle = await TestData.find({}, observerOptions()).observe({
         added (doc) {
           data.push(doc);
         }
       });
-      handle.stop();
+      assertObserverDriver(test, handle, driver);
+      await handle.stop();
       return data;
     });
 
     let result = await callAsync(methodId);
     let events = getLastMethodEvents([0, 2], ['noOfCachedDocs']);
 
-    events[2][1].oplog = false;
-
     let expected = [
       ['start',{userId: null, params: '[]'}],
       ['wait',{waitOn: []}],
-      ['db',{coll: 'tinytest-data', func: 'observe', cursor: true, selector: JSON.stringify({}), oplog: false, noOfCachedDocs: 2 }],
+      ['db',{coll: 'tinytest-data', func: 'observe', cursor: true, selector: JSON.stringify({}), ...expectedObserverInfo(driver), noOfCachedDocs: 2 }],
       ['complete']
     ];
 
@@ -653,6 +652,17 @@ addAsyncTest(
   }
 );
 
+function expectedObserverInfo (driver) {
+  if (driver === 'polling') {
+    return {
+      oplog: false,
+      noOplogCode: 'DISABLE_OPLOG',
+      noOplogReason: "You've disabled oplog for this cursor explicitly with _disableOplog option."
+    };
+  }
+  return {oplog: driver === 'oplog'};
+}
+
 function clearAdditionalObserverInfo (info) {
   delete info.queueLength;
   delete info.initialPollingTime;
@@ -662,7 +672,7 @@ function clearAdditionalObserverInfo (info) {
 
 // Recursively finds built db events with the given func in the
 // events and their nested events
-function findDbEvents(events, func, acc = []) {
+function findDbEvents (events, func, acc = []) {
   events.forEach((event) => {
     if (!Array.isArray(event)) {
       return;
