@@ -5,6 +5,7 @@
 * Add `Monti.event`
 * Tracer supports parallel events
 * Improve support for proxies
+* Instrument msavin:sjobs
 
 ## v2.50.2
 
