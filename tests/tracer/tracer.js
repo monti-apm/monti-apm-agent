@@ -857,6 +857,13 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
   let nestedDbEvents = events[2][2].nested;
   nestedDbEvents[nestedDbEvents.length - 1].length = 2;
 
+  // Remove offsets in case there are any
+  nestedDbEvents
+    .filter(event => ['{"_id":"b"}', '{"_id":"c"}'].includes(event[1].selector))
+    .forEach(event => {
+      event.length = 2;
+    });
+
   const expected = [
     ['start',{userId: null,params: '[]'}],
     ['wait',{waitOn: []}],
@@ -867,8 +874,8 @@ addAsyncTest('Tracer - Build Trace - custom with nested parallel events', async 
         ['db',{coll: 'tinytest-data',func: 'insertAsync'}],
         ['email',{from: 'arunoda@meteorhacks.com',to: 'hello@meteor.com', func: 'emailAsync'}, { offset: 1 }],
         ['db',{coll: 'tinytest-data',selector: '{"_id":"a"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"b"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}, { offset: 1 }],
-        ['db',{coll: 'tinytest-data',selector: '{"_id":"c"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}, { offset: 1 }],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"b"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}],
+        ['db',{coll: 'tinytest-data',selector: '{"_id":"c"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 1,docSize: 1}],
         ['db',{coll: 'tinytest-data',selector: '{"_id":"a1"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0}],
         ['db',{coll: 'tinytest-data',selector: '{"_id":"a2"}',func: 'fetch',cursor: true,limit: 1,docsFetched: 0,docSize: 0}]
       ]}
