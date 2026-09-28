@@ -435,6 +435,130 @@ addAsyncTest(
   }
 );
 
+addAsyncTest(
+  'Errors - uncaughtException - sends payload then exits with code 7',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    try {
+      emitKadiraUncaughtException(new Error('uncaught-default'));
+      test.isFalse(exit.called);
+      test.isTrue(Kadira._sendPayload.calledOnce);
+
+      await waitForUncaughtHandler();
+      test.isTrue(exit.calledOnceWith(7));
+      const errors = getTrackedErrors();
+      test.equal(errors.length, 1);
+      test.equal(errors[0].type, 'server-crash');
+      test.equal(errors[0].subType, 'uncaughtException');
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - keepProcessAlive tracks and does not exit',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    const clock = sinon.useFakeTimers();
+    try {
+      const err = new Error('uncaught-keep-alive');
+      Monti.keepProcessAlive(err);
+      emitKadiraUncaughtException(err);
+      await waitForUncaughtHandler();
+      clock.tick(10000);
+      test.isFalse(exit.called);
+      test.equal(getTrackedErrors().length, 1);
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - ignoreErrorTracking skips track and still exits',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    try {
+      const err = new Error('uncaught-ignored');
+      Monti.ignoreErrorTracking(err);
+      emitKadiraUncaughtException(err);
+      await waitForUncaughtHandler();
+      test.isTrue(Kadira._sendPayload.calledOnce);
+      test.isTrue(exit.calledOnceWith(7));
+      test.equal(getTrackedErrors().length, 0);
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - error tracking disabled skips track and still exits',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    Kadira.options.enableErrorTracking = false;
+    try {
+      emitKadiraUncaughtException(new Error('uncaught-tracking-disabled'));
+      await waitForUncaughtHandler();
+      test.isTrue(exit.calledOnceWith(7));
+      test.equal(getTrackedErrors().length, 0);
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - exits immediately when not connected',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    Kadira.connected = false;
+    try {
+      emitKadiraUncaughtException(new Error('uncaught-not-connected'));
+      test.isTrue(exit.calledOnceWith(7));
+      test.isFalse(Kadira._sendPayload.called);
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - exits once, after 10 seconds, if payload never sends',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    const clock = sinon.useFakeTimers();
+    Kadira._sendPayload.returns(new Promise(() => {}));
+    try {
+      emitKadiraUncaughtException(new Error('uncaught-send-hangs'));
+      await waitForUncaughtHandler();
+      clock.tick(9999);
+      test.isFalse(exit.called);
+      clock.tick(1);
+      test.isTrue(exit.calledOnceWith(7));
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - exits once when payload sends before timeout',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    const clock = sinon.useFakeTimers();
+    try {
+      emitKadiraUncaughtException(new Error('uncaught-exits-once'));
+      await waitForUncaughtHandler();
+      clock.tick(10000);
+      test.isTrue(exit.calledOnceWith(7));
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
 function _resetErrorTracking (status) {
   if (status) {
     Kadira.enableErrorTracking();
@@ -454,110 +578,16 @@ async function waitForUncaughtHandler () {
   await new Promise(resolve => process.nextTick(resolve));
 }
 
-addAsyncTest(
-  'Errors - uncaughtException - exits with code 7',
-  async function (test) {
-    const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
-    const originalSendPayload = Kadira._sendPayload;
-    const originalError = console.error;
-    Kadira.enableErrorTracking();
-    Kadira.models.error = new ErrorModel('foo');
-    Kadira._sendPayload = function () {
-      return Promise.resolve();
-    };
-    console.error = function () {};
-    const exitStub = sinon.stub(process, 'exit');
-    try {
-      emitKadiraUncaughtException(new Error('uncaught-default'));
-      await waitForUncaughtHandler();
-      test.isTrue(exitStub.calledWith(7));
-    } finally {
-      exitStub.restore();
-      Kadira._sendPayload = originalSendPayload;
-      console.error = originalError;
-      _resetErrorTracking(originalErrorTrackingStatus);
-    }
-  }
-);
+// Use sinon.restore() in the test afterwards
+function stubUncaughtHandler () {
+  sinon.replace(Kadira.options, 'enableErrorTracking', true);
+  sinon.replace(Kadira.models, 'error', new ErrorModel('foo'));
+  sinon.replace(Kadira, 'connected', true);
+  sinon.stub(Kadira, '_sendPayload').resolves();
+  sinon.stub(console, 'error');
+  return sinon.stub(process, 'exit');
+}
 
-addAsyncTest(
-  'Errors - uncaughtException - keepProcessAlive tracks and does not exit',
-  async function (test) {
-    const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
-    const originalSendPayload = Kadira._sendPayload;
-    const originalError = console.error;
-    Kadira.enableErrorTracking();
-    Kadira.models.error = new ErrorModel('foo');
-    Kadira._sendPayload = function () {
-      return Promise.resolve();
-    };
-    console.error = function () {};
-    const exitStub = sinon.stub(process, 'exit');
-    try {
-      const err = new Error('uncaught-keep-alive');
-      Monti.keepProcessAlive(err);
-      emitKadiraUncaughtException(err);
-      await waitForUncaughtHandler();
-      test.isFalse(exitStub.called);
-      const error = Kadira.models.error.buildPayload().errors[0];
-      test.equal(error.type, 'server-crash');
-      test.equal(error.subType, 'uncaughtException');
-      test.equal(error.name, 'uncaught-keep-alive');
-    } finally {
-      exitStub.restore();
-      Kadira._sendPayload = originalSendPayload;
-      console.error = originalError;
-      _resetErrorTracking(originalErrorTrackingStatus);
-    }
-  }
-);
-
-addAsyncTest(
-  'Errors - uncaughtException - ignoreErrorTracking skips track and still exits',
-  async function (test) {
-    const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
-    const originalError = console.error;
-    Kadira.enableErrorTracking();
-    Kadira.models.error = new ErrorModel('foo');
-    console.error = function () {};
-    const exitStub = sinon.stub(process, 'exit');
-    try {
-      const err = new Error('uncaught-ignored');
-      Monti.ignoreErrorTracking(err);
-      emitKadiraUncaughtException(err);
-      test.isTrue(exitStub.calledWith(7));
-      test.equal(Kadira.models.error.buildPayload().errors.length, 0);
-    } finally {
-      exitStub.restore();
-      console.error = originalError;
-      _resetErrorTracking(originalErrorTrackingStatus);
-    }
-  }
-);
-
-addAsyncTest(
-  'Errors - uncaughtException - ignoreErrorTracking exits once',
-  async function (test) {
-    const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
-    const originalError = console.error;
-    Kadira.enableErrorTracking();
-    Kadira.models.error = new ErrorModel('foo');
-    console.error = function () {};
-    const exitStub = sinon.stub(process, 'exit');
-    const clock = sinon.useFakeTimers();
-    try {
-      const err = new Error('uncaught-ignored-timer');
-      Monti.ignoreErrorTracking(err);
-      emitKadiraUncaughtException(err);
-      clock.tick(10000);
-      test.equal(exitStub.callCount, 1);
-      test.isTrue(exitStub.calledWith(7));
-      test.equal(Kadira.models.error.buildPayload().errors.length, 0);
-    } finally {
-      clock.restore();
-      exitStub.restore();
-      console.error = originalError;
-      _resetErrorTracking(originalErrorTrackingStatus);
-    }
-  }
-);
+function getTrackedErrors () {
+  return Kadira.models.error.buildPayload().errors;
+}
