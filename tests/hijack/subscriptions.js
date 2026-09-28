@@ -153,36 +153,34 @@ addAsyncTest.eachDriver(
 
 addAsyncTest.eachDriver(
   'Subscriptions - ObserverLifetime - sub',
-  async function (test) {
-    TestHelpers.cleanTestData();
-
+  async function (test, client) {
     TestHelpers.enableTrackingMethods();
-
-    let client = TestHelpers.getMeteorClient();
 
     await waitForConnection(client);
 
-    let start = Date.now();
-    let st = Date.now();
+    let deletedAt;
+    const onDeleted = (ownerInfo) => {
+      if (ownerInfo.name === 'tinytest-data') {
+        deletedAt = Date.now();
+      }
+    };
+    Kadira.EventBus.on('pubsub', 'observerDeleted', onDeleted);
+
+    let beforeSubscribe = Date.now();
     let h1 = await subscribeAndWait(client, 'tinytest-data');
-    let elapsedTime = Date.now() - st;
-    console.log('elapsed 1', elapsedTime);
 
     await sleep(100);
 
-    Kadira.EventBus.once('pubsub', 'observerDeleted', (ownerInfo) => console.log('on sub stop:', Date.now(), JSON.stringify(ownerInfo)));
-
-    st = Date.now();
     h1.stop();
 
     await waitForPubMetric('tinytest-data', 'observerLifetime', 50);
-    elapsedTime += Date.now() - st;
-    console.log('elapsed 2', Date.now() - st);
-    console.log('elapsed total', Date.now() - start);
+    Kadira.EventBus.removeListener('pubsub', 'observerDeleted', onDeleted);
 
     let metrics = TestHelpers.findMetricsForPub('tinytest-data');
+    let maxLifetime = deletedAt - beforeSubscribe;
 
-    test.isTrue(TestHelpers.compareNear(metrics.observerLifetime, 120, 60));
+    test.isTrue(metrics.observerLifetime >= 95, `lifetime ${metrics.observerLifetime} < 95`);
+    test.isTrue(metrics.observerLifetime <= maxLifetime, `lifetime ${metrics.observerLifetime} > ${maxLifetime}`);
   }
 );
 
