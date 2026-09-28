@@ -660,7 +660,7 @@ function expectedObserverInfo (driver) {
       noOplogReason: "You've disabled oplog for this cursor explicitly with _disableOplog option."
     };
   }
-  return {oplog: driver === 'oplog'};
+  return {oplog: driver === 'oplog' || driver === 'redis'};
 }
 
 function clearAdditionalObserverInfo (info) {
