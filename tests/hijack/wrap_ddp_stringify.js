@@ -38,7 +38,7 @@ Tinytest.add(
         throw new Error('fail');
       });
 
-      let outer = withCurrentSub(function (result) {
+      let outer = withCurrentSub(function (sub) {
         DDPCommon.stringifyDDP({ msg: 'added' });
 
         try {
@@ -48,7 +48,7 @@ Tinytest.add(
         }
 
         DDPCommon.stringifyDDP({ msg: 'changed' });
-        return result;
+        return sub;
       });
 
       result = outer.call(outerSub, 'result');
