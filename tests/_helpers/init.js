@@ -53,7 +53,7 @@ Meteor.publish('tinytest-data', function () {
 });
 
 Meteor.publish('tinytest-data-with-no-oplog', function () {
-  return TestData.find({}, { ...observerOptions(), disableOplog: true });
+  return TestData.find({}, { disableOplog: true });
 });
 
 Meteor.publish('tinytest-data-random', function () {
