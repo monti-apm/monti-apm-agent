@@ -513,7 +513,7 @@ addAsyncTest(
 );
 
 addAsyncTest(
-  'Errors - uncaughtException - ignoreErrorTracking skips track and exit',
+  'Errors - uncaughtException - ignoreErrorTracking skips track and still exits',
   async function (test) {
     const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
     const originalError = console.error;
@@ -525,8 +525,7 @@ addAsyncTest(
       const err = new Error('uncaught-ignored');
       Monti.ignoreErrorTracking(err);
       emitKadiraUncaughtException(err);
-      await waitForUncaughtHandler();
-      test.isFalse(exitStub.called);
+      test.isTrue(exitStub.calledWith(7));
       test.equal(Kadira.models.error.buildPayload().errors.length, 0);
     } finally {
       exitStub.restore();
@@ -537,7 +536,7 @@ addAsyncTest(
 );
 
 addAsyncTest(
-  'Errors - uncaughtException - ignoreErrorTracking clears kill timer',
+  'Errors - uncaughtException - ignoreErrorTracking exits once',
   async function (test) {
     const originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
     const originalError = console.error;
@@ -551,7 +550,8 @@ addAsyncTest(
       Monti.ignoreErrorTracking(err);
       emitKadiraUncaughtException(err);
       clock.tick(10000);
-      test.isFalse(exitStub.called);
+      test.equal(exitStub.callCount, 1);
+      test.isTrue(exitStub.calledWith(7));
       test.equal(Kadira.models.error.buildPayload().errors.length, 0);
     } finally {
       clock.restore();

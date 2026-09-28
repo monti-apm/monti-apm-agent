@@ -88,7 +88,7 @@ process.on('uncaughtExceptionMonitor', (error) => {
 });
 ```
 
-`Monti.ignoreErrorTracking(error)` skips sending that error to Monti APM. For uncaught exceptions it also prevents `process.exit(7)`. Previously the 10 second kill timer could still fire after a skip.
+`Monti.ignoreErrorTracking(error)` skips sending that error to Monti APM. An uncaught exception still exits with code 7.
 
 ### Options
 
