@@ -73,6 +73,7 @@ export namespace Monti {
     function disableClientErrorTracking(): void;
 
     function ignoreErrorTracking(error: Error): void;
+    function keepProcessAlive(error: Error): void;
 
     function event<T>(name: string, fn: () => T): T;
     function event<T>(name: string, data: Record<string, any> | undefined, fn: () => T): T;

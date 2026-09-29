@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import sinon from 'sinon';
 import { ErrorModel } from '../../lib/models/errors';
 import {
   addAsyncTest,
@@ -434,10 +435,159 @@ addAsyncTest(
   }
 );
 
+addAsyncTest(
+  'Errors - uncaughtException - sends payload then exits with code 7',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    try {
+      emitKadiraUncaughtException(new Error('uncaught-default'));
+      test.isFalse(exit.called);
+      test.isTrue(Kadira._sendPayload.calledOnce);
+
+      await waitForUncaughtHandler();
+      test.isTrue(exit.calledOnceWith(7));
+      const errors = getTrackedErrors();
+      test.equal(errors.length, 1);
+      test.equal(errors[0].type, 'server-crash');
+      test.equal(errors[0].subType, 'uncaughtException');
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - keepProcessAlive tracks and does not exit',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    const clock = sinon.useFakeTimers();
+    try {
+      const err = new Error('uncaught-keep-alive');
+      Monti.keepProcessAlive(err);
+      emitKadiraUncaughtException(err);
+      await waitForUncaughtHandler();
+      clock.tick(10000);
+      test.isFalse(exit.called);
+      test.equal(getTrackedErrors().length, 1);
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - ignoreErrorTracking skips track and still exits',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    try {
+      const err = new Error('uncaught-ignored');
+      Monti.ignoreErrorTracking(err);
+      emitKadiraUncaughtException(err);
+      await waitForUncaughtHandler();
+      test.isTrue(Kadira._sendPayload.calledOnce);
+      test.isTrue(exit.calledOnceWith(7));
+      test.equal(getTrackedErrors().length, 0);
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - error tracking disabled skips track and still exits',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    Kadira.options.enableErrorTracking = false;
+    try {
+      emitKadiraUncaughtException(new Error('uncaught-tracking-disabled'));
+      await waitForUncaughtHandler();
+      test.isTrue(exit.calledOnceWith(7));
+      test.equal(getTrackedErrors().length, 0);
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - exits immediately when not connected',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    Kadira.connected = false;
+    try {
+      emitKadiraUncaughtException(new Error('uncaught-not-connected'));
+      test.isTrue(exit.calledOnceWith(7));
+      test.isFalse(Kadira._sendPayload.called);
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - exits once, after 10 seconds, if payload never sends',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    const clock = sinon.useFakeTimers();
+    Kadira._sendPayload.returns(new Promise(() => {}));
+    try {
+      emitKadiraUncaughtException(new Error('uncaught-send-hangs'));
+      await waitForUncaughtHandler();
+      clock.tick(9999);
+      test.isFalse(exit.called);
+      clock.tick(1);
+      test.isTrue(exit.calledOnceWith(7));
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
+addAsyncTest(
+  'Errors - uncaughtException - exits once when payload sends before timeout',
+  async function (test) {
+    const exit = stubUncaughtHandler();
+    const clock = sinon.useFakeTimers();
+    try {
+      emitKadiraUncaughtException(new Error('uncaught-exits-once'));
+      await waitForUncaughtHandler();
+      clock.tick(10000);
+      test.isTrue(exit.calledOnceWith(7));
+    } finally {
+      sinon.restore();
+    }
+  }
+);
+
 function _resetErrorTracking (status) {
   if (status) {
     Kadira.enableErrorTracking();
   } else {
     Kadira.disableErrorTracking();
   }
+}
+
+function emitKadiraUncaughtException (err) {
+  process.listeners('uncaughtException')
+    .filter(listener => listener.name === 'handleUncaughtException')
+    .forEach(listener => listener(err));
+}
+
+async function waitForUncaughtHandler () {
+  await Promise.resolve();
+  await new Promise(resolve => process.nextTick(resolve));
+}
+
+// Use sinon.restore() in the test afterwards
+function stubUncaughtHandler () {
+  sinon.replace(Kadira.options, 'enableErrorTracking', true);
+  sinon.replace(Kadira.models, 'error', new ErrorModel('foo'));
+  sinon.replace(Kadira, 'connected', true);
+  sinon.stub(Kadira, '_sendPayload').resolves();
+  sinon.stub(console, 'error');
+  return sinon.stub(process, 'exit');
+}
+
+function getTrackedErrors () {
+  return Kadira.models.error.buildPayload().errors;
 }

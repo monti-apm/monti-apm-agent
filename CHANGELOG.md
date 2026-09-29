@@ -1,6 +1,7 @@
 # Changelog
 
 ## Next
+* Add `Monti.keepProcessAlive` to report uncaught exceptions without `process.exit(7)`
 * Support Meteor 3
 * Add `Monti.event`
 * Tracer supports parallel events
