@@ -78,6 +78,18 @@ try {
 
 Monti APM can use source maps to show where in the original code the error occurred. Learn more in our [docs](https://docs.montiapm.com/source-maps).
 
+By default, uncaught exceptions are reported and then the process exits with code 7. To report an uncaught exception without exiting, stamp the error from `uncaughtExceptionMonitor` (Node emits the monitor before `uncaughtException` listeners):
+
+```js
+process.on('uncaughtExceptionMonitor', (error) => {
+  if (isRetryableIdleTcp(error)) {
+    Monti.keepProcessAlive(error);
+  }
+});
+```
+
+`Monti.ignoreErrorTracking(error)` skips sending that error to Monti APM. An uncaught exception still exits with code 7.
+
 ### Options
 
 The Monti APM agent can be configured by
@@ -90,20 +102,20 @@ You should use the same method that you used to give the agent the app id and se
 
 #### List of Options
 
-| Name                | Environment Variable          | Default                     | Description                                                                                                                                                                                             |
-|---------------------|-------------------------------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| appId               | APP_ID                        | none                        |                                                                                                                                                                                                         |
-| appSecret           | APP_SECRET                    | none                        |                                                                                                                                                                                                         |
-| enableErrorTracking | OPTIONS_ENABLE_ERROR_TRACKING | true                        | Enable sending errors to Monti APM                                                                                                                                                                      |
-| disableClientErrorTracking | OPTIONS_DISABLE_CLIENT_ERROR_TRACKING | false        | Disable sending client errors to Monti APM                                                                                                                                                              |
-| endpoint            | OPTIONS_ENDPOINT              | https://engine.montiapm.com | Monti / Kadira engine url                                                                                                                                                                               |
-| hostname            | OPTIONS_HOSTNAME              | Server's hostname           | What the instance is named in Monti APM                                                                                                                                                                 |
-| uploadSourceMaps    | UPLOAD_SOURCE_MAPS            | true                        | Enables sending source maps to Monti APM to improve error stack traces                                                                                                                                  |
-| recordIPAddress     | RECORD_IP_ADDRESS             | 'full'                      | Set to 'full' to record IP Address, 'anonymized' to anonymize last octet of address, or 'none' to not record an IP Address for client errors                                                            |
-| eventStackTrace     | EVENT_STACK_TRACE             | false                       | If true, records a stack trace when an event starts. Slightly decreases server performance.                                                                                                             |
-| disableNtp          | OPTIONS_DISABLE_NTP           | false                       | Disable NTP time synchronization used to get the accurate time in case the server or client's clock is wrong                                                                                            |
-| stalledTimeout      | STALLED_TIMEOUT               | 1800000 (30m)               | Timeout used to detect when methods and subscriptions might be stalled (have been running for a long time and might never return). The value is in milliseconds, and can be disabled by setting it to 0 |
-| proxy               | OPTIONS_PROXY           | none                        | Allows you to connect to Monti APM using a proxy |
+| Name                       | Environment Variable                  | Default                     | Description                                                                                                                                                                                             |
+|----------------------------|---------------------------------------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| appId                      | APP_ID                                | none                        |                                                                                                                                                                                                         |
+| appSecret                  | APP_SECRET                            | none                        |                                                                                                                                                                                                         |
+| enableErrorTracking        | OPTIONS_ENABLE_ERROR_TRACKING         | true                        | Enable sending errors to Monti APM                                                                                                                                                                      |
+| disableClientErrorTracking | OPTIONS_DISABLE_CLIENT_ERROR_TRACKING | false                       | Disable sending client errors to Monti APM                                                                                                                                                              |
+| endpoint                   | OPTIONS_ENDPOINT                      | https://engine.montiapm.com | Monti / Kadira engine url                                                                                                                                                                               |
+| hostname                   | OPTIONS_HOSTNAME                      | Server's hostname           | What the instance is named in Monti APM                                                                                                                                                                 |
+| uploadSourceMaps           | UPLOAD_SOURCE_MAPS                    | true                        | Enables sending source maps to Monti APM to improve error stack traces                                                                                                                                  |
+| recordIPAddress            | RECORD_IP_ADDRESS                     | 'full'                      | Set to 'full' to record IP Address, 'anonymized' to anonymize last octet of address, or 'none' to not record an IP Address for client errors                                                            |
+| eventStackTrace            | EVENT_STACK_TRACE                     | false                       | If true, records a stack trace when an event starts. Slightly decreases server performance.                                                                                                             |
+| disableNtp                 | OPTIONS_DISABLE_NTP                   | false                       | Disable NTP time synchronization used to get the accurate time in case the server or client's clock is wrong                                                                                            |
+| stalledTimeout             | STALLED_TIMEOUT                       | 1800000 (30m)               | Timeout used to detect when methods and subscriptions might be stalled (have been running for a long time and might never return). The value is in milliseconds, and can be disabled by setting it to 0 |
+| proxy                      | MONTI_OPTIONS_PROXY                   | none                        | Allows you to connect to Monti APM using a proxy                                                                                                                                                        |
 | disableInstrumentation | DISABLE_INSTRUMENTATION | false                     | Disables recording most metrics and traces. Can be configured using Meteor.settings, or by env variable |
 
 
@@ -129,13 +141,26 @@ The agent records up to one level of nested events.
 You can add custom events to the traces to time specific code or events, or to provide more details to the trace.
 
 ```js
+Monti.event('event name', {
+  // This object can have any details you want to store
+  // The object is optional
+  userId: userId
+}, async () => {
+  // do the work inside the event
+  // the event will automatically end when this function returns
+});
+
+// Older api. Not recommended since it doesn't nest child events in Meteor 3
 const event = Monti.startEvent('event name', {
-  details: true
+  // This object can have any details you want
+  organization: organizationId
 });
 
 // After code runs or event happens
 Monti.endEvent(event, {
-  additionalDetails: true
+  // This object can have any details you want
+  // It is merged with the object created when starting the event
+  organizationMembers: 10
 });
 ```
 

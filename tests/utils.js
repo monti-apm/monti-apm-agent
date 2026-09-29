@@ -1,9 +1,9 @@
 import { Random } from 'meteor/random';
 import { _ } from 'meteor/underscore';
-import { OptimizedApply } from '../lib/utils';
+import { optimizedApply } from '../lib/utils';
 
 Tinytest.addAsync(
-  'Utils - OptimizedApply - calling arguments',
+  'Utils - optimizedApply - calling arguments',
   function (test, done) {
     runWithArgs(0);
     function runWithArgs (argCount) {
@@ -16,7 +16,7 @@ Tinytest.addAsync(
         return retValue;
       };
 
-      let ret = OptimizedApply(context, fn, args);
+      let ret = optimizedApply(context, fn, args);
       test.equal(ret, retValue);
 
       if (argCount > 10) {

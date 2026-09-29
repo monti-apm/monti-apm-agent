@@ -1,6 +1,7 @@
 import { Random } from 'meteor/random';
-const LRU = Npm.require('lru-cache');
 import { DocSzCache, DocSzCacheItem } from '../lib/docsize_cache';
+
+const LRU = require('lru-cache');
 
 Tinytest.add(
   'DocSize Cache - DocSzCache - constructor',
