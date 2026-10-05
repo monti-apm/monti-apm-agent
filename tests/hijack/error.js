@@ -409,6 +409,69 @@ addAsyncTest(
 );
 
 addAsyncTest(
+  'Errors - method error - caught error from nested method keeps its stack',
+  async function (test) {
+    let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+
+    let innerMethodId = RegisterMethod(async function () {
+      await Promise.resolve();
+      throw new Error('inner-error');
+    });
+
+    let methodId = RegisterMethod(async function () {
+      try {
+        await Meteor.callAsync(innerMethodId);
+      } catch (e) {
+        return e.stack;
+      }
+    });
+
+    let stack = await callAsync(methodId);
+
+    test.equal(typeof stack, 'string');
+    test.isTrue(stack.indexOf('inner-error') >= 0, `stack should be the real stack: ${stack}`);
+
+    _resetErrorTracking(originalErrorTrackingStatus);
+  }
+);
+
+addAsyncTest(
+  'Errors - Meteor._debug - track caught error logged in a method',
+  async function (test) {
+    let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+
+    let innerMethodId = RegisterMethod(async function () {
+      await Promise.resolve();
+      throw new Error('logged-error');
+    });
+
+    let methodId = RegisterMethod(async function () {
+      try {
+        await Meteor.callAsync(innerMethodId);
+      } catch (e) {
+        Meteor._debug('Inner method failed', e.stack);
+      }
+    });
+
+    await callAsync(methodId);
+
+    let payload = Kadira.models.error.buildPayload();
+
+    test.equal(payload.errors.length, 1);
+    test.equal(payload.errors[0].subType, 'Meteor._debug');
+    test.equal(payload.errors[0].name, 'Inner method failed');
+
+    _resetErrorTracking(originalErrorTrackingStatus);
+  }
+);
+
+addAsyncTest(
   'Errors - unhandledRejection - null reason',
   async function (test) {
     let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
