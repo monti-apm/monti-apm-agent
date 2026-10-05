@@ -631,6 +631,21 @@ addAsyncTest(
 );
 
 addAsyncTest(
+  'Database - Cursor - forEach and map outside a trace',
+  async function (test) {
+    await TestData.insertAsync({_id: 'aa'});
+
+    let ids = [];
+    // Shouldn't throw
+    await TestData.find({}).forEachAsync(doc => ids.push(doc._id));
+    let mapped = await TestData.find({}).mapAsync(doc => doc._id);
+
+    test.equal(ids, ['aa']);
+    test.equal(mapped, ['aa']);
+  }
+);
+
+addAsyncTest(
   'Database - basic - countDocuments and estimatedDocumentCount',
   async function (test) {
     await TestData.insertAsync({_id: 'aa'});
