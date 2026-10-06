@@ -334,6 +334,34 @@ addAsyncTest(
 );
 
 addAsyncTest(
+  'Tracer - Monti.event - handle rejects with undefined',
+  async function (test) {
+    let info;
+
+    const methodId = registerMethod(async function () {
+      try {
+        await Monti.event('rejects', async () => {
+          await 0;
+          // eslint-disable-next-line no-throw-literal
+          throw undefined;
+        });
+      } catch (e) {
+        // ignore
+      }
+
+      info = getInfo();
+    });
+
+    await callAsync(methodId);
+
+    let customEvent = cleanBuiltEvents(info.trace.events)
+      .find(event => event[0] === 'custom');
+
+    test.equal(customEvent[2].err, 'undefined');
+  }
+);
+
+addAsyncTest(
   'Tracer - Build Trace - simple',
   async function (test) {
     let now = Ntp._now();

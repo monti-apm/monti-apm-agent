@@ -112,6 +112,28 @@ Tinytest.addAsync(
   })
 );
 
+Tinytest.addAsync(
+  'Client Side - Error Manager - Reporters - tracker - afterFlush throws a string',
+  TestWithErrorTrackingAsync(function (test, next) {
+    Kadira._setupOnErrorReporter();
+    hijackKadiraSendErrors(mockKadiraSendErrors);
+
+    let message = Random.id();
+
+    Tracker.afterFlush(() => {
+      // eslint-disable-next-line no-throw-literal
+      throw message;
+    });
+
+    function mockKadiraSendErrors (_error) {
+      test.equal(message, _error.name);
+      test.equal('tracker.afterFlush', _error.subType);
+      restoreKadiraSendErrors();
+      next();
+    }
+  })
+);
+
 let originalKadiraSendError;
 
 function hijackKadiraSendErrors (mock) {

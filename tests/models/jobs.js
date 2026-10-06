@@ -1,5 +1,6 @@
 import { EJSON } from 'meteor/ejson';
 import { JobsModel } from '../../lib/models/jobs';
+import { ErrorModel } from '../../lib/models/errors';
 import { cleanTestData, CleanTestData } from '../_helpers/helpers';
 import { MontiAsyncStorage } from '../../lib/async/als';
 import { sleep } from '../../lib/utils';
@@ -209,6 +210,41 @@ Tinytest.addAsync(
 
     await CleanTestData();
     done();
+  }
+);
+
+Tinytest.addAsync(
+  'Models - Jobs - traceJob - job rejects with a string',
+  async function (test) {
+    await cleanTestData();
+    let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+
+    let rejection;
+    try {
+      await runTraceJob({ name: 'hello' }, async () => {
+        // eslint-disable-next-line no-throw-literal
+        throw 'err';
+      });
+    } catch (e) {
+      rejection = e;
+    }
+
+    test.equal(rejection, 'err');
+
+    let errors = Kadira.models.error.buildPayload().errors;
+    test.equal(errors.length, 1);
+    test.equal(errors[0].name, 'err');
+
+    let payload = Kadira.models.jobs.buildPayload();
+    test.equal(payload.jobMetrics[0].jobs.hello.active, undefined);
+    test.equal(payload.jobMetrics[0].jobs.hello.errors, 1);
+
+    if (!originalErrorTrackingStatus) {
+      Kadira.disableErrorTracking();
+    }
+    await cleanTestData();
   }
 );
 

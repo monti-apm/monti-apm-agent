@@ -125,6 +125,36 @@ Tinytest.addAsync(
   }
 );
 
+Tinytest.addAsync(
+  'Errors - pubsub error - publication throws null',
+  function (test, done) {
+    let originalErrorTrackingStatus = Kadira.options.enableErrorTracking;
+    Kadira.enableErrorTracking();
+    Kadira.models.error = new ErrorModel('foo');
+    let pubsub = registerPublication(function () {
+      // eslint-disable-next-line no-throw-literal
+      throw null;
+    });
+    let timeout = setTimeout(() => {
+      test.fail('subscription was not stopped');
+      _resetErrorTracking(originalErrorTrackingStatus);
+      done();
+    }, 2000);
+    let client = getMeteorClient();
+    client.subscribe(pubsub, {
+      onStop () {
+        clearTimeout(timeout);
+        let payload = Kadira.models.error.buildPayload();
+        test.equal(payload.errors.length, 1);
+        test.equal(payload.errors[0].type, 'sub');
+        test.equal(payload.errors[0].name, 'null');
+        _resetErrorTracking(originalErrorTrackingStatus);
+        done();
+      }
+    });
+  }
+);
+
 addAsyncTest(
   'Errors - Meteor._debug - do not track when no arguments',
   async function (test) {
