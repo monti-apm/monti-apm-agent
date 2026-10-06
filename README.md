@@ -78,7 +78,9 @@ try {
 
 Monti APM can use source maps to show where in the original code the error occurred. Learn more in our [docs](https://docs.montiapm.com/source-maps).
 
-By default, uncaught exceptions are reported and then the process exits with code 7. To report an uncaught exception without exiting, stamp the error from `uncaughtExceptionMonitor` (Node emits the monitor before `uncaughtException` listeners):
+#### Uncaught Exceptions
+
+Monti APM preserve's node's default behavior for uncaught exceptions. Node's [documentation](https://nodejs.org/docs/latest/api/process.html#warning-using-uncaughtexception-correctly) warns against changing the default and keeping the process running after an uncaught exception. However, you can disable the default behavior and keep the process running after specific errors by passing the error to `Monti.keepProcessAlive`.
 
 ```js
 process.on('uncaughtExceptionMonitor', (error) => {
@@ -87,8 +89,6 @@ process.on('uncaughtExceptionMonitor', (error) => {
   }
 });
 ```
-
-`Monti.ignoreErrorTracking(error)` skips sending that error to Monti APM. An uncaught exception still exits with code 7.
 
 ### Options
 
