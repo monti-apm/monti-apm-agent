@@ -102,7 +102,7 @@ Tinytest.add(
         // Old versions of IE don't have a useful error message
         test.equal(true, true);
       } else {
-        test.equal(/an error thrown from a filter you've suplied/.test(ex.message), true);
+        test.equal(/an error thrown from a filter you've supplied/.test(ex.message), true);
       }
     }
   }
