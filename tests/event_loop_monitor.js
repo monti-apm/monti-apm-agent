@@ -14,7 +14,7 @@ function blockEventLoop () {
 Tinytest.addAsync(
   'EventLoopMonitor - basic usage',
   function (test, done) {
-    const monitor = new EventLoopMonitor(100);
+    const monitor = new EventLoopMonitor(20);
     monitor.start();
 
     // Saturate the event loop so that we can detect lag.
@@ -28,7 +28,7 @@ Tinytest.addAsync(
       test.isTrue(status.elapsedTime > 0);
       monitor.stop();
       done();
-    }, 300);
+    }, 1);
   }
 );
 
@@ -47,7 +47,7 @@ Tinytest.addAsync(
 Tinytest.addAsync(
   'EventLoopMonitor - usage just after stopped',
   function (test, done) {
-    let monitor = new EventLoopMonitor(100);
+    let monitor = new EventLoopMonitor(20);
     monitor.start();
 
     // Saturate the event loop so that we can detect lag.
@@ -63,6 +63,6 @@ Tinytest.addAsync(
 
       test.isTrue(status.pctBlock === 0, `${status.pctBlock} === 0`);
       done();
-    }, 200);
+    }, 1);
   }
 );

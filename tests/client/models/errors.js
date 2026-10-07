@@ -119,18 +119,18 @@ Tinytest.addAsync(
   function (test, done) {
     let em = new ErrorModel({
       maxErrorsPerInterval: 2,
-      intervalInMillis: 200
+      intervalInMillis: 20
     });
 
     em.sendError({name: 'hoo'});
     em.sendError({name: 'hoo2'});
-    test.equal(em.canSendErrors(), false);
+    test.equal(em.canSendErrors(), false, 'canSendErrors should be false');
 
     setTimeout(function () {
-      test.equal(em.canSendErrors(), true);
+      test.equal(em.canSendErrors(), true, 'canSendErrors should be true');
       em.close();
       done();
-    }, 250);
+    }, 50);
   }
 );
 

@@ -1,21 +1,20 @@
 import { TestData } from './_helpers/globals';
-import { CleanTestData, CloseClient, GetMeteorClient, RegisterPublication, SubscribeAndWait } from './_helpers/helpers';
+import { addAsyncTest, getMeteorClient, registerPublication, subscribeAndWait } from './_helpers/helpers';
 import { OplogCheck } from '../lib/check_for_oplog';
 import { _ } from 'meteor/underscore';
 
-Tinytest.addAsync('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', function (test, done) {
+addAsyncTest.skip('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', async function (test) {
   const old = process.env.MONGO_OPLOG_URL;
-  process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd';
-
-  CleanTestData();
+  process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd/local';
 
   let observeChangesEvent;
 
-  TestData.insert({ foo: 'bar'});
+  await TestData.insertAsync({ foo: 'bar'});
 
-  const pubId = RegisterPublication(function () {
-    this.autorun(function () {
-      TestData.findOne({ foo: 'bar' }, {
+  const pubId = registerPublication(function () {
+    // `this.autorun` no longer there
+    this.autorun(async function () {
+      await TestData.findOneAsync({ foo: 'bar' }, {
         fields: { _id: 1},
         sort: { _id: 1 }
       });
@@ -30,9 +29,9 @@ Tinytest.addAsync('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', f
     });
   });
 
-  const client = GetMeteorClient();
+  const client = getMeteorClient();
 
-  const sub = SubscribeAndWait(client, pubId);
+  const sub = await subscribeAndWait(client, pubId);
 
   const { data } = observeChangesEvent;
 
@@ -41,10 +40,8 @@ Tinytest.addAsync('CheckForOplog - Kadira.checkWhyNoOplog - reactive publish', f
   test.equal(data.noOplogCode, 'TRACKER_ACTIVE');
 
   sub.stop();
-  CloseClient(client);
 
   process.env.MONGO_OPLOG_URL = old;
-  done();
 });
 
 Tinytest.add(
@@ -289,7 +286,7 @@ Tinytest.addAsync(
 );
 
 function WithMongoOplogUrl (fn) {
-  process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd';
+  process.env.MONGO_OPLOG_URL = 'mongodb://ssdsd/local';
   fn();
   delete process.env.MONGO_OPLOG_URL;
 }

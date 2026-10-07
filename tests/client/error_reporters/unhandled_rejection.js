@@ -53,6 +53,46 @@ Tinytest.addAsync(
   })
 );
 
+Tinytest.addAsync(
+  'Client Side - Error Manager - Reporters - window.onunhandledrejection - Event',
+  TestWithErrorTrackingAsync(function (test, next) {
+    hijackKadiraSendErrors(mockKadiraSendErrors);
+    let timeout = setTimeout(() => {
+      test.equal('false', 'browser supports onunhandledrejection');
+      next();
+    }, 500);
+    let img = new Image();
+    img.onerror = event => Promise.reject(event);
+    img.src = Meteor.absoluteUrl('does-not-exist.png');
+
+    function mockKadiraSendErrors (error) {
+      clearTimeout(timeout);
+      test.equal(`Event "error" on <img> ${img.src}`, error.name);
+      restoreKadiraSendErrors();
+      next();
+    }
+  })
+);
+
+Tinytest.addAsync(
+  'Client Side - Error Manager - Reporters - window.onunhandledrejection - object without message',
+  TestWithErrorTrackingAsync(function (test, next) {
+    hijackKadiraSendErrors(mockKadiraSendErrors);
+    let timeout = setTimeout(() => {
+      test.equal('false', 'browser supports onunhandledrejection');
+      next();
+    }, 500);
+    Promise.reject({ code: 1 });
+
+    function mockKadiraSendErrors (error) {
+      clearTimeout(timeout);
+      test.equal('[object Object]', error.name);
+      restoreKadiraSendErrors();
+      next();
+    }
+  })
+);
+
 let originalKadiraSendError;
 
 function hijackKadiraSendErrors (mock) {
