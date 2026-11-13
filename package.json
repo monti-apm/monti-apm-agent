@@ -7,7 +7,8 @@
     "test:redis": "REDIS_OPLOG_SETTINGS='{\"debug\":true}' FORCE_COLOR=true meteor test-packages ./ ",
     "test:local": "METEOR_PACKAGE_DIRS=./packages meteor test-packages ./",
     "lint": "eslint . --cache . --ext .js",
-    "publish": "npm prune --production && meteor publish"
+    "publish": "npm prune --production && meteor publish",
+    "test:sketch": "node tests/sketch-compat.js"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.62.0",
@@ -20,7 +21,9 @@
     "eslint-config-es": "^0.8.12",
     "eslint-plugin-babel": "^5.3.1",
     "yaml": "^2.3.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "@datadog/sketches-js": "2.1.1",
+    "monti-apm-sketches-js": "0.0.3"
   },
   "volta": {
     "node": "14.21.3"
