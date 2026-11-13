@@ -12,7 +12,7 @@ let npmModules = {
   '@monti-apm/core': '2.0.0',
   'lru-cache': '5.1.1',
   'json-stringify-safe': '5.0.1',
-  'monti-apm-sketches-js': '0.0.3',
+  '@datadog/sketches-js': '2.1.1',
 
   // parseurl is also used by WebApp.
   // Since it caches the parsed url on
